@@ -1,9 +1,20 @@
 import React from 'react'
-import { createRoot } from 'react-dom/client'
+import ReactDOM from 'react-dom/client'
+import { ConfigProvider } from 'antd'
 import App from './App'
+import './index.css'
 
-createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <App />
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: '#BB2649',
+          fontFamily: 'Roboto',
+        },
+      }}
+    >
+      <App />
+    </ConfigProvider>
   </React.StrictMode>
 )
