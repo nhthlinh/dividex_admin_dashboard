@@ -33,7 +33,7 @@ interface UserDetailDialogProps {
     id: string;
     name: string;
     email: string;
-    sales: string;
+    balance: string;
   };
   isOpen: boolean;
   onClose: () => void;
@@ -72,10 +72,6 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
     console.log(`User ${isLocked ? "unlocked" : "locked"}`);
   };
 
-  const handleAssignRole = () => {
-    console.log("Assign role");
-  };
-
   const handleSoftDelete = () => {
     console.log("Soft delete user");
   };
@@ -86,16 +82,31 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="min-w-[60vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>User Details</DialogTitle>
+          <DialogTitle>{user.name}</DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
-            <TabsTrigger value="relationship">Relationship</TabsTrigger>
+        <Tabs defaultValue="profile" className="w-full border-b pb-4">
+          <TabsList className="grid w-full grid-cols-3 gap-4 mb-8">
+            <TabsTrigger value="profile">
+              <div className="text-center">
+                <p className="text-sm font-semibold">Profile</p>
+                <p className="text-xs opacity-70">Basic Info & Stats</p>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger value="history">
+              <div className="text-center">
+                <p className="text-sm font-semibold">History</p>
+                <p className="text-xs opacity-70">Login & Activity</p>
+              </div>
+            </TabsTrigger>
+            <TabsTrigger value="relationship" className="text-center">
+              <div className="text-center">
+                <p className="text-sm font-semibold">Relationship</p>
+                <p className="text-xs opacity-70">Groups & Expenses</p>
+              </div>
+            </TabsTrigger>
           </TabsList>
 
           {/* Profile Tab */}
@@ -121,6 +132,7 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
                   variant="outline"
                   size="sm"
                   onClick={handleLockToggle}
+                  className={`${isLocked ? "bg-red-50 text-red-600 hover:bg-red-100" : ""}`}
                 >
                   {isLocked ? (
                     <>
@@ -133,14 +145,6 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
                       Lock
                     </>
                   )}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleAssignRole}
-                >
-                  <UserCog className="size-4 mr-2" />
-                  Assign Role
                 </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -193,8 +197,8 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
                 <h4 className="text-sm text-slate-900">Statistics</h4>
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Total Sales:</span>
-                    <span className="text-slate-900">{user.sales}</span>
+                    <span className="text-slate-500">Total Balance:</span>
+                    <span className="text-slate-900">{user.balance}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">Total Expenses:</span>
@@ -339,5 +343,126 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
         </Tabs>
       </DialogContent>
     </Dialog>
+    // <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto space-y-6">
+    //   <DialogHeader>
+    //     <DialogTitle>User Details</DialogTitle>
+    //   </DialogHeader>
+
+    //   {/* TOP: USER INFO */}
+    //   <UserProfileSection user={user} />
+
+    //   {/* BOTTOM: HISTORY */}
+    //   <UserHistorySection />
+    // </DialogContent>
+
   );
 }
+
+// function UserHistorySection() {
+//   return (
+//     <div className="grid grid-cols-1 gap-6">
+//       {/* Login History */}
+//       <HistoryTable
+//         title="Login History"
+//         headers={["Date & Time", "IP", "Location", "Device"]}
+//         rows={loginHistory.map(l => [
+//           l.date,
+//           l.ip,
+//           l.location,
+//           l.device,
+//         ])}
+//       />
+
+//       {/* Activity Log */}
+//       <HistoryTable
+//         title="Activity Log (Audit)"
+//         headers={["Date & Time", "Action", "Status"]}
+//         rows={activityLog.map(l => [
+//           l.date,
+//           l.action,
+//           <Badge className="bg-green-100 text-green-700">{l.status}</Badge>,
+//         ])}
+//       />
+//     </div>
+//   );
+// }
+
+// function UserActions() {
+//   return (
+//     <div className="flex items-center gap-2">
+//       <Button variant="outline" size="sm">
+//         <Lock className="size-4 mr-2" /> Lock
+//       </Button>
+
+//       <Button variant="outline" size="sm">
+//         <UserCog className="size-4 mr-2" /> Assign Role
+//       </Button>
+
+//       <DropdownMenu>
+//         <DropdownMenuTrigger asChild>
+//           <Button variant="outline" size="sm">
+//             <MoreVertical className="size-4" />
+//           </Button>
+//         </DropdownMenuTrigger>
+//         <DropdownMenuContent align="end">
+//           <DropdownMenuItem>
+//             <KeyRound className="size-4 mr-2" /> Reset Password
+//           </DropdownMenuItem>
+//           <DropdownMenuItem className="text-red-600">
+//             <Trash2 className="size-4 mr-2" /> Soft Delete
+//           </DropdownMenuItem>
+//         </DropdownMenuContent>
+//       </DropdownMenu>
+//     </div>
+//   );
+// }
+
+// function UserProfileSection({ user }: { user: any }) {
+//   return (
+//     <div className="border rounded-xl p-6 space-y-6">
+//       {/* Header */}
+//       <div className="flex items-start justify-between">
+//         <div className="flex gap-4">
+//           <Avatar className="size-20">
+//             <AvatarFallback className="text-lg bg-rose-100 text-rose-600">
+//               {user.name.split(" ").map((n: string) => n[0]).join("")}
+//             </AvatarFallback>
+//           </Avatar>
+
+//           <div>
+//             <h3 className="text-lg font-semibold">{user.name}</h3>
+//             <p className="text-sm text-slate-500">ID: {user.id}</p>
+//             <Badge className="mt-2 bg-green-100 text-green-700">Active</Badge>
+//           </div>
+//         </div>
+
+//         <UserActions />
+//       </div>
+
+//       {/* Info grid */}
+//       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
+//         {/* Basic Info */}
+//         <div className="space-y-3">
+//           <h4 className="text-sm font-medium">Basic Information</h4>
+
+//           <InfoRow icon={Mail} label="Email" value={user.email} />
+//           <InfoRow icon={Phone} label="Phone" value="+1 (555) 123-4567" />
+//           <InfoRow icon={MapPin} label="Location" value="New York, US" />
+//           <InfoRow icon={Calendar} label="Joined" value="Jan 15, 2024" />
+//         </div>
+
+//         {/* Stats */}
+//         <div className="space-y-3">
+//           <h4 className="text-sm font-medium">Statistics</h4>
+
+//           <StatRow label="Total Balance" value={user.balance} />
+//           <StatRow label="Total Expenses" value="$889.50" />
+//           <StatRow label="Groups" value="3" />
+//           <StatRow label="Last Login" value="Today, 10:30 AM" />
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+

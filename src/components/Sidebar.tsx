@@ -1,4 +1,19 @@
-import { LayoutDashboard, Users, ShoppingCart, Calendar, TrendingDown, CreditCard, Bell, MessageSquare, Settings, LogOut } from "lucide-react";
+import { useState } from "react";
+import {
+  LayoutDashboard,
+  Users,
+  ShoppingCart,
+  Calendar,
+  TrendingDown,
+  CreditCard,
+  Bell,
+  MessageSquare,
+  Settings,
+  LogOut,
+  Menu,
+  PersonStandingIcon,
+  PlusSquare,
+} from "lucide-react";
 import { Button } from "./ui/button";
 
 interface SidebarProps {
@@ -12,58 +27,84 @@ const menuItems = [
   { icon: ShoppingCart, label: "Group", key: "group" },
   { icon: Calendar, label: "Event", key: "event" },
   { icon: TrendingDown, label: "Expense", key: "expense" },
-  { icon: CreditCard, label: "Payment & Settlement", key: "payment" },
+  { icon: CreditCard, label: "Payment", key: "payment" },
   { icon: Bell, label: "Notification", key: "notification" },
   { icon: MessageSquare, label: "Messages", key: "messages" },
+  { icon: PlusSquare, label: "Admin", key: "admin" },
 ];
 
 export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
-    <aside className="w-64 bg-white border-r border-slate-200 flex flex-col">
-      <div className="p-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-rose-700 rounded-lg flex items-center justify-center">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white"/>
-              <path d="M2 17L12 22L22 17" stroke="white" strokeWidth="2"/>
-            </svg>
-          </div>
-          <span className="text-slate-900">Dividex</span>
-        </div>
+    <aside
+      className={`
+        bg-white border-r border-slate-200
+        flex flex-col transition-all duration-300
+        ${collapsed ? "w-[60px]" : "w-[200px]"}
+        hidden md:flex
+      `}
+    >
+      {/* Header */}
+      <div className="p-4 flex items-center justify-between">
+        {!collapsed && <span className="font-semibold">Dividex</span>}
+        <Button
+          size="icon"
+          variant="ghost"
+          onClick={() => setCollapsed(!collapsed)}
+        >
+          <Menu className="size-4" />
+        </Button>
       </div>
 
-      <nav className="flex-1 px-4">
+      {/* Menu */}
+      <nav className="flex-1 px-2">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentPage === item.key;
+
           return (
             <Button
               key={item.key}
               variant={isActive ? "default" : "ghost"}
-              className={`w-full justify-start mb-1 ${
-                isActive 
-                  ? "bg-gradient-to-r from-rose-700 to-rose-600 text-white hover:from-rose-800 hover:to-rose-700" 
-                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+              className={`w-full mb-1 ${
+                collapsed ? "justify-center" : "justify-start"
+              } ${
+                isActive
+                  ? "bg-gradient-to-r from-rose-700 to-rose-600 text-white"
+                  : "text-slate-600 hover:bg-slate-50"
               }`}
-              onClick={() => {
-                onNavigate(item.key);
-              }}
+              onClick={() => onNavigate(item.key)}
             >
-              <Icon className="size-4 mr-3" />
-              <span className="text-sm">{item.label}</span>
+              <Icon className="size-4" />
+              {!collapsed && (
+                <span className="ml-3 text-sm">{item.label}</span>
+              )}
             </Button>
           );
         })}
       </nav>
 
-      <div className="p-4 border-t border-slate-200">
-        <Button variant="ghost" className="w-full justify-start text-slate-600 hover:text-slate-900">
-          <Settings className="size-4 mr-3" />
-          <span className="text-sm">Settings</span>
+      {/* Footer */}
+      <div className="p-2 border-t">
+        <Button
+          variant="ghost"
+          className={`w-full ${
+            collapsed ? "justify-center" : "justify-start"
+          }`}
+        >
+          <Settings className="size-4" />
+          {!collapsed && <span className="ml-3">Settings</span>}
         </Button>
-        <Button variant="ghost" className="w-full justify-start text-slate-600 hover:text-slate-900">
-          <LogOut className="size-4 mr-3" />
-          <span className="text-sm">Sign Out</span>
+
+        <Button
+          variant="ghost"
+          className={`w-full ${
+            collapsed ? "justify-center" : "justify-start"
+          }`}
+        >
+          <LogOut className="size-4" />
+          {!collapsed && <span className="ml-3">Sign Out</span>}
         </Button>
       </div>
     </aside>

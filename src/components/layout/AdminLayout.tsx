@@ -19,12 +19,15 @@ export default function AdminLayout() {
           case "user":
             window.location.href = "/user";
             break;
+          case "admin":
+            window.location.href = "/admin";
+            break;
           default:
             window.location.href = "/";
         }
       }} />
       
-      <div className="flex-1">
+      <div className="flex-1 overflow-x-auto flex flex-col">
         <Header />
         
         <main className="p-6">

@@ -7,27 +7,31 @@ import { RateChart } from "../../components/RateChart";
 
 export function DashboardPage() {
   return (
-    <div className="grid gap-6">
-      {/* Today's Overview and User Insights */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <TodaysOverview />
-        </div>
-        <div className="lg:col-span-1">
-          <UserInsights />
+    <div className="space-y-6">
+      {/* Row 1 */}
+      <div className="overflow-x-auto">
+        <div className="flex gap-6 min-w-max">
+          <div className="min-w-[300px] lg:flex-1 lg:min-w-0">
+            <TodaysOverview />
+          </div>
+          <div className="min-w-[300px] lg:w-[33%] lg:min-w-0">
+            <UserInsights />
+          </div>
         </div>
       </div>
 
-      {/* Cash Flow, User Satisfaction*/}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <CashFlowChart />
-        </div>
-        <div className="lg:col-span-1">
-          <UserSatisfaction />
-        </div>
-        <div className="lg:col-span-1">
-          <RateChart />
+      {/* Row 2 */}
+      <div className="overflow-x-auto">
+        <div className="flex gap-6 min-w-max">
+          <div className="min-w-[300px] lg:flex-1 lg:min-w-0">
+            <CashFlowChart />
+          </div>
+          <div className="min-w-[300px] lg:flex-1 lg:min-w-0">
+            <UserSatisfaction />
+          </div>
+          <div className="min-w-[300px] lg:flex-1 lg:min-w-0">
+            <RateChart />
+          </div>
         </div>
       </div>
 
@@ -36,3 +40,4 @@ export function DashboardPage() {
     </div>
   );
 }
+

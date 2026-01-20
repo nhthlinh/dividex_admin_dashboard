@@ -2,13 +2,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 
 const data = [
-  { day: "Monday", deposit: 15, withdraw: 12 },
-  { day: "Tuesday", deposit: 18, withdraw: 10 },
-  { day: "Wednesday", deposit: 22, withdraw: 8 },
-  { day: "Thursday", deposit: 16, withdraw: 12 },
-  { day: "Friday", deposit: 14, withdraw: 10 },
-  { day: "Saturday", deposit: 18, withdraw: 14 },
-  { day: "Sunday", deposit: 20, withdraw: 16 },
+  { day: "Mon", deposit: 15, withdraw: 12 },
+  { day: "Tue", deposit: 18, withdraw: 10 },
+  { day: "Wed", deposit: 22, withdraw: 8 },
+  { day: "Thu", deposit: 16, withdraw: 12 },
+  { day: "Fri", deposit: 14, withdraw: 10 },
+  { day: "Sat", deposit: 18, withdraw: 14 },
+  { day: "Sun", deposit: 20, withdraw: 16 },
 ];
 
 export function CashFlowChart() {
@@ -46,14 +46,14 @@ export function CashFlowChart() {
               name="Deposit"
               fill="#3b82f6" 
               radius={[4, 4, 0, 0]}
-              barSize={20}
+              barSize={10}
             />
             <Bar 
               dataKey="withdraw" 
               name="Withdraw"
               fill="#22c55e" 
               radius={[4, 4, 0, 0]}
-              barSize={20}
+              barSize={10}
             />
           </BarChart>
         </ResponsiveContainer>

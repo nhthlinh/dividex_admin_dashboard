@@ -23,7 +23,7 @@ export function Header() {
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="size-5 text-slate-600" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-orange-400 rounded-full"></span>
+            <span className="absolute top-1 right-1 w-2 h-2 bg-red-400 rounded-full"></span>
           </Button>
 
           <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
