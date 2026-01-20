@@ -11,7 +11,6 @@ import {
   Settings,
   LogOut,
   Menu,
-  PersonStandingIcon,
   PlusSquare,
 } from "lucide-react";
 import { Button } from "./ui/button";

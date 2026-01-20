@@ -8,7 +8,9 @@
     "baseUrl": "./src",
     "paths": {
       "@/*": ["*"]
-    }
+    },
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
   }
 }
 

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Button, Input } from 'antd'
 import dividexLogo from '../../assets/dividex-logo.png'
-import { router } from '../../app/router'
 import { authStore } from './auth.store'
 import { useNavigate } from 'react-router-dom'
 

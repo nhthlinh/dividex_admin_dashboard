@@ -40,6 +40,7 @@ export function AdminInviteAcceptPage() {
       // thành công → về login
       navigate("/login", { replace: true });
     } catch (e) {
+      console.error(e);
       setError("Invalid or expired invitation link");
     } finally {
       setLoading(false);

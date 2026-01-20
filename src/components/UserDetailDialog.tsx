@@ -18,7 +18,6 @@ import {
 import {
   Lock,
   Unlock,
-  UserCog,
   Trash2,
   KeyRound,
   MoreVertical,

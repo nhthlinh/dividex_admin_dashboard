@@ -25,7 +25,7 @@ const Dialog = ({ open, onOpenChange, children }: DialogProps) => {
   )
 }
 
-const DialogTrigger = ({ children, ...props }: React.HTMLAttributes<HTMLElement>) => {
+const DialogTrigger = ({ children }: React.HTMLAttributes<HTMLElement>) => {
   return <>{children}</>
 }
 
