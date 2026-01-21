@@ -3,9 +3,9 @@ import LoginPage from "../features/auth/LoginPage";
 import AdminLayout from "../components/layout/AdminLayout";
 import ProtectedRoute from "../components/layout/ProtectedRoute";
 import { DashboardPage } from "../features/dashboard/DashboardPage";
-import { UserPage } from "../features/dashboard/UserPage";
-import { AdminManagementPage } from "../features/auth/AdminManagementPage";
-import { AdminInviteAcceptPage } from "../features/auth/AdminInviteAcceptPage";
+import { UserPage } from "../features/users/UserPage";
+import { AdminManagementPage } from "../features/admins/AdminManagementPage";
+import { AdminInviteAcceptPage } from "../features/admins/AdminInviteAcceptPage";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },

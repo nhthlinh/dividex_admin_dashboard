@@ -1,22 +1,63 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import {
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from "recharts";
+import { message, Spin } from "antd";
+import { DashboardAPI } from "../features/dashboard/dashboard.api";
 
-const data = [
-  { month: "Jan", loyal: 200, new: 150, returning: 180 },
-  { month: "Feb", loyal: 180, new: 200, returning: 160 },
-  { month: "Mar", loyal: 220, new: 180, returning: 200 },
-  { month: "Apr", loyal: 250, new: 220, returning: 240 },
-  { month: "May", loyal: 230, new: 280, returning: 260 },
-  { month: "Jun", loyal: 280, new: 250, returning: 240 },
-  { month: "Jul", loyal: 260, new: 300, returning: 280 },
-  { month: "Aug", loyal: 300, new: 280, returning: 300 },
-  { month: "Sep", loyal: 280, new: 320, returning: 290 },
-  { month: "Oct", loyal: 320, new: 300, returning: 310 },
-  { month: "Nov", loyal: 340, new: 350, returning: 330 },
-  { month: "Dec", loyal: 300, new: 280, returning: 270 },
-];
+interface ChartData {
+  month: string;
+  loyal: number;
+  new: number;
+  returning: number;
+}
 
 export function UserInsights() {
+  const [data, setData] = useState<ChartData[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchInsights = async () => {
+    try {
+      setLoading(true);
+      const res = await DashboardAPI.getUserInsights();
+
+      const chartData: ChartData[] = res.map(item => ({
+        month: formatMonth(item.month_year),
+        loyal: item.loyal_users,
+        new: item.new_users,
+        returning: item.return_users,
+      }));
+
+      setData(chartData);
+    } catch (err: any) {
+      message.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchInsights();
+  }, []);
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="flex justify-center py-10">
+          <Spin />
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -26,43 +67,44 @@ export function UserInsights() {
         <ResponsiveContainer width="100%" height={200}>
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-            <XAxis 
-              dataKey="month" 
+            <XAxis
+              dataKey="month"
               stroke="#94a3b8"
               fontSize={12}
               tickLine={false}
             />
-            <YAxis 
+            <YAxis
               stroke="#94a3b8"
               fontSize={12}
               tickLine={false}
             />
             <Tooltip />
-            <Legend 
-              wrapperStyle={{ fontSize: '12px' }}
+            <Legend
+              wrapperStyle={{ fontSize: "12px" }}
               iconType="line"
             />
-            <Line 
-              type="monotone" 
-              dataKey="loyal" 
+
+            <Line
+              type="monotone"
+              dataKey="loyal"
               name="Loyal User"
-              stroke="#ef4444" 
+              stroke="#ef4444"
               strokeWidth={2}
               dot={false}
             />
-            <Line 
-              type="monotone" 
-              dataKey="new" 
+            <Line
+              type="monotone"
+              dataKey="new"
               name="New User"
-              stroke="#f97316" 
+              stroke="#f97316"
               strokeWidth={2}
               dot={false}
             />
-            <Line 
-              type="monotone" 
-              dataKey="returning" 
+            <Line
+              type="monotone"
+              dataKey="returning"
               name="Returning User"
-              stroke="#22c55e" 
+              stroke="#22c55e"
               strokeWidth={2}
               dot={false}
             />
@@ -71,4 +113,17 @@ export function UserInsights() {
       </CardContent>
     </Card>
   );
+}
+
+/**
+ * Convert "2025-01" → "Jan"
+ * hoặc "01/2025" → "Jan"
+ */
+function formatMonth(monthYear: string): string {
+  const [year, month] = monthYear.includes("-")
+    ? monthYear.split("-")
+    : monthYear.split("/").reverse();
+
+  const date = new Date(Number(year), Number(month) - 1);
+  return date.toLocaleString("en-US", { month: "short" });
 }
