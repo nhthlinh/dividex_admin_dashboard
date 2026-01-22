@@ -26,14 +26,10 @@ import {
   MapPin,
   Calendar,
 } from "lucide-react";
+import type { User } from "../features/users/user.types";
 
 interface UserDetailDialogProps {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    balance: string;
-  };
+  user: User;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -83,7 +79,7 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="min-w-[60vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{user.name}</DialogTitle>
+          <DialogTitle>{user.full_name}</DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="profile" className="w-full border-b pb-4">
@@ -114,12 +110,12 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
               <div className="flex items-center gap-4">
                 <Avatar className="size-20">
                   <AvatarFallback className="text-lg bg-rose-100 text-rose-600">
-                    {user.name.split(" ").map(n => n[0]).join("")}
+                    {user.full_name.split(" ").map(n => n[0]).join("")}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h3 className="text-slate-900">{user.name}</h3>
-                  <p className="text-sm text-slate-500">ID: {user.id}</p>
+                  <h3 className="text-slate-900">{user.full_name}</h3>
+                  <p className="text-sm text-slate-500">ID: {user.uid}</p>
                   <Badge className="mt-2 bg-green-100 text-green-700 hover:bg-green-200">
                     Active
                   </Badge>
@@ -177,17 +173,17 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
                   <div className="flex items-center gap-3 text-sm">
                     <Phone className="size-4 text-slate-400" />
                     <span className="text-slate-500">Phone:</span>
-                    <span className="text-slate-900">+1 (555) 123-4567</span>
+                    <span className="text-slate-900">{user.phone_number || ""}</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <MapPin className="size-4 text-slate-400" />
-                    <span className="text-slate-500">Location:</span>
-                    <span className="text-slate-900">New York, US</span>
+                    <span className="text-slate-500">Role:</span>
+                    <span className="text-slate-900">{user.role || ""}</span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm">
+                  <div className="flex items-center gap-3 text-sm"> 
                     <Calendar className="size-4 text-slate-400" />
                     <span className="text-slate-500">Joined:</span>
-                    <span className="text-slate-900">January 15, 2024</span>
+                    <span className="text-slate-900"></span>
                   </div>
                 </div>
               </div>
@@ -197,19 +193,19 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">Total Balance:</span>
-                    <span className="text-slate-900">{user.balance}</span>
+                    <span className="text-slate-900">{user.balance?.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">Total Expenses:</span>
-                    <span className="text-slate-900">$889.50</span>
+                    <span className="text-slate-900"></span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">Groups:</span>
-                    <span className="text-slate-900">3</span>
+                    <span className="text-slate-900"></span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">Last Login:</span>
-                    <span className="text-slate-900">Today, 10:30 AM</span>
+                    <span className="text-slate-900"></span>
                   </div>
                 </div>
               </div>

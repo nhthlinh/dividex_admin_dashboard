@@ -25,8 +25,8 @@ export default function LoginPage() {
       setLoading(true)
 
       const res = await AuthAPI.login({ email, password })
-
       authStore.setToken(res.access_token)
+      authStore.setUserInfo(res.user)
 
       message.success('Đăng nhập thành công')
       navigate('/', { replace: true })

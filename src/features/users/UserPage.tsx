@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
-import { Download, Users as UsersIcon, UserCheck, UserPlus } from "lucide-react";
+import { Users as UsersIcon, UserCheck, UserPlus } from "lucide-react";
 import { UserDetailDialog } from "../../components/UserDetailDialog";
 import { Dialog, DialogContent } from "../../components/ui/dialog";
+import type { User } from "./user.types";
+import { UserAPI } from "./user.api";
 
 const userStats = [
   {
@@ -32,21 +34,44 @@ const userStats = [
   },
 ];
 
-const topUsers = [
-  { id: "01", name: "Amy Roo", email: "amy.roo@example.com", balance: "5.3k", popularity: 85 },
-  { id: "02", name: "Hana Ghoghly", email: "hana.ghoghly@example.com", balance: "3.3k", popularity: 70 },
-  { id: "03", name: "Nguyễn Hồ Thúy Linh", email: "nguyen.linh@example.com", balance: "2.3k", popularity: 60 },
-  { id: "04", name: "Nguyễn Hồ Chi Vũ", email: "nguyen.vu@example.com", balance: "1.3k", popularity: 45 },
-];
+const PAGE_SIZE = 2;
 
 export function UserPage() {
-  const [selectedUser, setSelectedUser] = useState<typeof topUsers[0] | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isOverviewDialogOpen, setIsOverviewDialogOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleUserClick = (user: typeof topUsers[0]) => {
+  const handleUserClick = (user: User) => {
     setSelectedUser(user);
     setIsDialogOpen(true);
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, [page]);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const res = await UserAPI.listUsers({
+        page,
+        page_size: PAGE_SIZE,
+        order_by: "full_name",
+        sort_type: "desc",
+      });
+
+      setUsers(res.content);
+      setTotal(res.total_rows);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -63,29 +88,74 @@ export function UserPage() {
             </Button>
           </CardHeader>
           <CardContent>
+            {/* Header */}
+            <div className="grid grid-cols-12 gap-4 px-4 pb-2 text-sm text-slate-500">
+              <div className="col-span-1">#</div>
+              <div className="col-span-4">Name</div>
+              <div className="col-span-5">Email</div>
+              <div className="col-span-2 text-right">Balance</div>
+            </div>
+
+            {/* Rows */}
             <div className="space-y-1">
-              <div className="grid grid-cols-12 gap-4 px-4 pb-2 text-sm text-slate-500">
-                <div className="col-span-1">#</div>
-                <div className="col-span-4">Name</div>
-                <div className="col-span-5">Email</div>
-                <div className="col-span-2 text-right">Balance</div>
-              </div>
-              {topUsers.map((user) => (
-                <div
-                  key={user.id}
-                  className="grid grid-cols-12 gap-4 px-4 py-3 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors"
-                  onClick={() => handleUserClick(user)}
-                >
-                  <div className="col-span-1 text-slate-500">{user.id}</div>
-                  <div className="col-span-4 text-slate-900">{user.name}</div>
-                  <div className="col-span-5 text-slate-900">{user.email}</div>
-                  <div className="col-span-2 text-right">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs bg-purple-50 text-purple-600">
-                      {user.balance}
-                    </span>
-                  </div>
+              {loading ? (
+                <div className="py-10 text-center text-slate-500">
+                  Loading users...
                 </div>
-              ))}
+              ) : (
+                users.map((user, index) => (
+                  <div
+                    key={user.uid}
+                    className="grid grid-cols-12 gap-4 px-4 py-3 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors"
+                    onClick={() => handleUserClick(user)}
+                  >
+                    <div className="col-span-1 text-slate-500">
+                      {(page - 1) * PAGE_SIZE + index + 1}
+                    </div>
+
+                    <div className="col-span-4 text-slate-900">
+                      {user.full_name}
+                    </div>
+
+                    <div className="col-span-5 text-slate-500">
+                      {user.email}
+                    </div>
+
+                    <div className="col-span-2 text-right">
+                      <span className="inline-flex px-2.5 py-0.5 rounded-md text-xs bg-purple-50 text-purple-600">
+                        {user.balance?.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between mt-6">
+              <span className="text-sm text-slate-500">
+                Page {page} / {totalPages || 1}
+              </span>
+
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={page === 1}
+                  onClick={() => setPage((p) => p - 1)}
+                >
+                  Previous
+                </Button>
+
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  Next
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -108,12 +178,8 @@ export function UserPage() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle>Today's Overview</CardTitle>
-                  <p className="text-sm text-slate-500 mt-1">Summery</p>
+                  <p className="text-sm text-slate-500 mt-1">Summary</p>
                 </div>
-                <Button variant="outline" size="sm">
-                  <Download className="size-4 mr-2" />
-                  Export
-                </Button>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

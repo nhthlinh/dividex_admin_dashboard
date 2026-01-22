@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/ca
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Lock } from "lucide-react";
+import { AdminAPI } from "./admin.api";
 
 export function AdminInviteAcceptPage() {
   const [params] = useSearchParams();
@@ -32,16 +33,23 @@ export function AdminInviteAcceptPage() {
     try {
       setLoading(true);
 
-      // TODO: call API
-      // await authService.acceptAdminInvite({ token, password });
+      if (!token) {
+        setError("Invalid invitation token");
+        return;
+      }
 
-      console.log("Accept admin invite:", { token, password });
+      await AdminAPI.activateAdmin({
+        token,
+        password,
+      });
 
-      // thành công → về login
       navigate("/login", { replace: true });
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      setError("Invalid or expired invitation link");
+      setError(
+        e?.response?.data?.message ||
+        "Invalid or expired invitation link"
+      );
     } finally {
       setLoading(false);
     }

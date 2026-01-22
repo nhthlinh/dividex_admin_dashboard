@@ -98,9 +98,6 @@ export function AdminManagementPage() {
                 <div className="flex items-center gap-3">
                   <Mail className="size-4 text-slate-500" />
                   <div className="text-sm font-medium">{admin.email}</div>
-                  <div className="text-xs text-slate-500">
-                    {admin.role}
-                  </div>
                 </div>
 
                 <div className="flex items-center gap-3">

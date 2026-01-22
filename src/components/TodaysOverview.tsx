@@ -55,9 +55,9 @@ export function TodaysOverview() {
     },
     {
       icon: TrendingUp,
-      label: "Total Admin",
-      value: data.total_admins,
-      change: `${data.percent_increase_admins}% from yesterday`,
+      label: "Total Money",
+      value: data.total_money,
+      change: `${data.percent_increase_money}% from yesterday`,
       bgColor: "bg-green-50",
       iconColor: "text-green-500",
     },
@@ -78,10 +78,10 @@ export function TodaysOverview() {
           <CardTitle>Today's Overview</CardTitle>
           <p className="text-sm text-slate-500 mt-1">Summary</p>
         </div>
-        <Button variant="outline" size="sm">
+        {/* <Button variant="outline" size="sm">
           <Download className="size-4 mr-2" />
           Export
-        </Button>
+        </Button> */}
       </CardHeader>
 
       <CardContent>

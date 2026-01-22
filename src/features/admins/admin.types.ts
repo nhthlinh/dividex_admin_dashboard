@@ -1,8 +1,12 @@
 export interface Admin {
   email: string
   uid: string
-  role: string
   status: string
+}
+
+export interface ActivateAdminRequest {
+  password: string;
+  token: string;
 }
 
 export interface ListAdminsParams {
