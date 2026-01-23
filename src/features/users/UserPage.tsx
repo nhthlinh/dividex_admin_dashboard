@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
-import { Users as UsersIcon, UserCheck, UserPlus } from "lucide-react";
+import { Users as UsersIcon, UserCheck, UserPlus, Plus } from "lucide-react";
 import { UserDetailDialog } from "../../components/UserDetailDialog";
 import { Dialog, DialogContent } from "../../components/ui/dialog";
 import type { User } from "./user.types";
 import { UserAPI } from "./user.api";
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { getAvatarGradient } from "../../components/Header";
 
 const userStats = [
   {
@@ -76,6 +78,21 @@ export function UserPage() {
 
   return (
     <div className="grid gap-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">User Management</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Manage and monitor all users
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <Button size="sm" className="text-white bg-rose-600 hover:bg-rose-700">
+            <Plus className="h-4 w-4 mr-2" />
+            Create User
+          </Button>
+        </div>
+      </div>
       <div className="grid grid-cols-1 gap-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
@@ -113,7 +130,18 @@ export function UserPage() {
                       {(page - 1) * PAGE_SIZE + index + 1}
                     </div>
 
-                    <div className="col-span-4 text-slate-900">
+                    <div className="col-span-4 text-slate-900 flex items-center gap-3">
+                      <Avatar className="size-7">
+                        {user.avatar_url?.public_url ? (
+                          <AvatarImage src={user.avatar_url.public_url} />
+                        ) : (
+                          <AvatarFallback
+                            className={`bg-gradient-to-br ${getAvatarGradient(user.uid)} text-white font-semibold`}
+                          >
+                            {user.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
                       {user.full_name}
                     </div>
 

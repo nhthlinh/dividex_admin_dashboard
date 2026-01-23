@@ -14,6 +14,7 @@ import {
   PlusSquare,
 } from "lucide-react";
 import { Button } from "./ui/button";
+import { authStore } from "../features/auth/auth.store";
 
 interface SidebarProps {
   currentPage: string;
@@ -34,6 +35,11 @@ const menuItems = [
 
 export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+
+  const handleLogout = () => {
+    authStore.logout(); // clear token + user
+    window.location.href = "/login";
+  };
 
   return (
     <aside
@@ -101,9 +107,10 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
           className={`w-full ${
             collapsed ? "justify-center" : "justify-start"
           }`}
+          onClick={handleLogout}
         >
-          <LogOut className="size-4" />
-          {!collapsed && <span className="ml-3">Sign Out</span>}
+          <LogOut className="size-4 text-red-600" />
+          {!collapsed && <span className="ml-3 text-red-600">Sign Out</span>}
         </Button>
       </div>
     </aside>

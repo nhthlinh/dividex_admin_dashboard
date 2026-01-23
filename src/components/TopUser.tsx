@@ -12,6 +12,8 @@ import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import type { User } from "../features/users/user.types";
 import { UserAPI } from "../features/users/user.api";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { getAvatarGradient } from "./Header";
 
 export function TopUser() {
   const [users, setUsers] = useState<User[]>([]);
@@ -72,7 +74,18 @@ export function TopUser() {
                     {index + 1}
                   </TableCell>
 
-                  <TableCell className="text-slate-900">
+                  <TableCell className="text-slate-900 flex flex-row items-center gap-3">
+                    <Avatar className="size-7">
+                      {user.avatar_url?.public_url ? (
+                        <AvatarImage src={user.avatar_url.public_url} />
+                      ) : (
+                        <AvatarFallback
+                          className={`bg-gradient-to-br ${getAvatarGradient(user.uid)} text-white font-semibold`}
+                        >
+                          {user.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
                     {user.full_name}
                   </TableCell>
 

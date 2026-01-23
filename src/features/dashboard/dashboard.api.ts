@@ -12,7 +12,7 @@ export const DashboardAPI = {
 
   getUserInsights: async (): Promise<UserInsightItem[]> => {
     const res = await api.get<ApiResponse<UserInsightItem[]>>(
-      `/admin/user-insights?year=${new Date().getFullYear()}`
+      `/admin/user-insights?year=2025`
     )
     return res.data.data
   },

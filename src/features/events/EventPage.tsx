@@ -1,0 +1,714 @@
+import { useState } from "react";
+
+import {
+  Users,
+  Calendar,
+  Search,
+  Plus, 
+  TrendingUp,
+  Clock,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
+import { Badge } from "../../components/ui/badge";
+import type { Event } from "./event.types";
+import { EventDetailDialog } from "./EventDetailDialog";
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { getAvatarGradient } from "../../components/Header";
+
+const eventStats = [
+  {
+    icon: Calendar,
+    label: "Total Events",
+    value: "67",
+    change: "+18% from last month",
+    bgColor: "bg-pink-50",
+    iconColor: "text-pink-500",
+  },
+  {
+    icon: Clock,
+    label: "Active Events",
+    value: "23",
+    change: "+12% from last month",
+    bgColor: "bg-orange-50",
+    iconColor: "text-orange-500",
+  },
+  {
+    icon: CheckCircle,
+    label: "Completed Events",
+    value: "38",
+    change: "+8% from last month",
+    bgColor: "bg-green-50",
+    iconColor: "text-green-500",
+  },
+  {
+    icon: Users,
+    label: "Total Participants",
+    value: "512",
+    change: "+25% from last month",
+    bgColor: "bg-purple-50",
+    iconColor: "text-purple-500",
+  },
+];
+
+const mockEvents: Event[] = [
+  {
+    uid: "evt-001",
+    name: "Team Building 2024",
+    creator: {
+      uid: "usr-001",
+      full_name: "Amy Roo",
+      email: "amy.roo@example.com",
+      avatar_url: {
+        uid: "",
+        original_name: undefined,
+        public_url: undefined
+      }
+    },
+    group_uid: "grp-001",
+    group_name: "Team Alpha",
+    group: {
+      uid: "grp-001",
+      name: "Team Alpha",
+      leader: {
+        uid: "usr-001",
+        full_name: "Amy Roo",
+        email: "",
+        avatar_url: {
+          uid: "",
+          original_name: undefined,
+          public_url: undefined
+        },
+      },
+      total_members: 0,
+      total_balance: 0,
+      status: "ACTIVE",
+      created_at: "",
+      avatar_url: {
+        public_url: ""
+      }
+    },
+    description:
+      "Annual team building event with outdoor activities and team challenges. Great opportunity for team bonding and collaboration.",
+    event_start: "2024-04-15",
+    event_end: "2024-04-17",
+    created_at: "2024-03-01T10:30:00Z",
+    status: "ACTIVE",
+  },
+  {
+    uid: "evt-002",
+    name: "Marketing Campaign Launch",
+    creator: {
+      uid: "usr-002",
+      full_name: "Hana Ghoghly",
+      email: "hana.g@example.com",
+      avatar_url: {
+        uid: "",
+        original_name: undefined,
+        public_url: undefined
+      }
+    },
+    group_uid: "grp-002",
+    group_name: "Marketing Squad",
+    group: {
+      uid: "grp-002",
+      name: "Marketing Squad",
+      leader: {
+        uid: "usr-002",
+        full_name: "Hana Ghoghly",
+        email: "",
+        avatar_url: {
+          uid: "",
+          original_name: undefined,
+          public_url: undefined
+        }
+      },
+      total_members: 0,
+      total_balance: 0, 
+      status: "ACTIVE",
+      created_at: "",
+      avatar_url: {
+        public_url: ""
+      }
+    },
+    description:
+      "Launch event for our new product marketing campaign with stakeholder presentations.",
+    event_start: "2024-03-25",
+    event_end: "2024-03-25",
+    created_at: "2024-02-10T14:20:00Z",
+    status: "COMPLETED",
+  },
+  {
+    uid: "evt-003",
+    name: "Sprint Planning Q2",
+    creator: {
+      uid: "usr-003",
+      full_name: "Nguyễn Hồ Thúy Linh",
+      email: "linh.nguyen@example.com",
+      avatar_url: {
+        uid: "",
+        original_name: undefined,
+        public_url: undefined
+      }
+    },
+    group_uid: "grp-003",
+    group_name: "Development Team",
+    group: {
+      uid: "grp-003",
+      name: "Development Team",
+      leader: {
+        uid: "usr-003",
+        full_name: "Nguyễn Hồ Thúy Linh",
+        email: "",
+        avatar_url: {
+          uid: "",
+          original_name: undefined,
+          public_url: undefined
+        }
+      },
+      total_members: 0,
+      total_balance: 0,
+      status: "ACTIVE",
+      created_at: "",
+      avatar_url: {
+        public_url: ""
+      }
+    },
+    description: "Quarterly sprint planning session for development roadmap.",
+    event_start: "2024-04-01",
+    event_end: "2024-04-02",
+    created_at: "2024-03-15T09:15:00Z",
+    status: "ACTIVE",
+  },
+  {
+    uid: "evt-004",
+    name: "Sales Kickoff Meeting",
+    creator: {
+      uid: "usr-004",
+      full_name: "Nguyễn Hồ Chi Vũ",
+      email: "vu.nguyen@example.com",
+      avatar_url: {
+        uid: "",
+        original_name: undefined,
+        public_url: undefined
+      }
+    },
+    group_uid: "grp-004",
+    group_name: "Sales Force",
+    group: {
+      uid: "grp-004",
+      name: "Sales Force",
+      leader: {
+        uid: "usr-004",
+        full_name: "Nguyễn Hồ Chi Vũ",
+        email: "",
+        avatar_url: {
+          uid: "",
+          original_name: undefined,
+          public_url: undefined
+        }
+      },
+      total_members: 0,
+      total_balance: 0,
+      status: "ACTIVE",
+      created_at: "",
+      avatar_url: {
+        public_url: ""
+      }
+    },
+    description:
+      "Monthly sales team kickoff to review targets and discuss strategies.",
+    event_start: "2024-04-05",
+    event_end: "2024-04-05",
+    created_at: "2024-03-20T16:45:00Z",
+    status: "ACTIVE",
+  },
+  {
+    uid: "evt-005",
+    name: "Design Workshop",
+    creator: {
+      uid: "usr-005",
+      full_name: "John Smith",
+      email: "john.smith@example.com",
+      avatar_url: {
+        uid: "",
+        original_name: undefined,
+        public_url: undefined
+      }
+    },
+    group_uid: "grp-005",
+    group_name: "Design Studio",
+    group: {
+      uid: "grp-005",
+      name: "Design Studio",
+      leader: {
+        uid: "usr-005",
+        full_name: "John Smith",
+        email: "",
+        avatar_url: {
+          uid: "",
+          original_name: undefined,
+          public_url: undefined
+        }
+      },
+      total_members: 0,
+      total_balance: 0,
+      status: "ACTIVE",
+      created_at: "",
+      avatar_url: {
+        public_url: ""
+      }
+    },
+    description: "Collaborative design thinking workshop for new project ideation.",
+    event_start: "2024-02-20",
+    event_end: "2024-02-21",
+    created_at: "2024-02-01T11:00:00Z",
+    status: "COMPLETED",
+  },
+  {
+    uid: "evt-006",
+    name: "Product Roadmap Review",
+    creator: {
+      uid: "usr-006",
+      full_name: "Sarah Johnson",
+      email: "sarah.j@example.com",
+      avatar_url: {
+        uid: "",
+        original_name: undefined,
+        public_url: undefined
+      }
+    },
+    group_uid: "grp-006",
+    group_name: "Product Team",
+    group: {
+      uid: "grp-006",
+      name: "Product Team",
+      leader: {
+        uid: "usr-006",
+        full_name: "Sarah Johnson",
+        email: "",
+        avatar_url: {
+          uid: "",
+          original_name: undefined,
+          public_url: undefined
+        }
+      },
+      total_members: 0,
+      total_balance: 0,
+      status: "ACTIVE",
+      created_at: "",
+      avatar_url: {
+        public_url: ""
+      }
+    },
+    description:
+      "Comprehensive review of product roadmap with key stakeholders and decision makers.",
+    event_start: "2024-04-10",
+    event_end: "2024-04-11",
+    created_at: "2024-03-05T13:30:00Z",
+    status: "ACTIVE",
+  },
+  {
+    uid: "evt-007",
+    name: "Annual Company Retreat",
+    creator: {
+      uid: "usr-001",
+      full_name: "Amy Roo",
+      email: "amy.roo@example.com",
+      avatar_url: {
+        uid: "",
+        original_name: undefined,
+        public_url: undefined
+      }
+    },
+    group_uid: "grp-001",
+    group_name: "Team Alpha",
+    group: {
+      uid: "grp-001",
+      name: "Team Alpha",
+      leader: {
+        uid: "usr-001",
+        full_name: "Amy Roo",
+        email: "",
+        avatar_url: {
+          uid: "",
+          original_name: undefined,
+          public_url: undefined
+        }
+      },
+      total_members: 0,
+      total_balance: 0,
+      status: "ACTIVE",
+      created_at: "",
+      avatar_url: {
+        public_url: ""
+      }
+    },
+    description:
+      "Company-wide retreat at mountain resort with team activities and strategic planning sessions.",
+    event_start: "2024-05-20",
+    event_end: "2024-05-23",
+    created_at: "2024-03-10T10:00:00Z",
+    status: "ACTIVE",
+  },
+  {
+    uid: "evt-008",
+    name: "Client Presentation",
+    creator: {
+      uid: "usr-002",
+      full_name: "Hana Ghoghly",
+      email: "hana.g@example.com",
+      avatar_url: {
+        uid: "",
+        original_name: undefined,
+        public_url: undefined
+      }
+    },
+    group_uid: "grp-002",
+    group_name: "Marketing Squad",
+    group: {
+      uid: "grp-002",
+      name: "Marketing Squad",
+      leader: {
+        uid: "usr-002",
+        full_name: "Hana Ghoghly",
+        email: "hana.g@example.com",
+        avatar_url: {
+          uid: "",
+          original_name: undefined,
+          public_url: undefined
+        }
+      },
+      total_members: 0,
+      total_balance: 0,
+      status: "ACTIVE",
+      created_at: "",
+      avatar_url: {
+        public_url: ""
+      }
+    },
+    description: "Quarterly business review presentation for key client accounts.",
+    event_start: "2024-03-15",
+    event_end: "2024-03-15",
+    created_at: "2024-03-01T08:30:00Z",
+    status: "COMPLETED",
+  },
+];
+
+const PAGE_SIZE = 2;
+
+export function EventPage() {
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("ALL");
+  
+  const [page, setPage] = useState(1);
+  const [total] = useState(mockEvents.length);
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  const handleEventClick = (event: Event) => {
+    setSelectedEvent(event);
+    setIsDialogOpen(true);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "ACTIVE":
+        return "bg-green-100 text-green-800";
+      case "COMPLETED":
+        return "bg-blue-100 text-blue-800";
+      case "CANCELLED":
+        return "bg-red-100 text-red-800";
+      case "INACTIVE":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "ACTIVE":
+        return <Clock className="h-3 w-3" />;
+      case "COMPLETED":
+        return <CheckCircle className="h-3 w-3" />;
+      case "CANCELLED":
+        return <XCircle className="h-3 w-3" />;
+      default:
+        return <Calendar className="h-3 w-3" />;
+    }
+  };
+
+  const isEventUpcoming = (eventStart: string) => {
+    return new Date(eventStart) > new Date();
+  };
+
+  const filteredEvents = mockEvents.filter((event) => {
+    const matchesSearch = event.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesStatus =
+      filterStatus === "ALL" || event.status === filterStatus;
+    return matchesSearch && matchesStatus;
+  });
+
+  return (
+    <div className="p-8 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">Event Management</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Manage and monitor all events
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <Button size="sm" className="text-white bg-rose-600 hover:bg-rose-700">
+            <Plus className="h-4 w-4 mr-2" />
+            Create Event
+          </Button>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-4 gap-4">
+        {eventStats.map((stat, index) => (
+          <Card key={index} className="border-0 shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600 mb-2">{stat.label}</p>
+                  <p className="text-2xl font-bold mb-2">{stat.value}</p>
+                  <div className="flex items-center gap-1 text-xs">
+                    <TrendingUp className="h-3 w-3 text-green-600" />
+                    <span className="text-green-600">{stat.change}</span>
+                  </div>
+                </div>
+                <div className={`p-3 ${stat.bgColor} rounded-lg`}>
+                  <stat.icon className={`h-6 w-6 ${stat.iconColor}`} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Search and Filter */}
+      <Card className="border-0 shadow-sm">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>All Events</CardTitle>
+            <div className="flex gap-3">
+              <div className="flex gap-2">
+                <Button
+                  variant={filterStatus === "ALL" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setFilterStatus("ALL")}
+                  className={
+                    filterStatus === "ALL" ? "bg-rose-600 hover:bg-rose-700 text-white" : ""
+                  }
+                >
+                  All
+                </Button>
+                <Button
+                  variant={filterStatus === "ACTIVE" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setFilterStatus("ACTIVE")}
+                  className={
+                    filterStatus === "ACTIVE"
+                      ? "bg-rose-600 hover:bg-rose-700 text-white"
+                      : ""
+                  }
+                >
+                  Active
+                </Button>
+                <Button
+                  variant={filterStatus === "COMPLETED" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setFilterStatus("COMPLETED")}
+                  className={
+                    filterStatus === "COMPLETED"
+                      ? "bg-rose-600 hover:bg-rose-700 text-white"
+                      : ""
+                  }
+                >
+                  Completed
+                </Button>
+              </div>
+              <div className="relative w-72">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search events..."
+                  className="pl-9"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {filteredEvents.map((event) => (
+              <Card
+                key={event.uid}
+                className="cursor-pointer hover:shadow-md transition-all duration-200 border hover:border-rose-300"
+                onClick={() => handleEventClick(event)}
+              >
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="p-3 bg-gradient-to-br from-pink-100 to-purple-100 rounded-lg">
+                          <Calendar className="h-5 w-5 text-rose-600" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-lg">
+                              {event.name}
+                            </h3>
+                            {isEventUpcoming(event.event_start) && (
+                              <Badge
+                                variant="secondary"
+                                className="bg-orange-100 text-orange-800 text-xs"
+                              >
+                                Upcoming
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-500">
+                            ID: {event.uid}
+                          </p>
+                        </div>
+                        <Badge
+                          variant="secondary"
+                          className={`flex items-center gap-1 ${getStatusColor(
+                            event.status
+                          )}`}
+                        >
+                          {getStatusIcon(event.status)}
+                          {event.status}
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-4 gap-4 mb-3">
+                        <div className="p-3 bg-blue-50 rounded-lg">
+                          <p className="text-xs text-gray-600 mb-1">Group</p>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="size-7">
+                              {event.group.avatar_url?.public_url ? (
+                                <AvatarImage src={event.group.avatar_url.public_url} />
+                              ) : (
+                                <AvatarFallback
+                                  className={`bg-gradient-to-br ${getAvatarGradient(event.group.uid)} text-white font-semibold`}
+                                >
+                                  {event.group.name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                                </AvatarFallback>
+                              )}
+                            </Avatar>
+                            <p className="font-semibold text-sm truncate">
+                              {event.group_name}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="p-3 bg-purple-50 rounded-lg">
+                          <p className="text-xs text-gray-600 mb-1">Creator</p>
+                          <div className="flex items-center gap-2">
+                            <Avatar className="size-7">
+                              {event.creator.avatar_url?.public_url ? (
+                                <AvatarImage src={event.creator.avatar_url.public_url} />
+                              ) : (
+                                <AvatarFallback
+                                  className={`bg-gradient-to-br ${getAvatarGradient(event.creator.uid)} text-white font-semibold`}
+                                >
+                                  {event.creator.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                                </AvatarFallback>
+                              )}
+                            </Avatar>
+                            <p className="font-semibold text-sm truncate">
+                              {event.creator.full_name}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="p-3 bg-green-50 rounded-lg">
+                          <p className="text-xs text-gray-600 mb-1">Start Date</p>
+                          <p className="font-semibold text-sm">
+                            {formatDate(event.event_start)}
+                          </p>
+                        </div>
+                        <div className="p-3 bg-orange-50 rounded-lg">
+                          <p className="text-xs text-gray-600 mb-1">End Date</p>
+                          <p className="font-semibold text-sm">
+                            {formatDate(event.event_end)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {event.description && (
+                        <p className="text-sm text-gray-600 line-clamp-2">
+                          {event.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {filteredEvents.length === 0 && (
+            <div className="text-center py-12">
+              <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500">No events found</p>
+            </div>
+          )}
+
+          {/* Pagination */}
+          <div className="flex items-center justify-between mt-6">
+            <span className="text-sm text-slate-500">
+              Page {page} / {totalPages || 1}
+            </span>
+
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                Previous
+              </Button>
+
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={page >= totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <EventDetailDialog
+        event={selectedEvent}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+      />
+    </div>
+  );
+}

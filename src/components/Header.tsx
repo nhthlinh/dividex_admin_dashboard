@@ -8,7 +8,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { DropdownMenuLabel, DropdownMenuSeparator } from "@radix-ui/react-dropdown-menu";
 
 export function Header() {
   return (
@@ -53,11 +52,6 @@ function AdminUserMenu() {
     .slice(0, 2)
     .toUpperCase();
 
-  const handleLogout = () => {
-    authStore.logout(); // clear token + user
-    window.location.href = "/login";
-  };
-
   const gradient = getAvatarGradient(user.uid);
 
   return (
@@ -81,7 +75,7 @@ function AdminUserMenu() {
               {displayName}
             </span>
             <span className="text-xs text-slate-500 capitalize">
-              {user.role.toLowerCase()}
+              {user.role?.toLowerCase() ?? "Super Admin"}
             </span>
           </div>
 
@@ -89,7 +83,7 @@ function AdminUserMenu() {
         </div>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-48">
+      {/* <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuItem
           onClick={handleLogout}
           className="text-red-600 focus:text-red-600"
@@ -97,12 +91,12 @@ function AdminUserMenu() {
           <LogOut className="mr-2 size-4" />
           Logout
         </DropdownMenuItem>
-      </DropdownMenuContent>
+      </DropdownMenuContent> */}
     </DropdownMenu>
   );
 }
 
-const getAvatarGradient = (uid: string) => {
+export const getAvatarGradient = (uid: string) => {
   const gradients = [
     "from-rose-500 to-pink-500",
     "from-indigo-500 to-purple-500",

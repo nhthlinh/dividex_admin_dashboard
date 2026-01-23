@@ -6,6 +6,9 @@ import { DashboardPage } from "../features/dashboard/DashboardPage";
 import { UserPage } from "../features/users/UserPage";
 import { AdminManagementPage } from "../features/admins/AdminManagementPage";
 import { AdminInviteAcceptPage } from "../features/admins/AdminInviteAcceptPage";
+import { GroupPage } from "../features/groups/GroupPage";
+import { EventPage } from "../features/events/EventPage";
+import { ExpensePage } from "../features/expenses/ExpensePage";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
@@ -26,6 +29,9 @@ export const router = createBrowserRouter([
       { index: true, element: <DashboardPage /> },
       { path: "user", element: <UserPage /> },
       { path: "admin", element: <AdminManagementPage /> },
+      { path: "group", element: <GroupPage /> },
+      { path: "event", element: <EventPage /> },
+      { path: "expense", element: <ExpensePage /> }
     ],
   },
 ]);

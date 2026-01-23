@@ -78,10 +78,6 @@ export function TodaysOverview() {
           <CardTitle>Today's Overview</CardTitle>
           <p className="text-sm text-slate-500 mt-1">Summary</p>
         </div>
-        {/* <Button variant="outline" size="sm">
-          <Download className="size-4 mr-2" />
-          Export
-        </Button> */}
       </CardHeader>
 
       <CardContent>
