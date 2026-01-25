@@ -119,6 +119,10 @@ export function GroupDetailDialog({
     },
   ];
 
+  const handleGoToEventPage = () => {
+    window.location.href = `/event/group/${group.uid}`;
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -151,7 +155,14 @@ export function GroupDetailDialog({
             >
               {group.status}
             </Badge>
+            
           </div>
+          <Button size="sm" className="mt-3 bg-rose-600 hover:bg-rose-700 text-white"
+            onClick={handleGoToEventPage}
+          >
+            <Calendar className="h-4 w-4 mr-2" />
+            Go to group's events
+          </Button>
         </DialogHeader>
 
         <Tabs defaultValue="info" className="mt-2">
@@ -176,7 +187,7 @@ export function GroupDetailDialog({
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="info" className="space-y-6 mt-6">
+          <TabsContent value="info" className="space-y-6">
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
@@ -264,7 +275,7 @@ export function GroupDetailDialog({
             </div>
           </TabsContent>
 
-          <TabsContent value="members" className="mt-6">
+          <TabsContent value="members">
             <div className="space-y-3">
               {members.map((member) => (
                 <div
@@ -299,7 +310,7 @@ export function GroupDetailDialog({
             </div>
           </TabsContent>
 
-          <TabsContent value="activity" className="mt-6">
+          <TabsContent value="activity">
             <div className="space-y-3">
               {activities.map((activity) => (
                 <div

@@ -16,6 +16,7 @@ import type { Expense } from "./expense.types";
 import { ExpenseDetailDialog } from "./ExpenseDetailDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { getAvatarGradient } from "../../components/Header";
+import { router } from "../../app/router";
 
 const expenseStats = [
   {
@@ -158,186 +159,20 @@ const mockExpenses: Expense[] = [
     created_at: "2024-03-14T18:00:00Z",
     updated_at: "2024-03-14T18:00:00Z",
   },
-  {
-    uid: "exp-004",
-    name: "Office Supplies",
-    event_uid: "evt-003",
-    event_name: "Sprint Planning Q2",
-    currency: "USD",
-    total_amount: 350.0,
-    paid_by: {
-      uid: "usr-004",
-      full_name: "John Smith",
-      email: "john.smith@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    creator: {
-      uid: "usr-003",
-      full_name: "Nguyễn Hồ Thúy Linh",
-      email: "linh.nguyen@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    split_type: "PERCENTAGE",
-    note: "Whiteboard markers, sticky notes, and other planning materials",
-    category: "Office Supplies",
-    expense_date: "2024-03-20T10:00:00Z",
-    status: "ACTIVE",
-    created_at: "2024-03-20T11:00:00Z",
-    updated_at: "2024-03-20T11:00:00Z",
-  },
-  {
-    uid: "exp-005",
-    name: "Marketing Materials",
-    event_uid: "evt-002",
-    event_name: "Marketing Campaign Launch",
-    currency: "USD",
-    total_amount: 850.0,
-    paid_by: {
-      uid: "usr-002",
-      full_name: "Hana Ghoghly",
-      email: "hana.g@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    creator: {
-      uid: "usr-002",
-      full_name: "Hana Ghoghly",
-      email: "hana.g@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    split_type: "EXACT",
-    note: "Printed brochures, banners, and promotional items for the launch event",
-    category: "Marketing",
-    expense_date: "2024-03-22T14:00:00Z",
-    status: "SETTLED",
-    created_at: "2024-03-22T15:00:00Z",
-    updated_at: "2024-03-25T09:00:00Z",
-  },
-  {
-    uid: "exp-006",
-    name: "Client Lunch Meeting",
-    event_uid: "evt-004",
-    event_name: "Sales Kickoff Meeting",
-    currency: "USD",
-    total_amount: 240.0,
-    paid_by: {
-      uid: "usr-004",
-      full_name: "Nguyễn Hồ Chi Vũ",
-      email: "vu.nguyen@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    creator: {
-      uid: "usr-004",
-      full_name: "Nguyễn Hồ Chi Vũ",
-      email: "vu.nguyen@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    split_type: "EQUAL",
-    note: "Business lunch with potential clients to discuss partnership opportunities",
-    category: "Food & Dining",
-    expense_date: "2024-03-25T12:30:00Z",
-    status: "ACTIVE",
-    created_at: "2024-03-25T14:00:00Z",
-    updated_at: "2024-03-25T14:00:00Z",
-  },
-  {
-    uid: "exp-007",
-    name: "Software Licenses",
-    event_uid: "evt-003",
-    event_name: "Sprint Planning Q2",
-    currency: "USD",
-    total_amount: 1500.0,
-    paid_by: {
-      uid: "usr-003",
-      full_name: "Nguyễn Hồ Thúy Linh",
-      email: "linh.nguyen@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    creator: {
-      uid: "usr-003",
-      full_name: "Nguyễn Hồ Thúy Linh",
-      email: "linh.nguyen@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    split_type: "SHARE",
-    note: "Annual renewal for project management and development tools",
-    category: "Software & Tools",
-    expense_date: "2024-03-18T09:00:00Z",
-    status: "SETTLED",
-    created_at: "2024-03-18T10:00:00Z",
-    updated_at: "2024-03-20T16:00:00Z",
-  },
-  {
-    uid: "exp-008",
-    name: "Team Coffee & Snacks",
-    event_uid: "evt-003",
-    event_name: "Sprint Planning Q2",
-    currency: "USD",
-    total_amount: 85.0,
-    paid_by: {
-      uid: "usr-001",
-      full_name: "Amy Roo",
-      email: "amy.roo@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    creator: {
-      uid: "usr-001",
-      full_name: "Amy Roo",
-      email: "amy.roo@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    split_type: "EQUAL",
-    note: "Coffee, tea, and snacks for the planning sessions",
-    category: "Food & Dining",
-    expense_date: "2024-03-19T08:00:00Z",
-    status: "ACTIVE",
-    created_at: "2024-03-19T17:00:00Z",
-    updated_at: "2024-03-19T17:00:00Z",
-  },
 ];
+
+const event = {
+    uid: "evt-001",
+    name: "Team Building 2024",
+    description: "Annual team building event for all company employees.",
+    start_date: "2024-03-14T08:00:00Z",
+}
 
 const PAGE_SIZE = 2;
 
-export function ExpensePage() {
+export function ExpenseInEventPage() {
+  const eventId = router.state.location.pathname.split("/").pop();
+  console.log("Event ID from URL:", eventId);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -432,10 +267,7 @@ export function ExpensePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Expense Management</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Track and manage all expenses
-          </p>
+          <h1 className="text-2xl font-semibold">Expense Management for {event.name}</h1>
         </div>
         <div className="flex gap-3">
           <Button size="sm" className="text-white bg-rose-600 hover:bg-rose-700">

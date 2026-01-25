@@ -209,7 +209,7 @@ export function ExpenseDetailDialog({
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="info" className="space-y-6 mt-6">
+          <TabsContent value="info" className="space-y-6">
             {/* Amount Card */}
             <div className="p-6 bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg">
               <div className="flex items-center justify-between">
@@ -350,7 +350,7 @@ export function ExpenseDetailDialog({
             </div>
           </TabsContent>
 
-          <TabsContent value="splits" className="mt-6">
+          <TabsContent value="splits">
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
                 <div>
@@ -422,7 +422,7 @@ export function ExpenseDetailDialog({
             </div>
           </TabsContent>
 
-          <TabsContent value="attachments" className="mt-6">
+          <TabsContent value="attachments">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-600">

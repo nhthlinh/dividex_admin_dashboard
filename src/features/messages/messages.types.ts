@@ -1,4 +1,3 @@
-import type { Group } from "../groups/group.types";
 import type { User } from "../users/user.types";
 
 export type MessageStatus = "ACTIVE" | "DELETED" | "EDITED";

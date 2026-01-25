@@ -12,6 +12,7 @@ import {
   Trash2,
   CheckCircle,
   XCircle,
+  DollarSign,
 } from "lucide-react";
 import type { Event } from "./event.types";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
@@ -161,6 +162,10 @@ export function EventDetailDialog({
 
   const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
 
+  const handleGoToExpensePage = () => {
+    window.location.href = `/expense/event/${event.uid}`;
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -174,6 +179,12 @@ export function EventDetailDialog({
               {event.status}
             </Badge>
           </div>
+          <Button size="sm" className="mt-3 bg-rose-600 hover:bg-rose-700 text-white"
+            onClick={handleGoToExpensePage}
+          >
+            <DollarSign className="h-4 w-4 mr-2" />
+            Go to event's expense
+          </Button>
         </DialogHeader>
 
         <Tabs defaultValue="info" className="mt-2">
@@ -198,7 +209,7 @@ export function EventDetailDialog({
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="info" className="space-y-6 mt-6">
+          <TabsContent value="info" className="space-y-6">
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div className="p-4 bg-purple-50 rounded-lg">
@@ -326,7 +337,7 @@ export function EventDetailDialog({
             </div>
           </TabsContent>
 
-          <TabsContent value="participants" className="mt-6">
+          <TabsContent value="participants">
             <div className="space-y-3">
               <div className="flex items-center justify-between mb-4">
                 <p className="text-sm text-gray-600">
@@ -376,7 +387,7 @@ export function EventDetailDialog({
             </div>
           </TabsContent>
 
-          <TabsContent value="expenses" className="mt-6">
+          <TabsContent value="expenses">
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg">
                 <div>

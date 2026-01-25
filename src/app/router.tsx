@@ -12,6 +12,8 @@ import { ExpensePage } from "../features/expenses/ExpensePage";
 import { TransactionPage } from "../features/transactions/TransactionPage";
 import { NotificationPage } from "../features/notifications/NotificationPage";
 import { MessagePage } from "../features/messages/MessagePage";
+import { EventInGroupPage } from "../features/events/EventInGroupPage";
+import { ExpenseInEventPage } from "../features/expenses/ExpenseInEventPage";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
@@ -34,7 +36,9 @@ export const router = createBrowserRouter([
       { path: "admin", element: <AdminManagementPage /> },
       { path: "group", element: <GroupPage /> },
       { path: "event", element: <EventPage /> },
+      { path: "event/group/:group_uid", element: <EventInGroupPage /> },
       { path: "expense", element: <ExpensePage /> },
+      { path: "expense/event/:event_uid", element: <ExpenseInEventPage /> },
       { path: "transaction", element: <TransactionPage /> },
       { path: "notification", element: <NotificationPage />},
       { path: "message", element: <MessagePage />}

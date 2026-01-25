@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { authStore } from "../features/auth/auth.store";
+import { router } from "../app/router";
 
 interface SidebarProps {
   currentPage: string;
@@ -66,7 +67,13 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
       <nav className="flex-1 px-2">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = currentPage === item.key;
+          const pathname = router.state.location.pathname;
+          const routeKey = pathname.split("/")[1]; // an toàn hơn slice(1)
+          console.log("Current routeKey:", routeKey, "Item key:", item.key);
+
+          const isActive = routeKey === item.key;
+
+          console.log("isActive for", item.key, ":", isActive);
 
           return (
             <Button
