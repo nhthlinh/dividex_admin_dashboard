@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Users as UsersIcon, UserCheck, UserPlus, Plus } from "lucide-react";
-import { UserDetailDialog } from "../../components/UserDetailDialog";
 import { Dialog, DialogContent } from "../../components/ui/dialog";
 import type { User } from "./user.types";
 import { UserAPI } from "./user.api";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { getAvatarGradient } from "../../components/Header";
+import { UserDetailDialog } from "./UserDetailDialog";
 
 const userStats = [
   {

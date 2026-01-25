@@ -27,9 +27,9 @@ const menuItems = [
   { icon: ShoppingCart, label: "Group", key: "group" },
   { icon: Calendar, label: "Event", key: "event" },
   { icon: TrendingDown, label: "Expense", key: "expense" },
-  { icon: CreditCard, label: "Payment", key: "payment" },
+  { icon: CreditCard, label: "Transaction", key: "transaction" },
   { icon: Bell, label: "Notification", key: "notification" },
-  { icon: MessageSquare, label: "Messages", key: "messages" },
+  { icon: MessageSquare, label: "Message", key: "message" },
   { icon: PlusSquare, label: "Admin", key: "admin" },
 ];
 

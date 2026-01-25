@@ -9,6 +9,9 @@ import { AdminInviteAcceptPage } from "../features/admins/AdminInviteAcceptPage"
 import { GroupPage } from "../features/groups/GroupPage";
 import { EventPage } from "../features/events/EventPage";
 import { ExpensePage } from "../features/expenses/ExpensePage";
+import { TransactionPage } from "../features/transactions/TransactionPage";
+import { NotificationPage } from "../features/notifications/NotificationPage";
+import { MessagePage } from "../features/messages/MessagePage";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
@@ -31,7 +34,10 @@ export const router = createBrowserRouter([
       { path: "admin", element: <AdminManagementPage /> },
       { path: "group", element: <GroupPage /> },
       { path: "event", element: <EventPage /> },
-      { path: "expense", element: <ExpensePage /> }
+      { path: "expense", element: <ExpensePage /> },
+      { path: "transaction", element: <TransactionPage /> },
+      { path: "notification", element: <NotificationPage />},
+      { path: "message", element: <MessagePage />}
     ],
   },
 ]);

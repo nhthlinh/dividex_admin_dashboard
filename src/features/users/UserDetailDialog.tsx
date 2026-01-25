@@ -4,17 +4,17 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Button } from "./ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Badge } from "./ui/badge";
+} from "../../components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { Button } from "../../components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { Badge } from "../../components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+} from "../../components/ui/dropdown-menu";
 import {
   Lock,
   Unlock,
@@ -26,8 +26,8 @@ import {
   MapPin,
   Calendar,
 } from "lucide-react";
-import type { User } from "../features/users/user.types";
-import { getAvatarGradient } from "./Header";
+import type { User } from "./user.types";
+import { getAvatarGradient } from "../../components/Header";
 
 interface UserDetailDialogProps {
   user: User;

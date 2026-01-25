@@ -28,6 +28,15 @@ export default function AdminLayout() {
           case "expense":
             window.location.href = "/expense";
             break;
+          case "transaction":
+            window.location.href = "/transaction";
+            break;
+          case "notification":
+            window.location.href = "/notification";
+            break;
+          case "message":
+            window.location.href = "/message";
+            break;
           case "admin":
             window.location.href = "/admin";
             break;
