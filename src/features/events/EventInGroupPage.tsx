@@ -14,7 +14,7 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Badge } from "../../components/ui/badge";
-import type { Event } from "./event.types";
+import type { EventItem } from "./event.types";
 import { EventDetailDialog } from "./EventDetailDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { getAvatarGradient } from "../../components/Header";
@@ -55,10 +55,10 @@ const eventStats = [
   },
 ];
 
-const mockEvents: Event[] = [
+const mockEvents: EventItem[] = [
   {
-    uid: "evt-001",
-    name: "Team Building 2024",
+    event_uid: "evt-001",
+    event_name: "Team Building 2024",
     creator: {
       uid: "usr-001",
       full_name: "Amy Roo",
@@ -69,8 +69,6 @@ const mockEvents: Event[] = [
         public_url: undefined
       }
     },
-    group_uid: "grp-001",
-    group_name: "Team Alpha",
     group: {
       uid: "grp-001",
       name: "Team Alpha",
@@ -85,23 +83,21 @@ const mockEvents: Event[] = [
         },
       },
       total_members: 0,
-      total_balance: 0,
       status: "ACTIVE",
       created_at: "",
       avatar_url: {
-        public_url: ""
+        public_url: "",
+        uid: ""
       }
     },
-    description:
-      "Annual team building event with outdoor activities and team challenges. Great opportunity for team bonding and collaboration.",
+    event_description: "Annual team building event with outdoor activities and team challenges. Great opportunity for team bonding and collaboration.",
     event_start: "2024-04-15",
     event_end: "2024-04-17",
-    created_at: "2024-03-01T10:30:00Z",
     status: "ACTIVE",
   },
   {
-    uid: "evt-007",
-    name: "Annual Company Retreat",
+    event_uid: "evt-007",
+    event_name: "Annual Company Retreat",
     creator: {
       uid: "usr-001",
       full_name: "Amy Roo",
@@ -112,8 +108,6 @@ const mockEvents: Event[] = [
         public_url: undefined
       }
     },
-    group_uid: "grp-001",
-    group_name: "Team Alpha",
     group: {
       uid: "grp-001",
       name: "Team Alpha",
@@ -128,23 +122,22 @@ const mockEvents: Event[] = [
         }
       },
       total_members: 0,
-      total_balance: 0,
       status: "ACTIVE",
       created_at: "",
       avatar_url: {
-        public_url: ""
+        public_url: "",
+        uid: ""
       }
     },
-    description:
+    event_description:
       "Company-wide retreat at mountain resort with team activities and strategic planning sessions.",
     event_start: "2024-05-20",
     event_end: "2024-05-23",
-    created_at: "2024-03-10T10:00:00Z",
     status: "ACTIVE",
   },
   {
-    uid: "evt-008",
-    name: "Client Presentation",
+    event_uid: "evt-008",
+    event_name: "Client Presentation",
     creator: {
       uid: "usr-002",
       full_name: "Hana Ghoghly",
@@ -155,8 +148,6 @@ const mockEvents: Event[] = [
         public_url: undefined
       }
     },
-    group_uid: "grp-001",
-    group_name: "Team Alpha",
     group: {
       uid: "grp-001",
       name: "Team Alpha",
@@ -171,17 +162,16 @@ const mockEvents: Event[] = [
         }
       },
       total_members: 0,
-      total_balance: 0,
       status: "ACTIVE",
       created_at: "",
       avatar_url: {
-        public_url: ""
+        public_url: "",
+        uid: ""
       }
     },
-    description: "Quarterly business review presentation for key client accounts.",
+    event_description: "Quarterly business review presentation for key client accounts.",
     event_start: "2024-03-15",
     event_end: "2024-03-15",
-    created_at: "2024-03-01T08:30:00Z",
     status: "COMPLETED",
   },
 ];
@@ -195,8 +185,8 @@ const group = {
         email: "",
         avatar_url: {
           uid: "",
-            original_name: undefined,   
-            public_url: undefined   
+          original_name: undefined,   
+          public_url: undefined   
         }
     },
     total_members: 0,
@@ -207,7 +197,7 @@ const PAGE_SIZE = 2;
 export function EventInGroupPage() {
   const groupId = router.state.location.pathname.split("/").pop();
   console.log("Group ID from URL:", groupId);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
@@ -216,7 +206,7 @@ export function EventInGroupPage() {
   const [total] = useState(mockEvents.length);
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
-  const handleEventClick = (event: Event) => {
+  const handleEventClick = (event: EventItem) => {
     setSelectedEvent(event);
     setIsDialogOpen(true);
   };
@@ -262,7 +252,7 @@ export function EventInGroupPage() {
   };
 
   const filteredEvents = mockEvents.filter((event) => {
-    const matchesSearch = event.name
+    const matchesSearch = event.event_name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
     const matchesStatus =
@@ -276,12 +266,6 @@ export function EventInGroupPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Event Management For {group.name}</h1>
-        </div>
-        <div className="flex gap-3">
-          <Button size="sm" className="text-white bg-rose-600 hover:bg-rose-700">
-            <Plus className="h-4 w-4 mr-2" />
-            Create Event
-          </Button>
         </div>
       </div>
 
@@ -366,7 +350,7 @@ export function EventInGroupPage() {
           <div className="space-y-3">
             {filteredEvents.map((event) => (
               <Card
-                key={event.uid}
+                key={event.event_uid}
                 className="cursor-pointer hover:shadow-md transition-all duration-200 border hover:border-rose-300"
                 onClick={() => handleEventClick(event)}
               >
@@ -380,7 +364,7 @@ export function EventInGroupPage() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <h3 className="font-semibold text-lg">
-                              {event.name}
+                              {event.event_name}
                             </h3>
                             {isEventUpcoming(event.event_start) && (
                               <Badge
@@ -392,7 +376,7 @@ export function EventInGroupPage() {
                             )}
                           </div>
                           <p className="text-xs text-gray-500">
-                            ID: {event.uid}
+                            ID: {event.event_uid}
                           </p>
                         </div>
                         <Badge
@@ -422,7 +406,7 @@ export function EventInGroupPage() {
                               )}
                             </Avatar>
                             <p className="font-semibold text-sm truncate">
-                              {event.group_name}
+                              {event.group.name}
                             </p>
                           </div>
                         </div>
@@ -459,9 +443,9 @@ export function EventInGroupPage() {
                         </div>
                       </div>
 
-                      {event.description && (
+                      {event.event_description && (
                         <p className="text-sm text-gray-600 line-clamp-2">
-                          {event.description}
+                          {event.event_description}
                         </p>
                       )}
                     </div>

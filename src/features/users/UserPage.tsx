@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
-import { Users as UsersIcon, UserCheck, UserPlus, Plus } from "lucide-react";
+import { Users as UsersIcon, UserCheck, UserPlus, Plus, Search } from "lucide-react";
 import { Dialog, DialogContent } from "../../components/ui/dialog";
 import type { User } from "./user.types";
 import { UserAPI } from "./user.api";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { getAvatarGradient } from "../../components/Header";
 import { UserDetailDialog } from "./UserDetailDialog";
+import { Input } from "../../components/ui/input";
 
 const userStats = [
   {
@@ -50,6 +51,8 @@ export function UserPage() {
   const [isOverviewDialogOpen, setIsOverviewDialogOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  const [inputValue, setInputValue] = useState("");
+
   const handleUserClick = (user: User) => {
     setSelectedUser(user);
     setIsDialogOpen(true);
@@ -67,6 +70,7 @@ export function UserPage() {
         page_size: PAGE_SIZE,
         order_by: "full_name",
         sort_type: "desc",
+        search: inputValue,
       });
 
       setUsers(res.content);
@@ -86,17 +90,24 @@ export function UserPage() {
             Manage and monitor all users
           </p>
         </div>
-        <div className="flex gap-3">
-          <Button size="sm" className="text-white bg-rose-600 hover:bg-rose-700">
-            <Plus className="h-4 w-4 mr-2" />
-            Create User
-          </Button>
-        </div>
       </div>
       <div className="grid grid-cols-1 gap-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>All Users</CardTitle>
+            <div className="flex-1 max-w-md mx-8">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-rose-500" 
+                  onClick={fetchUsers}
+                />
+                <Input 
+                  type="search" 
+                  placeholder="Search here..." 
+                  className="pl-10 border-slate-200"
+                  onChange={(e) => setInputValue(e.target.value)}
+                />
+              </div>
+            </div>
             <Button 
               variant="link" className="text-sm px-0 mt-1"
               onClick={() => setIsOverviewDialogOpen(true)}

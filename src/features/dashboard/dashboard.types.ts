@@ -21,3 +21,8 @@ export interface ExpenseCategoryItem {
   total_amount: number;
 }
 
+export interface RatingItem {
+  date: string; // ISO
+  rate: number;
+}
+

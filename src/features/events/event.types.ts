@@ -1,17 +1,46 @@
-import type { Group } from "../groups/group.types";
+import type { GroupItem } from "../groups/group.types";
 import type { User } from "../users/user.types";
 
-export interface Event {
-  uid: string;
-  name: string;
-  name_no_accent?: string;
+export interface EventStatistics {
+  total_events: number;
+  total_members: number;
+  active_events: number;
+  total_finished_events: number;
+  percent_increase_events: number;
+  percent_increase_members: number;
+  percent_increase_active_events: number;
+  percent_increase_finished_events: number;
+}
+
+export interface EventItem {
+  event_uid: string;
+  event_name: string;
+  event_description: string;
+  event_start: string; // yyyy-mm-dd
+  event_end: string;   // yyyy-mm-dd
+  status: string;
   creator: User;
-  group_uid: string;
-  group_name: string;
-  group: Group;
-  description?: string;
-  event_start: string; // Date string
-  event_end: string; // Date string
-  created_at: string;
-  status: "ACTIVE" | "INACTIVE" | "COMPLETED" | "CANCELLED";
+  group: GroupItem;
+}
+
+export interface EventListResponse {
+  content: EventItem[];
+  current_page: number;
+  page_size: number;
+  total_rows: number;
+  total_pages: number;
+}
+
+export interface EventMember {
+  event_member_uid: string;
+  status: string;
+  user: User;
+}
+
+export interface EventMemberListResponse {
+  content: EventMember[];
+  current_page: number;
+  page_size: number;
+  total_rows: number;
+  total_pages: number;
 }

@@ -1,22 +1,22 @@
 import {
   Users,
   Calendar,
-  DollarSign,
   Lock,
   Unlock,
   UserPlus,
   Trash2,
 } from "lucide-react";
-import type { Group } from "./group.types";
+import type { GroupItem } from "./group.types";
 import { Badge } from "../../components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 import { Button } from "../../components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { getAvatarGradient } from "../../components/Header";
+import { GroupAPI } from "./group.api";
 
 interface GroupDetailDialogProps {
-  group: Group | null;
+  group: GroupItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -123,6 +123,14 @@ export function GroupDetailDialog({
     window.location.href = `/event/group/${group.uid}`;
   }
 
+  const handleDeactivateGroup = async () => {
+    await GroupAPI.deactivateGroup(group.uid);
+  }
+
+  const handleActivateGroup = async () => {
+    // await GroupAPI.activateGroup(group.uid);
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -188,91 +196,67 @@ export function GroupDetailDialog({
           </TabsList>
 
           <TabsContent value="info" className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Users className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Total Members</p>
-                    <p className="text-xl font-semibold">
-                      {group.total_members}
-                    </p>
-                  </div>
+            <div className="grid grid-cols-3 gap-6">
+              <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Users className="h-5 w-5 text-blue-600" />
                 </div>
-
-                <div className="flex items-center gap-3 p-4 bg-green-50 rounded-lg">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <DollarSign className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Total Balance</p>
-                    <p className="text-xl font-semibold">
-                      {formatCurrency(group.total_balance)}
-                    </p>
-                  </div>
+                <div>
+                  <p className="text-sm text-gray-600">Total Members</p>
+                  <p className="text-xl font-semibold">
+                    {group.total_members}
+                  </p>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="p-4 bg-purple-50 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-2">Group Leader</p>
-                  <div className="flex items-center gap-3 mb-1">
-                    <Avatar className="size-7">
-                      {group.leader.avatar_url?.public_url ? (
-                        <AvatarImage src={group.leader.avatar_url.public_url} />
-                      ) : (
-                        <AvatarFallback
-                          className={`bg-gradient-to-br ${getAvatarGradient(group.leader.uid)} text-white font-semibold`}
-                        >
-                          {group.leader.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
-                    <p className="font-semibold">{group.leader.full_name}</p>
-                  </div>
-                  {/* <p className="text-sm text-gray-500">{group.leader.email}</p> */}
+              <div className="p-4 bg-purple-50 rounded-lg">
+                <p className="text-sm text-gray-600 mb-2">Group Leader</p>
+                <div className="flex items-center gap-3 mb-1">
+                  <Avatar className="size-7">
+                    {group.leader.avatar_url?.public_url ? (
+                      <AvatarImage src={group.leader.avatar_url.public_url} />
+                    ) : (
+                      <AvatarFallback
+                        className={`bg-gradient-to-br ${getAvatarGradient(group.leader.uid)} text-white font-semibold`}
+                      >
+                        {group.leader.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <p className="font-semibold">{group.leader.full_name}</p>
                 </div>
+                {/* <p className="text-sm text-gray-500">{group.leader.email}</p> */}
+              </div>
 
-                <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-lg">
-                  <div className="p-2 bg-orange-100 rounded-lg">
-                    <Calendar className="h-5 w-5 text-orange-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Created At</p>
-                    <p className="text-base font-semibold">
-                      {formatDate(group.created_at)}
-                    </p>
-                  </div>
+              <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-lg">
+                <div className="p-2 bg-orange-100 rounded-lg">
+                  <Calendar className="h-5 w-5 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Created At</p>
+                  <p className="text-base font-semibold">
+                    {formatDate(group.created_at)}
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div className="pt-4 border-t">
-              <h3 className="text-sm font-semibold mb-3">Group Actions</h3>
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Add Member
-                </Button>
-                {group.status === "ACTIVE" ? (
-                  <Button variant="outline" size="sm">
-                    <Lock className="h-4 w-4 mr-2" />
-                    Deactivate Group
-                  </Button>
-                ) : (
-                  <Button variant="outline" size="sm">
-                    <Unlock className="h-4 w-4 mr-2" />
-                    Activate Group
-                  </Button>
-                )}
-                <Button variant="outline" size="sm" className="text-red-600">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Group
-                </Button>
-              </div>
-            </div>
+            {group.status === "ACTIVE" ? (
+              <Button size="sm" className="mt-3 bg-rose-600 hover:bg-rose-700 text-white"
+                onClick={handleDeactivateGroup}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Deactivate Group
+              </Button>
+              ) : (
+                <Button size="sm" className="mt-3 bg-green-600 hover:bg-green-700 text-white"
+                onClick={handleActivateGroup}
+              >
+                <Unlock className="h-4 w-4 mr-2" />
+                Activate Group
+              </Button>
+              )
+            }
           </TabsContent>
 
           <TabsContent value="members">

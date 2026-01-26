@@ -4,22 +4,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/ta
 import { Button } from "../../components/ui/button";
 import {
   Calendar,
-  User,
+  User as UserIcon,
   Users,
   FileText,
-  Unlock,
-  Edit,
-  Trash2,
-  CheckCircle,
-  XCircle,
   DollarSign,
 } from "lucide-react";
-import type { Event } from "./event.types";
+import type { EventItem } from "./event.types";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { getAvatarGradient } from "../../components/Header";
+import { useEffect, useState } from "react";
+import type { User } from "../users/user.types";
+import { EventAPI } from "./event.api";
+import { Input } from "../../components/ui/input";
+import { Spin } from "antd";
 
 interface EventDetailDialogProps {
-  event: Event | null;
+  event: EventItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -36,16 +36,6 @@ export function EventDetailDialog({
       year: "numeric",
       month: "short",
       day: "numeric",
-    });
-  };
-
-  const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     });
   };
 
@@ -71,45 +61,32 @@ export function EventDetailDialog({
     (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
   );
 
-  // Mock participants
-  const participants = [
-    {
-      uid: "1",
-      name: "Amy Roo",
-      email: "amy.roo@example.com",
-      status: "Confirmed",
-      avatar_url: {
-        public_url: "",
-      },
-    },
-    {
-      uid: "2",
-      name: "Hana Ghoghly",
-      email: "hana.g@example.com",
-      status: "Confirmed",
-      avatar_url: {
-        public_url: "",
-      },
-    },
-    {
-      uid: "3",
-      name: "Nguyễn Hồ Thúy Linh",
-      email: "linh.nguyen@example.com",
-      status: "Pending",
-      avatar_url: {
-        public_url: "",
-      },
-    },
-    {
-      uid: "4",
-      name: "John Smith",
-      email: "john.smith@example.com",
-      status: "Confirmed",
-      avatar_url: {
-        public_url: "",
-      },
-    },
-  ];
+  const [participants, setParticipants] = useState<User[]>([])
+  const [totalParticipants, setTotalParticipants] = useState<number>(0);
+  const [participantsPage, setParticipantsPage] = useState<number>(1);
+  const totalParticipantPages = Math.ceil(totalParticipants / 20);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [inputSearch, setInputSearch] = useState<string>("");
+
+  useEffect(() => {
+    const fetchParticipants = async () => {
+      const p = await EventAPI.getEventMembers(
+        {
+          page: participantsPage,
+          page_size: 20,
+          search: inputSearch,
+        }
+      );
+      const users = p.content
+        .filter((member) => member.event_member_uid === event.event_uid)
+        .map((member) => member.user);
+      setParticipants(users);
+      setTotalParticipants(p.total_rows);
+      setParticipantsPage(p.current_page);
+      setLoading(false);
+    }
+    fetchParticipants();
+  }, [event.event_uid]);
 
   // Mock expenses
   const expenses = [
@@ -163,7 +140,7 @@ export function EventDetailDialog({
   const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
 
   const handleGoToExpensePage = () => {
-    window.location.href = `/expense/event/${event.uid}`;
+    window.location.href = `/expense/event/${event.event_uid}`;
   }
 
   return (
@@ -172,8 +149,8 @@ export function EventDetailDialog({
         <DialogHeader>
           <div className="flex items-start justify-between">
             <div>
-              <DialogTitle className="text-2xl">{event.name}</DialogTitle>
-              <p className="text-sm text-gray-500 mt-1">Event ID: {event.uid}</p>
+              <DialogTitle className="text-2xl">{event.event_name}</DialogTitle>
+              <p className="text-sm text-gray-500 mt-1">Event ID: {event.event_uid}</p>
             </div>
             <Badge variant="secondary" className={getStatusColor(event.status)}>
               {event.status}
@@ -214,7 +191,7 @@ export function EventDetailDialog({
               <div className="space-y-4">
                 <div className="p-4 bg-purple-50 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <User className="h-4 w-4 text-purple-600" />
+                    <UserIcon className="h-4 w-4 text-purple-600" />
                     <p className="text-sm text-gray-600">Creator</p>
                   </div>
                   <div className="flex flex-row items-center gap-3 mb-1">
@@ -269,28 +246,16 @@ export function EventDetailDialog({
                         </AvatarFallback>
                       )} 
                     </Avatar>
-                    <p className="font-semibold">{event.group_name}</p>
+                    <p className="font-semibold">{event.group.name}</p>
                   </div> 
                   <p className="text-sm text-gray-500">
-                    Group ID: {event.group_uid}
+                    Group ID: {event.group.uid}
                   </p>
-                </div>
-
-                <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-lg">
-                  <div className="p-2 bg-orange-100 rounded-lg">
-                    <Calendar className="h-5 w-5 text-orange-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Created At</p>
-                    <p className="font-semibold text-sm">
-                      {formatDateTime(event.created_at)}
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>
 
-            {event.description && (
+            {event.event_description && (
               <div className="p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <FileText className="h-4 w-4 text-gray-600" />
@@ -299,55 +264,31 @@ export function EventDetailDialog({
                   </p>
                 </div>
                 <p className="text-sm text-gray-700 leading-relaxed">
-                  {event.description}
+                  {event.event_description}
                 </p>
               </div>
             )}
-
-            <div className="pt-4 border-t">
-              <h3 className="text-sm font-semibold mb-3">Event Actions</h3>
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm">
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Event
-                </Button>
-                {event.status === "ACTIVE" && (
-                  <>
-                    <Button variant="outline" size="sm">
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Mark as Completed
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <XCircle className="h-4 w-4 mr-2" />
-                      Cancel Event
-                    </Button>
-                  </>
-                )}
-                {event.status === "INACTIVE" && (
-                  <Button variant="outline" size="sm">
-                    <Unlock className="h-4 w-4 mr-2" />
-                    Activate Event
-                  </Button>
-                )}
-                <Button variant="outline" size="sm" className="text-red-600">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Event
-                </Button>
-              </div>
-            </div>
           </TabsContent>
 
           <TabsContent value="participants">
             <div className="space-y-3">
               <div className="flex items-center justify-between mb-4">
-                <p className="text-sm text-gray-600">
-                  Total Participants: {participants.length}
-                </p>
-                <Button size="sm" variant="outline">
-                  <Users className="h-4 w-4 mr-2" />
-                  Add Participant
-                </Button>
+                <Input
+                  type="text"
+                  placeholder="Search participants..."
+                  value={inputSearch}
+                  onChange={(e) => setInputSearch(e.target.value)}
+                />
               </div>
+
+              {loading && (
+                <Spin />
+              )}
+
+              {participants.length === 0 && (
+                <p className="text-center text-gray-500">No participants found.</p>
+              )}
+
               {participants.map((participant) => (
                 <div
                   key={participant.uid}
@@ -361,29 +302,46 @@ export function EventDetailDialog({
                         <AvatarFallback
                           className={`bg-gradient-to-br ${getAvatarGradient(participant.uid)} text-white font-semibold`}
                         >
-                          {participant.name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                          {participant.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
                         </AvatarFallback>
                       )}
                     </Avatar>
                     <div>
-                      <p className="font-semibold">{participant.name}</p>
+                      <p className="font-semibold">{participant.full_name}</p>
                       <p className="text-sm text-gray-500">
                         {participant.email}
                       </p>
                     </div>
                   </div>
-                  <Badge
-                    variant="secondary"
-                    className={
-                      participant.status === "Confirmed"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }
-                  >
-                    {participant.status}
-                  </Badge>
                 </div>
               ))}
+
+              {/* Pagination */}
+              <div className="flex items-center justify-between mt-6">
+                <span className="text-sm text-slate-500">
+                  Page {participantsPage} / {totalParticipantPages || 1}
+                </span>
+
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={participantsPage === 1}
+                    onClick={() => setParticipantsPage((p) => p - 1)}
+                  >
+                    Previous
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={participantsPage >= totalParticipantPages}
+                    onClick={() => setParticipantsPage((p) => p + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
             </div>
           </TabsContent>
 

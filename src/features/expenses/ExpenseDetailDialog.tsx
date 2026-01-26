@@ -330,24 +330,6 @@ export function ExpenseDetailDialog({
                 </p>
               </div>
             )}
-
-            <div className="pt-4 border-t">
-              <h3 className="text-sm font-semibold mb-3">Expense Actions</h3>
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm">
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Expense
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Receipt className="h-4 w-4 mr-2" />
-                  Add Receipt
-                </Button>
-                <Button variant="outline" size="sm" className="text-red-600">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Expense
-                </Button>
-              </div>
-            </div>
           </TabsContent>
 
           <TabsContent value="splits">
