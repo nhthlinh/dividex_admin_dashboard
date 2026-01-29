@@ -42,3 +42,22 @@ export interface ExpenseAttachment {
   attachment_name: string;
   uploaded_at: string;
 }
+
+export interface ExpenseListResponse {
+  content: Expense[];
+  current_page: number;
+  page_size: number;
+  total_rows: number;
+  total_pages: number;
+}
+
+export interface ExpenseStatistics {
+  total_expenses: number;
+  total_avg_amount: number;
+  active_expenses: number;
+  total_expired_expenses: number;
+  percent_increase_expenses: number;
+  percent_increase_avg_amount: number;
+  percent_increase_active_expenses: number;
+  percent_increase_expired_expenses: number;
+}

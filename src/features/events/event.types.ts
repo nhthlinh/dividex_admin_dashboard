@@ -44,3 +44,17 @@ export interface EventMemberListResponse {
   total_rows: number;
   total_pages: number;
 }
+
+export interface ExpenseSimple {
+  expense_uid: string;
+  amount: number;
+  currency: string;
+  created_at: string;
+  paid_by: User;
+  name: string;
+}
+
+export interface ExpenseSimpleListResponse {
+  expenses: ExpenseSimple[];
+  total_amount: number;
+}

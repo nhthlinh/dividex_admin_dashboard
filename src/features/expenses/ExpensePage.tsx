@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
@@ -16,324 +16,7 @@ import type { Expense } from "./expense.types";
 import { ExpenseDetailDialog } from "./ExpenseDetailDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { getAvatarGradient } from "../../components/Header";
-
-const expenseStats = [
-  {
-    icon: DollarSign,
-    label: "Total Expenses",
-    value: "$45,230",
-    change: "+22% from last month",
-    bgColor: "bg-pink-50",
-    iconColor: "text-pink-500",
-  },
-  {
-    icon: Receipt,
-    label: "Active Expenses",
-    value: "156",
-    change: "+18% from last month",
-    bgColor: "bg-orange-50",
-    iconColor: "text-orange-500",
-  },
-  {
-    icon: TrendingUp,
-    label: "Settled Expenses",
-    value: "89",
-    change: "+12% from last month",
-    bgColor: "bg-green-50",
-    iconColor: "text-green-500",
-  },
-  {
-    icon: PieChart,
-    label: "Avg per Expense",
-    value: "$290",
-    change: "+8% from last month",
-    bgColor: "bg-purple-50",
-    iconColor: "text-purple-500",
-  },
-];
-
-const mockExpenses: Expense[] = [
-  {
-    uid: "exp-001",
-    name: "Team Dinner at Restaurant",
-    event_uid: "evt-001",
-    event_name: "Team Building 2024",
-    currency: "USD",
-    total_amount: 500.0,
-    paid_by: {
-      uid: "usr-001",
-      full_name: "Amy Roo",
-      email: "amy.roo@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    creator: {
-      uid: "usr-001",
-      full_name: "Amy Roo",
-      email: "amy.roo@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    split_type: "EQUAL",
-    note: "Team dinner after the team building activities. Great food and conversation!",
-    category: "Food & Dining",
-    expense_date: "2024-03-15T19:30:00Z",
-    status: "ACTIVE",
-    created_at: "2024-03-15T20:00:00Z",
-    updated_at: "2024-03-15T20:00:00Z",
-  },
-  {
-    uid: "exp-002",
-    name: "Hotel Accommodation",
-    event_uid: "evt-001",
-    event_name: "Team Building 2024",
-    currency: "USD",
-    total_amount: 1200.0,
-    paid_by: {
-      uid: "usr-002",
-      full_name: "Hana Ghoghly",
-      email: "hana.g@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    creator: {
-      uid: "usr-002",
-      full_name: "Hana Ghoghly",
-      email: "hana.g@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    split_type: "EQUAL",
-    note: "3 nights accommodation for 4 people at Mountain View Resort",
-    category: "Accommodation",
-    expense_date: "2024-03-14T15:00:00Z",
-    status: "SETTLED",
-    created_at: "2024-03-14T16:00:00Z",
-    updated_at: "2024-03-18T10:00:00Z",
-  },
-  {
-    uid: "exp-003",
-    name: "Transportation & Gas",
-    event_uid: "evt-001",
-    event_name: "Team Building 2024",
-    currency: "USD",
-    total_amount: 180.0,
-    paid_by: {
-      uid: "usr-003",
-      full_name: "Nguyễn Hồ Thúy Linh",
-      email: "linh.nguyen@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    creator: {
-      uid: "usr-003",
-      full_name: "Nguyễn Hồ Thúy Linh",
-      email: "linh.nguyen@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    split_type: "EQUAL",
-    note: "Gas and toll fees for the road trip",
-    category: "Transportation",
-    expense_date: "2024-03-14T09:00:00Z",
-    status: "ACTIVE",
-    created_at: "2024-03-14T18:00:00Z",
-    updated_at: "2024-03-14T18:00:00Z",
-  },
-  {
-    uid: "exp-004",
-    name: "Office Supplies",
-    event_uid: "evt-003",
-    event_name: "Sprint Planning Q2",
-    currency: "USD",
-    total_amount: 350.0,
-    paid_by: {
-      uid: "usr-004",
-      full_name: "John Smith",
-      email: "john.smith@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    creator: {
-      uid: "usr-003",
-      full_name: "Nguyễn Hồ Thúy Linh",
-      email: "linh.nguyen@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    split_type: "PERCENTAGE",
-    note: "Whiteboard markers, sticky notes, and other planning materials",
-    category: "Office Supplies",
-    expense_date: "2024-03-20T10:00:00Z",
-    status: "ACTIVE",
-    created_at: "2024-03-20T11:00:00Z",
-    updated_at: "2024-03-20T11:00:00Z",
-  },
-  {
-    uid: "exp-005",
-    name: "Marketing Materials",
-    event_uid: "evt-002",
-    event_name: "Marketing Campaign Launch",
-    currency: "USD",
-    total_amount: 850.0,
-    paid_by: {
-      uid: "usr-002",
-      full_name: "Hana Ghoghly",
-      email: "hana.g@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    creator: {
-      uid: "usr-002",
-      full_name: "Hana Ghoghly",
-      email: "hana.g@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    split_type: "EXACT",
-    note: "Printed brochures, banners, and promotional items for the launch event",
-    category: "Marketing",
-    expense_date: "2024-03-22T14:00:00Z",
-    status: "SETTLED",
-    created_at: "2024-03-22T15:00:00Z",
-    updated_at: "2024-03-25T09:00:00Z",
-  },
-  {
-    uid: "exp-006",
-    name: "Client Lunch Meeting",
-    event_uid: "evt-004",
-    event_name: "Sales Kickoff Meeting",
-    currency: "USD",
-    total_amount: 240.0,
-    paid_by: {
-      uid: "usr-004",
-      full_name: "Nguyễn Hồ Chi Vũ",
-      email: "vu.nguyen@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    creator: {
-      uid: "usr-004",
-      full_name: "Nguyễn Hồ Chi Vũ",
-      email: "vu.nguyen@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    split_type: "EQUAL",
-    note: "Business lunch with potential clients to discuss partnership opportunities",
-    category: "Food & Dining",
-    expense_date: "2024-03-25T12:30:00Z",
-    status: "ACTIVE",
-    created_at: "2024-03-25T14:00:00Z",
-    updated_at: "2024-03-25T14:00:00Z",
-  },
-  {
-    uid: "exp-007",
-    name: "Software Licenses",
-    event_uid: "evt-003",
-    event_name: "Sprint Planning Q2",
-    currency: "USD",
-    total_amount: 1500.0,
-    paid_by: {
-      uid: "usr-003",
-      full_name: "Nguyễn Hồ Thúy Linh",
-      email: "linh.nguyen@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    creator: {
-      uid: "usr-003",
-      full_name: "Nguyễn Hồ Thúy Linh",
-      email: "linh.nguyen@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    split_type: "SHARE",
-    note: "Annual renewal for project management and development tools",
-    category: "Software & Tools",
-    expense_date: "2024-03-18T09:00:00Z",
-    status: "SETTLED",
-    created_at: "2024-03-18T10:00:00Z",
-    updated_at: "2024-03-20T16:00:00Z",
-  },
-  {
-    uid: "exp-008",
-    name: "Team Coffee & Snacks",
-    event_uid: "evt-003",
-    event_name: "Sprint Planning Q2",
-    currency: "USD",
-    total_amount: 85.0,
-    paid_by: {
-      uid: "usr-001",
-      full_name: "Amy Roo",
-      email: "amy.roo@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    creator: {
-      uid: "usr-001",
-      full_name: "Amy Roo",
-      email: "amy.roo@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    split_type: "EQUAL",
-    note: "Coffee, tea, and snacks for the planning sessions",
-    category: "Food & Dining",
-    expense_date: "2024-03-19T08:00:00Z",
-    status: "ACTIVE",
-    created_at: "2024-03-19T17:00:00Z",
-    updated_at: "2024-03-19T17:00:00Z",
-  },
-];
+import { ExpenseAPI } from "./expense.api";
 
 const PAGE_SIZE = 2;
 
@@ -345,8 +28,35 @@ export function ExpensePage() {
   const [filterCategory, setFilterCategory] = useState<string>("ALL");
 
   const [page, setPage] = useState(1);
-  const [total] = useState(mockExpenses.length);
+  const [total, setTotal] = useState(0);
   const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  const [loading, setLoading] = useState(false);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [stats, setStats] = useState<any>(null);
+
+  useEffect(() => {
+    ExpenseAPI.getExpenseStatistics().then(setStats);
+  }, []);
+
+  useEffect(() => {
+    const fetchExpenses = async () => {
+      setLoading(true);
+      try {
+        const res = await ExpenseAPI.getExpenses({
+          page,
+          page_size: PAGE_SIZE,
+        });
+
+        setExpenses(res.content);
+        setTotal(res.total_pages);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExpenses();
+  }, [page]);
 
   const handleExpenseClick = (expense: Expense) => {
     setSelectedExpense(expense);
@@ -411,12 +121,47 @@ export function ExpensePage() {
     return colors[category] || "bg-gray-100 text-gray-700";
   };
 
+  const expenseStats = stats ? [
+    {
+      icon: DollarSign,
+      label: "Total Expenses",
+      value: stats.totalExpenses,
+      change: stats.percent_increase_expenses + "% from last month",
+      bgColor: "bg-pink-50",
+      iconColor: "text-pink-500",
+    },
+    {
+      icon: Receipt,
+      label: "Active Expenses",
+      value: stats.activeExpenses,
+      change: stats.percent_increase_active + "% from last month",
+      bgColor: "bg-orange-50",
+      iconColor: "text-orange-500",
+    },
+    {
+      icon: TrendingUp,
+      label: "Pending Expenses",
+      value: stats.pendingExpenses,
+      change: stats.percent_increase_pending + "% from last month",
+      bgColor: "bg-green-50",
+      iconColor: "text-green-500",
+    },
+    {
+      icon: PieChart,
+      label: "Avg per Expense",
+      value: formatCurrency(stats.avgPerExpense, "USD"),
+      change: stats.percent_increase_avg + "% from last month",
+      bgColor: "bg-purple-50",
+      iconColor: "text-purple-500",
+    },
+  ] : [];
+
   // Get unique categories
   const categories = Array.from(
-    new Set(mockExpenses.map((exp) => exp.category).filter(Boolean))
+    new Set(expenses.map((exp) => exp.category).filter(Boolean))
   );
 
-  const filteredExpenses = mockExpenses.filter((expense) => {
+  const filteredExpenses = expenses.filter((expense) => {
     const matchesSearch = expense.name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());

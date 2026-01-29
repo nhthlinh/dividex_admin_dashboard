@@ -8,8 +8,10 @@ import {
   Users,
   FileText,
   DollarSign,
+  Trash2,
+  Unlock,
 } from "lucide-react";
-import type { EventItem } from "./event.types";
+import type { EventItem, ExpenseSimpleListResponse } from "./event.types";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { getAvatarGradient } from "../../components/Header";
 import { useEffect, useState } from "react";
@@ -24,12 +26,52 @@ interface EventDetailDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function EventDetailDialog({
-  event,
-  open,
-  onOpenChange,
-}: EventDetailDialogProps) {
-  if (!event) return null;
+
+export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDialogProps) {
+  const [localEvent, setLocalEvent] = useState<EventItem | null>(event);
+
+  const [participants, setParticipants] = useState<User[]>([]);
+  const [totalParticipants, setTotalParticipants] = useState<number>(0);
+  const [participantsPage, setParticipantsPage] = useState<number>(1);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [inputSearch, setInputSearch] = useState<string>("");
+
+  const [expenses, setExpenses] = useState<ExpenseSimpleListResponse | null>(null);
+
+  useEffect(() => {
+    setLocalEvent(event);
+  }, [event]);
+
+  useEffect(() => {
+    if (!localEvent) return;
+
+    const fetchParticipants = async () => {
+      setLoading(true);
+      const p = await EventAPI.getEventMembers({
+        event_uid: localEvent.event_uid,
+        page: participantsPage,
+        page_size: 20,
+        search: inputSearch,
+      });
+
+      const users = p.content.map((m) => m.user);
+
+      setParticipants(users);
+      setTotalParticipants(p.total_rows);
+      setParticipantsPage(p.current_page);
+      setLoading(false);
+    };
+
+    const fetchExpenses = async () => {
+      const exp = await EventAPI.getExpensesInEvent(localEvent.event_uid);
+      setExpenses(exp);
+    }
+
+    fetchParticipants();
+    fetchExpenses();
+  }, [localEvent?.event_uid, participantsPage, inputSearch]);
+
+  if (!open || !event || !localEvent) return null;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -55,92 +97,43 @@ export function EventDetailDialog({
   };
 
   // Calculate event duration
-  const startDate = new Date(event.event_start);
-  const endDate = new Date(event.event_end);
+  const startDate = new Date(localEvent.event_start);
+  const endDate = new Date(localEvent.event_end);
   const durationDays = Math.ceil(
     (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
   );
 
-  const [participants, setParticipants] = useState<User[]>([])
-  const [totalParticipants, setTotalParticipants] = useState<number>(0);
-  const [participantsPage, setParticipantsPage] = useState<number>(1);
   const totalParticipantPages = Math.ceil(totalParticipants / 20);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [inputSearch, setInputSearch] = useState<string>("");
-
-  useEffect(() => {
-    const fetchParticipants = async () => {
-      const p = await EventAPI.getEventMembers(
-        {
-          page: participantsPage,
-          page_size: 20,
-          search: inputSearch,
-        }
-      );
-      const users = p.content
-        .filter((member) => member.event_member_uid === event.event_uid)
-        .map((member) => member.user);
-      setParticipants(users);
-      setTotalParticipants(p.total_rows);
-      setParticipantsPage(p.current_page);
-      setLoading(false);
-    }
-    fetchParticipants();
-  }, [event.event_uid]);
-
-  // Mock expenses
-  const expenses = [
-    {
-      id: "1",
-      description: "Venue booking",
-      amount: 500.0,
-      paid_by: {
-        uid: "1",
-        name: "Amy Roo",
-        email: "amy.roo@example.com",
-        status: "Confirmed",
-        avatar_url: {
-          public_url: "",
-        },
-      },
-      date: "2024-03-01",
-    },
-    {
-      id: "2",
-      description: "Catering",
-      amount: 350.0,
-      paid_by: {
-        uid: "2",
-        name: "Hana Ghoghly",
-        email: "hana.g@example.com",
-        status: "Confirmed",
-        avatar_url: {
-          public_url: "",
-        },
-      },
-      date: "2024-03-05",
-    },
-    {
-      id: "3",
-      description: "Equipment rental",
-      amount: 200.0,
-      paid_by: {
-        uid: "1",
-        name: "Amy Roo",
-        email: "amy.roo@example.com",
-        status: "Confirmed",
-        avatar_url: {
-          public_url: "",
-        },
-      },
-      date: "2024-03-08",
-    },
-  ];
-
-  const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+  const totalExpenses = expenses ? expenses.total_amount : 0;
 
   const handleGoToExpensePage = () => {
-    window.location.href = `/expense/event/${event.event_uid}`;
+    window.location.href = `/expense/event/${localEvent.event_uid}`;
+  }
+
+    const handleDeactivateEvent = async () => {
+    try {
+      setLocalEvent(prev =>
+        prev ? { ...prev, status: "INACTIVE" } : prev
+      );
+
+      await EventAPI.deactivateEvent(localEvent.event_uid);
+    } catch (error) {
+      console.error("Failed to deactivate event:", error);
+      setLocalEvent(event);
+    }
+  };
+
+  const handleActivateEvent = async () => {
+    try {
+      setLocalEvent(prev =>
+        prev ? { ...prev, status: "ACTIVE" } : prev
+      );
+
+      await EventAPI.activateEvent(localEvent.event_uid);
+    } catch (error) {
+      console.error("Failed to activate event:", error);
+      setLocalEvent(event);
+    }
   }
 
   return (
@@ -149,11 +142,11 @@ export function EventDetailDialog({
         <DialogHeader>
           <div className="flex items-start justify-between">
             <div>
-              <DialogTitle className="text-2xl">{event.event_name}</DialogTitle>
-              <p className="text-sm text-gray-500 mt-1">Event ID: {event.event_uid}</p>
+              <DialogTitle className="text-2xl">{localEvent.event_name}</DialogTitle>
+              <p className="text-sm text-gray-500 mt-1">Event ID: {localEvent.event_uid}</p>
             </div>
-            <Badge variant="secondary" className={getStatusColor(event.status)}>
-              {event.status}
+            <Badge variant="secondary" className={getStatusColor(localEvent.status)}>
+              {localEvent.status}
             </Badge>
           </div>
           <Button size="sm" className="mt-3 bg-rose-600 hover:bg-rose-700 text-white"
@@ -196,19 +189,19 @@ export function EventDetailDialog({
                   </div>
                   <div className="flex flex-row items-center gap-3 mb-1">
                     <Avatar className="size-7">
-                      {event.creator.avatar_url?.public_url ? (
-                        <AvatarImage src={event.creator.avatar_url.public_url} />
+                      {localEvent.creator.avatar_url?.public_url ? (
+                        <AvatarImage src={localEvent.creator.avatar_url.public_url} />
                       ) : (
                         <AvatarFallback
-                          className={`bg-gradient-to-br ${getAvatarGradient(event.creator.uid)} text-white font-semibold`}
+                          className={`bg-gradient-to-br ${getAvatarGradient(localEvent.creator.uid)} text-white font-semibold`}
                         >
-                          {event.creator.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                          {localEvent.creator.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
                         </AvatarFallback>
                       )}
                     </Avatar>
-                    <p className="font-semibold">{event.creator.full_name}</p>
+                    <p className="font-semibold">{localEvent.creator.full_name}</p>
                   </div>
-                  <p className="text-sm text-gray-500">{event.creator.email}</p>
+                  <p className="text-sm text-gray-500">{localEvent.creator.email}</p>
                 </div>
 
                 <div className="flex items-center gap-3 p-4 bg-green-50 rounded-lg">
@@ -218,8 +211,8 @@ export function EventDetailDialog({
                   <div>
                     <p className="text-sm text-gray-600">Event Period</p>
                     <p className="font-semibold text-sm">
-                      {formatDate(event.event_start)} -{" "}
-                      {formatDate(event.event_end)}
+                      {formatDate(localEvent.event_start)} -{" "}
+                      {formatDate(localEvent.event_end)}
                     </p>
                     <p className="text-xs text-gray-500">
                       {durationDays} day{durationDays > 1 ? "s" : ""}
@@ -236,26 +229,26 @@ export function EventDetailDialog({
                   </div>
                   <div className="flex flex-row items-center gap-3 mb-1">
                     <Avatar className="size-7">
-                      {event.group.avatar_url?.public_url ? (
-                        <AvatarImage src={event.group.avatar_url.public_url} />
+                      {localEvent.group.avatar_url?.public_url ? (
+                        <AvatarImage src={localEvent.group.avatar_url.public_url} />
                       ) : (
                         <AvatarFallback
-                          className={`bg-gradient-to-br ${getAvatarGradient(event.group.uid)} text-white font-semibold`}
+                          className={`bg-gradient-to-br ${getAvatarGradient(localEvent.group.uid)} text-white font-semibold`}
                         >
-                          {event.group.name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                          {localEvent.group.name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
                         </AvatarFallback>
                       )} 
                     </Avatar>
-                    <p className="font-semibold">{event.group.name}</p>
+                    <p className="font-semibold">{localEvent.group.name}</p>
                   </div> 
                   <p className="text-sm text-gray-500">
-                    Group ID: {event.group.uid}
+                    Group ID: {localEvent.group.uid}
                   </p>
                 </div>
               </div>
             </div>
 
-            {event.event_description && (
+            {localEvent.event_description && (
               <div className="p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <FileText className="h-4 w-4 text-gray-600" />
@@ -264,10 +257,27 @@ export function EventDetailDialog({
                   </p>
                 </div>
                 <p className="text-sm text-gray-700 leading-relaxed">
-                  {event.event_description}
+                  {localEvent.event_description}
                 </p>
               </div>
             )}
+
+            {localEvent.status === "ACTIVE" ? (
+              <Button size="sm" className="mt-3 bg-rose-600 hover:bg-rose-700 text-white"
+                onClick={handleDeactivateEvent}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Deactivate Event
+              </Button>
+              ) : (
+                <Button size="sm" className="mt-3 bg-green-600 hover:bg-green-700 text-white"
+                onClick={handleActivateEvent}
+              >
+                <Unlock className="h-4 w-4 mr-2" />
+                Activate Event
+              </Button>
+              )
+            }
           </TabsContent>
 
           <TabsContent value="participants">
@@ -282,7 +292,9 @@ export function EventDetailDialog({
               </div>
 
               {loading && (
-                <Spin />
+                <div className="flex justify-center my-6"> 
+                  <Spin />
+                </div>
               )}
 
               {participants.length === 0 && (
@@ -351,26 +363,21 @@ export function EventDetailDialog({
                 <div>
                   <p className="text-sm text-gray-600">Total Expenses</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    $
                     {totalExpenses.toLocaleString("en-US", {
                       minimumFractionDigits: 2,
-                    })}
+                    })} đ
                   </p>
                 </div>
-                <Button size="sm" variant="outline">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Add Expense
-                </Button>
               </div>
 
               <div className="space-y-3">
-                {expenses.map((expense) => (
+                { expenses?.expenses.map((expense) => (
                   <div
-                    key={expense.id}
+                    key={expense.expense_uid}
                     className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
                   >
                     <div className="flex-1">
-                      <p className="font-semibold">{expense.description}</p>
+                      <p className="font-semibold">{expense.name}</p>
                       <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
                         Paid by 
                         <Avatar className="size-7">
@@ -380,18 +387,17 @@ export function EventDetailDialog({
                             <AvatarFallback
                               className={`bg-gradient-to-br ${getAvatarGradient(expense.paid_by.uid)} text-white font-semibold`}
                             >
-                              {expense.paid_by.name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                              {expense.paid_by.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
                             </AvatarFallback>
                           )}
                         </Avatar>
-                        {expense.paid_by.name} • {formatDate(expense.date)}
+                        {expense.paid_by.full_name} • {formatDate(expense.created_at)}
                       </p>
                     </div>
                     <p className="font-bold text-lg">
-                      $
                       {expense.amount.toLocaleString("en-US", {
                         minimumFractionDigits: 2,
-                      })}
+                      })} đ
                     </p>
                   </div>
                 ))}

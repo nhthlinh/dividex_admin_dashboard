@@ -1,9 +1,7 @@
 import {
   Users,
   Calendar,
-  Lock,
   Unlock,
-  UserPlus,
   Trash2,
 } from "lucide-react";
 import type { GroupItem } from "./group.types";
@@ -21,12 +19,16 @@ interface GroupDetailDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function GroupDetailDialog({
-  group,
-  open,
-  onOpenChange,
-}: GroupDetailDialogProps) {
-  if (!group) return null;
+import { useEffect, useState } from "react";
+
+export function GroupDetailDialog({ group, open, onOpenChange }: GroupDetailDialogProps) {
+  const [localGroup, setLocalGroup] = useState<GroupItem | null>(group);
+
+  useEffect(() => {
+    setLocalGroup(group);
+  }, [group]);
+
+  if (!localGroup) return null;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -120,15 +122,33 @@ export function GroupDetailDialog({
   ];
 
   const handleGoToEventPage = () => {
-    window.location.href = `/event/group/${group.uid}`;
+    window.location.href = `/event/group/${localGroup.uid}`;
   }
 
   const handleDeactivateGroup = async () => {
-    await GroupAPI.deactivateGroup(group.uid);
-  }
+    try {
+      setLocalGroup(prev =>
+        prev ? { ...prev, status: "INACTIVE" } : prev
+      );
+
+      await GroupAPI.deactivateGroup(localGroup.uid);
+    } catch (error) {
+      console.error("Failed to deactivate group:", error);
+      setLocalGroup(group);
+    }
+  };
 
   const handleActivateGroup = async () => {
-    // await GroupAPI.activateGroup(group.uid);
+    try {
+      setLocalGroup(prev =>
+        prev ? { ...prev, status: "ACTIVE" } : prev
+      );
+
+      await GroupAPI.activateGroup(localGroup.uid);
+    } catch (error) {
+      console.error("Failed to activate group:", error);
+      setLocalGroup(group);
+    }
   }
 
   return (
@@ -139,29 +159,29 @@ export function GroupDetailDialog({
             <div>
               <div className="flex items-center gap-3 mb-1">
                 <Avatar className="size-7">
-                  {group.avatar_url?.public_url ? (
-                    <AvatarImage src={group.avatar_url.public_url} />
+                  {localGroup.avatar_url?.public_url ? (
+                    <AvatarImage src={localGroup.avatar_url.public_url} />
                   ) : (
                     <AvatarFallback
-                      className={`bg-gradient-to-br ${getAvatarGradient(group.uid)} text-white font-semibold`}
+                      className={`bg-gradient-to-br ${getAvatarGradient(localGroup.uid)} text-white font-semibold`}
                     >
-                      {group.name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                      {localGroup.name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
                     </AvatarFallback>
                   )}
                 </Avatar>
-                <DialogTitle className="text-2xl">{group.name}</DialogTitle>
+                <DialogTitle className="text-2xl">{localGroup.name}</DialogTitle>
               </div>
-              <p className="text-sm text-gray-500 mt-1">Group ID: {group.uid}</p>
+              <p className="text-sm text-gray-500 mt-1">Group ID: {localGroup.uid}</p>
             </div>
             <Badge
-              variant={group.status === "ACTIVE" ? "default" : "secondary"}
+              variant={localGroup.status === "ACTIVE" ? "default" : "secondary"}
               className={
-                group.status === "ACTIVE"
+                localGroup.status === "ACTIVE"
                   ? "bg-green-100 text-green-800"
                   : "bg-gray-100 text-gray-800"
               }
             >
-              {group.status}
+              {localGroup.status}
             </Badge>
             
           </div>
@@ -204,7 +224,7 @@ export function GroupDetailDialog({
                 <div>
                   <p className="text-sm text-gray-600">Total Members</p>
                   <p className="text-xl font-semibold">
-                    {group.total_members}
+                    {localGroup.total_members}
                   </p>
                 </div>
               </div>
@@ -213,19 +233,19 @@ export function GroupDetailDialog({
                 <p className="text-sm text-gray-600 mb-2">Group Leader</p>
                 <div className="flex items-center gap-3 mb-1">
                   <Avatar className="size-7">
-                    {group.leader.avatar_url?.public_url ? (
-                      <AvatarImage src={group.leader.avatar_url.public_url} />
+                    {localGroup.leader.avatar_url?.public_url ? (
+                      <AvatarImage src={localGroup.leader.avatar_url.public_url} />
                     ) : (
                       <AvatarFallback
-                        className={`bg-gradient-to-br ${getAvatarGradient(group.leader.uid)} text-white font-semibold`}
+                        className={`bg-gradient-to-br ${getAvatarGradient(localGroup.leader.uid)} text-white font-semibold`}
                       >
-                        {group.leader.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                        {localGroup.leader.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
                       </AvatarFallback>
                     )}
                   </Avatar>
-                  <p className="font-semibold">{group.leader.full_name}</p>
+                  <p className="font-semibold">{localGroup.leader.full_name}</p>
                 </div>
-                {/* <p className="text-sm text-gray-500">{group.leader.email}</p> */}
+                {/* <p className="text-sm text-gray-500">{localGroup.leader.email}</p> */}
               </div>
 
               <div className="flex items-center gap-3 p-4 bg-orange-50 rounded-lg">
@@ -235,13 +255,13 @@ export function GroupDetailDialog({
                 <div>
                   <p className="text-sm text-gray-600">Created At</p>
                   <p className="text-base font-semibold">
-                    {formatDate(group.created_at)}
+                    {formatDate(localGroup.created_at)}
                   </p>
                 </div>
               </div>
             </div>
 
-            {group.status === "ACTIVE" ? (
+            {localGroup.status === "ACTIVE" ? (
               <Button size="sm" className="mt-3 bg-rose-600 hover:bg-rose-700 text-white"
                 onClick={handleDeactivateGroup}
               >

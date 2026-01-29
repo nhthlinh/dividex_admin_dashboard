@@ -32,5 +32,9 @@ export const GroupAPI = {
 
   deactivateGroup: async (groupUid: string): Promise<void> => {
     await api.patch(`/admin/group/${groupUid}`);
+  },
+
+  activateGroup: async (groupUid: string): Promise<void> => {
+    await api.patch(`/admin/group/active/${groupUid}`);
   }
 };

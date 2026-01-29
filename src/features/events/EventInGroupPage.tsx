@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   Users,
@@ -19,192 +19,47 @@ import { EventDetailDialog } from "./EventDetailDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { getAvatarGradient } from "../../components/Header";
 import { router } from "../../app/router";
-
-const eventStats = [
-  {
-    icon: Calendar,
-    label: "Total Events",
-    value: "67",
-    change: "+18% from last month",
-    bgColor: "bg-pink-50",
-    iconColor: "text-pink-500",
-  },
-  {
-    icon: Clock,
-    label: "Active Events",
-    value: "23",
-    change: "+12% from last month",
-    bgColor: "bg-orange-50",
-    iconColor: "text-orange-500",
-  },
-  {
-    icon: CheckCircle,
-    label: "Completed Events",
-    value: "38",
-    change: "+8% from last month",
-    bgColor: "bg-green-50",
-    iconColor: "text-green-500",
-  },
-  {
-    icon: Users,
-    label: "Total Participants",
-    value: "512",
-    change: "+25% from last month",
-    bgColor: "bg-purple-50",
-    iconColor: "text-purple-500",
-  },
-];
-
-const mockEvents: EventItem[] = [
-  {
-    event_uid: "evt-001",
-    event_name: "Team Building 2024",
-    creator: {
-      uid: "usr-001",
-      full_name: "Amy Roo",
-      email: "amy.roo@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    group: {
-      uid: "grp-001",
-      name: "Team Alpha",
-      leader: {
-        uid: "usr-001",
-        full_name: "Amy Roo",
-        email: "",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        },
-      },
-      total_members: 0,
-      status: "ACTIVE",
-      created_at: "",
-      avatar_url: {
-        public_url: "",
-        uid: ""
-      }
-    },
-    event_description: "Annual team building event with outdoor activities and team challenges. Great opportunity for team bonding and collaboration.",
-    event_start: "2024-04-15",
-    event_end: "2024-04-17",
-    status: "ACTIVE",
-  },
-  {
-    event_uid: "evt-007",
-    event_name: "Annual Company Retreat",
-    creator: {
-      uid: "usr-001",
-      full_name: "Amy Roo",
-      email: "amy.roo@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    group: {
-      uid: "grp-001",
-      name: "Team Alpha",
-      leader: {
-        uid: "usr-001",
-        full_name: "Amy Roo",
-        email: "",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      total_members: 0,
-      status: "ACTIVE",
-      created_at: "",
-      avatar_url: {
-        public_url: "",
-        uid: ""
-      }
-    },
-    event_description:
-      "Company-wide retreat at mountain resort with team activities and strategic planning sessions.",
-    event_start: "2024-05-20",
-    event_end: "2024-05-23",
-    status: "ACTIVE",
-  },
-  {
-    event_uid: "evt-008",
-    event_name: "Client Presentation",
-    creator: {
-      uid: "usr-002",
-      full_name: "Hana Ghoghly",
-      email: "hana.g@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    group: {
-      uid: "grp-001",
-      name: "Team Alpha",
-      leader: {
-        uid: "usr-001",
-        full_name: "Amy Roo",
-        email: "",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      total_members: 0,
-      status: "ACTIVE",
-      created_at: "",
-      avatar_url: {
-        public_url: "",
-        uid: ""
-      }
-    },
-    event_description: "Quarterly business review presentation for key client accounts.",
-    event_start: "2024-03-15",
-    event_end: "2024-03-15",
-    status: "COMPLETED",
-  },
-];
-
-const group = {
-    uid: "grp-001",
-    name: "Team Alpha",
-    leader: {
-      uid: "usr-001",
-        full_name: "Amy Roo",
-        email: "",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,   
-          public_url: undefined   
-        }
-    },
-    total_members: 0,
-}
+import { EventAPI } from "./event.api";
+import { Spin } from "antd";
 
 const PAGE_SIZE = 2;
 
 export function EventInGroupPage() {
   const groupId = router.state.location.pathname.split("/").pop();
-  console.log("Group ID from URL:", groupId);
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("ALL");
   
   const [page, setPage] = useState(1);
-  const [total] = useState(mockEvents.length);
+  const [total, setTotal] = useState(1);
   const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  
+  useEffect(() => {
+    setLoading(true);
+    const fetchEvents = async () => {
+      setLoading(true);
+      try {
+        const res = await EventAPI.getEventsInGroup({
+          group_uid: groupId || "",
+          search: searchQuery || undefined,
+          page,
+          page_size: PAGE_SIZE,
+        });
+
+        setEvents(res.content);
+        setTotal(res.total_rows);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+    setLoading(false);  
+  }, [searchQuery, page]);
 
   const handleEventClick = (event: EventItem) => {
     setSelectedEvent(event);
@@ -251,7 +106,7 @@ export function EventInGroupPage() {
     return new Date(eventStart) > new Date();
   };
 
-  const filteredEvents = mockEvents.filter((event) => {
+  const filteredEvents = events.filter((event) => {
     const matchesSearch = event.event_name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
@@ -265,12 +120,12 @@ export function EventInGroupPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Event Management For {group.name}</h1>
+          <h1 className="text-2xl font-semibold">Event Management</h1>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-4">
+      {/* <div className="grid grid-cols-4 gap-4">
         {eventStats.map((stat, index) => (
           <Card key={index} className="border-0 shadow-sm">
             <CardContent className="p-6">
@@ -290,13 +145,12 @@ export function EventInGroupPage() {
             </CardContent>
           </Card>
         ))}
-      </div>
+      </div> */}
 
       {/* Search and Filter */}
       <Card className="border-0 shadow-sm">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>All Events</CardTitle>
             <div className="flex gap-3">
               <div className="flex gap-2">
                 <Button
@@ -348,6 +202,7 @@ export function EventInGroupPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
+            {loading && <Spin />}
             {filteredEvents.map((event) => (
               <Card
                 key={event.event_uid}

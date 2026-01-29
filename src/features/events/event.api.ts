@@ -1,6 +1,6 @@
 import { api } from "../../config/api.config";
 import type { ApiResponse } from "../../config/api.types";
-import type { EventListResponse, EventMemberListResponse, EventStatistics } from "./event.types";
+import type { EventListResponse, EventMemberListResponse, EventStatistics, ExpenseSimpleListResponse } from "./event.types";
 
 export const EventAPI = {
   getEventStatistics: async (): Promise<EventStatistics> => {
@@ -32,12 +32,13 @@ export const EventAPI = {
   },
 
   getEventMembers: async (params?: {
+    event_uid: string;
     search?: string;
     page?: number;
     page_size?: number;
   }): Promise<EventMemberListResponse> => {
     const res = await api.get<ApiResponse<EventMemberListResponse>>(
-      "/admin/event-members",
+      `/admin/event/${params?.event_uid}/event-members`,
       {
         params: {
           search: params?.search ?? null,
@@ -49,4 +50,36 @@ export const EventAPI = {
 
     return res.data.data;
   },
+
+  getEventsInGroup: async (params?: {
+    group_uid: string;
+    search?: string;
+    page?: number;
+    page_size?: number;
+  }): Promise<EventListResponse> => {
+    const res = await api.get<ApiResponse<EventListResponse>>(
+      "/groups/" + params?.group_uid + "/events",
+      {
+        params: {
+          search: params?.search ?? null,
+          page: params?.page ?? 1,
+          page_size: params?.page_size ?? 10,
+        },
+      }
+    );
+    return res.data.data;
+  },
+
+  deactivateEvent: async (eventUid: string): Promise<void> => {
+    await api.patch(`/admin/event/${eventUid}`);
+  },
+
+  activateEvent: async (eventUid: string): Promise<void> => {
+    await api.patch(`/admin/event/active/${eventUid}`);
+  },
+
+  getExpensesInEvent: async (eventUid: string): Promise<ExpenseSimpleListResponse> => {
+    const res = await api.get(`/admin/expense/${eventUid}`);
+    return res.data.data;
+  }
 };
