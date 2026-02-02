@@ -12,11 +12,12 @@ import {
   Receipt,
   PieChart,
 } from "lucide-react";
-import type { Expense } from "./expense.types";
+import type { Expense, ExpenseStatistics } from "./expense.types";
 import { ExpenseDetailDialog } from "./ExpenseDetailDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { getAvatarGradient } from "../../components/Header";
 import { ExpenseAPI } from "./expense.api";
+import { Spin } from "antd";
 
 const PAGE_SIZE = 2;
 
@@ -24,7 +25,6 @@ export function ExpensePage() {
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<string>("ALL");
   const [filterCategory, setFilterCategory] = useState<string>("ALL");
 
   const [page, setPage] = useState(1);
@@ -33,7 +33,7 @@ export function ExpensePage() {
 
   const [loading, setLoading] = useState(false);
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<ExpenseStatistics | null>(null);
 
   useEffect(() => {
     ExpenseAPI.getExpenseStatistics().then(setStats);
@@ -63,7 +63,11 @@ export function ExpensePage() {
     setIsDialogOpen(true);
   };
 
-  const formatCurrency = (amount: number, currency: string) => {
+  const formatCurrency = (amount?: number, currency?: string) => {
+    if (amount === undefined || currency === undefined) {
+      return "";
+    }
+
     const currencySymbols: Record<string, string> = {
       USD: "$",
       VND: "₫",
@@ -73,14 +77,10 @@ export function ExpensePage() {
     };
     const symbol = currencySymbols[currency] || "$";
     
-    if (currency === "VND") {
-      return `${amount.toLocaleString("vi-VN")}${symbol}`;
-    }
-    
-    return `${symbol}${amount.toLocaleString("en-US", {
+    return `${amount.toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    })}`;
+    })} ${symbol}`;
   };
 
   const formatDate = (dateString: string) => {
@@ -125,7 +125,7 @@ export function ExpensePage() {
     {
       icon: DollarSign,
       label: "Total Expenses",
-      value: stats.totalExpenses,
+      value: stats.total_expenses,
       change: stats.percent_increase_expenses + "% from last month",
       bgColor: "bg-pink-50",
       iconColor: "text-pink-500",
@@ -133,24 +133,24 @@ export function ExpensePage() {
     {
       icon: Receipt,
       label: "Active Expenses",
-      value: stats.activeExpenses,
-      change: stats.percent_increase_active + "% from last month",
+      value: stats.active_expenses,
+      change: stats.percent_increase_active_expenses + "% from last month",
       bgColor: "bg-orange-50",
       iconColor: "text-orange-500",
     },
     {
       icon: TrendingUp,
-      label: "Pending Expenses",
-      value: stats.pendingExpenses,
-      change: stats.percent_increase_pending + "% from last month",
+      label: "Expired Expenses",
+      value: stats.total_expired_expenses,
+      change: stats.percent_increase_expired_expenses + "% from last month",
       bgColor: "bg-green-50",
       iconColor: "text-green-500",
     },
     {
       icon: PieChart,
       label: "Avg per Expense",
-      value: formatCurrency(stats.avgPerExpense, "USD"),
-      change: stats.percent_increase_avg + "% from last month",
+      value: formatCurrency(stats.total_avg_amount, "VND"),
+      change: stats.percent_increase_avg_amount + "% from last month",
       bgColor: "bg-purple-50",
       iconColor: "text-purple-500",
     },
@@ -165,8 +165,7 @@ export function ExpensePage() {
     const matchesSearch = expense.name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      filterStatus === "ALL" || expense.status === filterStatus;
+    const matchesStatus = true;
     const matchesCategory =
       filterCategory === "ALL" || expense.category === filterCategory;
     return matchesSearch && matchesStatus && matchesCategory;
@@ -218,42 +217,6 @@ export function ExpensePage() {
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
             <div className="flex gap-3 flex-1 justify-end">
-              <div className="flex gap-2">
-                <Button
-                  variant={filterStatus === "ALL" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilterStatus("ALL")}
-                  className={
-                    filterStatus === "ALL" ? "bg-rose-600 hover:bg-rose-700 text-white" : ""
-                  }
-                >
-                  All
-                </Button>
-                <Button
-                  variant={filterStatus === "ACTIVE" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilterStatus("ACTIVE")}
-                  className={
-                    filterStatus === "ACTIVE"
-                      ? "bg-rose-600 hover:bg-rose-700 text-white"
-                      : ""
-                  }
-                >
-                  Active
-                </Button>
-                <Button
-                  variant={filterStatus === "SETTLED" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilterStatus("SETTLED")}
-                  className={
-                    filterStatus === "SETTLED"
-                      ? "bg-rose-600 hover:bg-rose-700 text-white"
-                      : ""
-                  }
-                >
-                  Settled
-                </Button>
-              </div>
               
               <select
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
@@ -263,7 +226,7 @@ export function ExpensePage() {
                 <option value="ALL">All Categories</option>
                 {categories.map((category) => (
                   <option key={category} value={category}>
-                    {category}
+                    {category?.toLocaleUpperCase()}
                   </option>
                 ))}
               </select>
@@ -281,6 +244,11 @@ export function ExpensePage() {
           </div>
         </CardHeader>
         <CardContent>
+          {loading && (
+            <div className="text-center py-12">
+              <Spin/>
+            </div>
+          )}
           <div className="space-y-3">
             {filteredExpenses.map((expense) => (
               <Card
@@ -326,7 +294,7 @@ export function ExpensePage() {
                               )}
                             </p>
                           </div>
-                          <div>
+                          <div className="w-[200px]">
                             <p className="text-xs text-gray-500">Paid By</p>
                             <div className="flex items-center gap-1">
                               <Avatar className="size-7">
@@ -340,13 +308,13 @@ export function ExpensePage() {
                                   </AvatarFallback>
                                 )}
                               </Avatar>
-                              <p className="font-semibold">{expense.paid_by.full_name}</p>
+                              <p className="font-semibold">{expense.paid_by.full_name.split(" ").slice(-2).map(n => n).join(" ")}</p>
                             </div>
                           </div>
                           <div>
                             <p className="text-xs text-gray-500">Event</p>
                             <p className="font-semibold text-sm truncate">
-                              {expense.event_name}
+                              {expense.event.name}
                             </p>
                           </div>
                           <div>

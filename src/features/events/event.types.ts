@@ -1,3 +1,4 @@
+import type { Expense } from "../expenses/expense.types";
 import type { GroupItem } from "../groups/group.types";
 import type { User } from "../users/user.types";
 
@@ -23,8 +24,26 @@ export interface EventItem {
   group: GroupItem;
 }
 
+export interface EventInGroupItem {
+  creator: User;
+  description: string;
+  event_end: string;
+  event_start: string;
+  group: string;
+  name: string;
+  uid: string;
+}
+
 export interface EventListResponse {
   content: EventItem[];
+  current_page: number;
+  page_size: number;
+  total_rows: number;
+  total_pages: number;
+}
+
+export interface EventInGroupListResponse {
+  content: EventInGroupItem[];
   current_page: number;
   page_size: number;
   total_rows: number;
@@ -34,7 +53,7 @@ export interface EventListResponse {
 export interface EventMember {
   event_member_uid: string;
   status: string;
-  user: User;
+  user_infor: User;
 }
 
 export interface EventMemberListResponse {
@@ -55,6 +74,6 @@ export interface ExpenseSimple {
 }
 
 export interface ExpenseSimpleListResponse {
-  expenses: ExpenseSimple[];
+  expenses: Expense[];
   total_amount: number;
 }

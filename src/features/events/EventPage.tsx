@@ -322,7 +322,7 @@ export function EventPage() {
                               )}
                             </Avatar>
                             <p className="font-semibold text-sm truncate">
-                              {event.creator.full_name}
+                              {event.creator.full_name.split(" ").slice(-2).map(n => n).join(" ")}
                             </p>
                           </div>
                         </div>

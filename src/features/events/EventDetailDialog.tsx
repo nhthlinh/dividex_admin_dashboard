@@ -26,7 +26,6 @@ interface EventDetailDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-
 export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDialogProps) {
   const [localEvent, setLocalEvent] = useState<EventItem | null>(event);
 
@@ -54,7 +53,7 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
         search: inputSearch,
       });
 
-      const users = p.content.map((m) => m.user);
+      const users = p.content.map((m) => m.user_infor);
 
       setParticipants(users);
       setTotalParticipants(p.total_rows);
@@ -110,7 +109,7 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
     window.location.href = `/expense/event/${localEvent.event_uid}`;
   }
 
-    const handleDeactivateEvent = async () => {
+  const handleDeactivateEvent = async () => {
     try {
       setLocalEvent(prev =>
         prev ? { ...prev, status: "INACTIVE" } : prev
@@ -373,7 +372,7 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
               <div className="space-y-3">
                 { expenses?.expenses.map((expense) => (
                   <div
-                    key={expense.expense_uid}
+                    key={expense.uid} 
                     className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
                   >
                     <div className="flex-1">
@@ -391,11 +390,11 @@ export function EventDetailDialog({ event, open, onOpenChange }: EventDetailDial
                             </AvatarFallback>
                           )}
                         </Avatar>
-                        {expense.paid_by.full_name} • {formatDate(expense.created_at)}
+                        {expense.paid_by.full_name} • {formatDate(expense.expense_date)}
                       </p>
                     </div>
                     <p className="font-bold text-lg">
-                      {expense.amount.toLocaleString("en-US", {
+                      {expense.total_amount.toLocaleString("en-US", {
                         minimumFractionDigits: 2,
                       })} đ
                     </p>

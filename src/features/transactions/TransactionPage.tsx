@@ -504,7 +504,7 @@ export function TransactionPage() {
                               )}
                             </Avatar>
                             <span className="font-medium">
-                              {transaction.user.full_name}
+                              {transaction.user.full_name.split(" ").slice(-2).map(n => n).join(" ")}
                             </span>
                           </div>
                           <div>

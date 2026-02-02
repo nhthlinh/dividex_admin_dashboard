@@ -1,17 +1,14 @@
 import { useEffect, useState } from "react";
 
 import {
-  Users,
   Calendar,
   Search,
-  Plus, 
-  TrendingUp,
   Clock,
   CheckCircle,
   XCircle,
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Card, CardContent, CardHeader } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Badge } from "../../components/ui/badge";
 import type { EventItem } from "./event.types";
@@ -280,7 +277,7 @@ export function EventInGroupPage() {
                               )}
                             </Avatar>
                             <p className="font-semibold text-sm truncate">
-                              {event.creator.full_name}
+                              {event.creator.full_name.split(" ").slice(-2).map(n => n).join(" ")}
                             </p>
                           </div>
                         </div>

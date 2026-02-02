@@ -7,17 +7,19 @@ import {
   User,
   Calendar,
   FileText,
-  Edit,
   Trash2,
   Download,
   Image,
   Receipt,
   PieChart,
+  Unlock,
 } from "lucide-react";
-import type { Expense, UserShare } from "./expense.types";
+import type { Expense, ExpenseAttachment, SplitUserShare } from "./expense.types";
 import { Progress } from "../../components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { getAvatarGradient } from "../../components/Header";
+import { useEffect, useState } from "react";
+import { ExpenseAPI } from "./expense.api";
 
 interface ExpenseDetailDialogProps {
   expense: Expense | null;
@@ -30,7 +32,30 @@ export function ExpenseDetailDialog({
   open,
   onOpenChange,
 }: ExpenseDetailDialogProps) {
-  if (!expense) return null;
+  const [localExpense, setLocalExpense] = useState(expense);
+  const [attachments, setAttachments] = useState<ExpenseAttachment[]>([]); // Placeholder for attachments
+  const [userShares, setUserShares] = useState<SplitUserShare[]>([]); 
+
+  useEffect(() => {
+    const fetchExpenseDetails = async () => {
+      setLocalExpense(expense);
+      const split = await ExpenseAPI.getSplitExpense(expense!.uid);
+
+      const attachments = await ExpenseAPI.getExpenseAttachments(expense!.uid, {
+        page: 1,
+        page_size: 10,
+      });
+
+      setUserShares(split.list_user_shares);
+      setAttachments(attachments.content);
+    };
+
+    if (expense) {
+      fetchExpenseDetails();
+    }
+  }, [expense]);
+
+  if (!localExpense) return null;
 
   const formatCurrency = (amount: number, currency: string) => {
     const currencySymbols: Record<string, string> = {
@@ -95,83 +120,33 @@ export function ExpenseDetailDialog({
     return labels[splitType] || splitType;
   };
 
-  // Mock user shares
-  const userShares: UserShare[] = [
-    {
-      uid: "share-1",
-      expense_uid: expense.uid,
-      user: {
-        uid: "usr-001",
-        full_name: "Amy Roo",
-        email: "amy.roo@example.com",
-        avatar_url: { uid: "", original_name: undefined, public_url: undefined }
-      },
-      amount: 125.0,
-      receiver_amount: 0,
-      deleted: "ACTIVE",
-    },
-    {
-      uid: "share-2",
-      expense_uid: expense.uid,
-      user: {
-        uid: "usr-002",
-        full_name: "Hana Ghoghly",
-        email: "hana.g@example.com",
-        avatar_url: { uid: "", original_name: undefined, public_url: undefined }
-      },
-      amount: 125.0,
-      receiver_amount: 0,
-      deleted: "ACTIVE",
-    },
-    {
-      uid: "share-3",
-      expense_uid: expense.uid,
-      user: {
-        uid: "usr-003",
-        full_name: "Nguyễn Hồ Thúy Linh",
-        email: "linh.nguyen@example.com",
-        avatar_url: { uid: "", original_name: undefined, public_url: undefined }
-      },
-      amount: 125.0,
-      receiver_amount: 0,
-      deleted: "ACTIVE",
-    },
-    {
-      uid: "share-4",
-      expense_uid: expense.uid,
-      user: {
-        uid: "usr-004",
-        full_name: "John Smith",
-        email: "john.smith@example.com",
-        avatar_url: { uid: "", original_name: undefined, public_url: undefined }
-      },
-      amount: 125.0,
-      receiver_amount: 0,
-      deleted: "ACTIVE",
-    },
-  ];
-
-  // Mock attachments
-  const attachments = [
-    {
-      uid: "att-1",
-      name: "receipt_restaurant.jpg",
-      url: "#",
-      type: "image",
-      size: "2.4 MB",
-      uploaded_at: "2024-03-15T14:30:00Z",
-    },
-    {
-      uid: "att-2",
-      name: "invoice.pdf",
-      url: "#",
-      type: "pdf",
-      size: "1.1 MB",
-      uploaded_at: "2024-03-15T14:35:00Z",
-    },
-  ];
-
   const totalShares = userShares.reduce((sum, share) => sum + share.amount, 0);
+
+  const handleDeactivateExpense = async () => {
+    try {
+      setLocalExpense(prev =>
+        prev ? { ...prev, status: "INACTIVE" } : prev
+      );
+
+      await ExpenseAPI.deactivateExpense(localExpense.uid);
+    } catch (error) {
+      console.error("Failed to deactivate expense:", error);
+      setLocalExpense(expense);
+    }
+  };
+
+  const handleActivateExpense = async () => {
+    try {
+      setLocalExpense(prev =>
+        prev ? { ...prev, status: "ACTIVE" } : prev
+      );
+
+      await ExpenseAPI.activateExpense(localExpense.uid);
+    } catch (error) {
+      console.error("Failed to activate expense:", error);
+      setLocalExpense(expense);
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -179,13 +154,13 @@ export function ExpenseDetailDialog({
         <DialogHeader>
           <div className="flex items-start justify-between">
             <div>
-              <DialogTitle className="text-2xl">{expense.name}</DialogTitle>
+              <DialogTitle className="text-2xl">{localExpense.name}</DialogTitle>
               <p className="text-sm text-gray-500 mt-1">
-                Expense ID: {expense.uid}
+                Expense ID: {localExpense.uid}
               </p>
             </div>
-            <Badge variant="secondary" className={getStatusColor(expense.status)}>
-              {expense.status}
+            <Badge variant="secondary" className={getStatusColor(localExpense.status)}>
+              {localExpense.status}
             </Badge>
           </div>
         </DialogHeader>
@@ -216,10 +191,10 @@ export function ExpenseDetailDialog({
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Total Amount</p>
                   <p className="text-3xl font-bold text-gray-900">
-                    {formatCurrency(expense.total_amount, expense.currency)}
+                    {formatCurrency(localExpense.total_amount, localExpense.currency)}
                   </p>
                   <p className="text-sm text-gray-600 mt-1">
-                    {getSplitTypeLabel(expense.split_type)}
+                    {getSplitTypeLabel(localExpense.split_type)}
                   </p>
                 </div>
                 <div className="p-4 bg-white rounded-lg shadow-sm">
@@ -237,21 +212,44 @@ export function ExpenseDetailDialog({
                   </div>
                   <div className="flex items-center gap-3 mb-1">
                     <Avatar className="size-7">
-                      {expense.paid_by.avatar_url?.public_url ? (
-                        <AvatarImage src={expense.paid_by.avatar_url.public_url} />
+                      {localExpense.paid_by.avatar_url?.public_url ? (
+                        <AvatarImage src={localExpense.paid_by.avatar_url.public_url} />
                       ) : (
                         <AvatarFallback
-                          className={`bg-gradient-to-br ${getAvatarGradient(expense.paid_by.uid)} text-white font-semibold`}
+                          className={`bg-gradient-to-br ${getAvatarGradient(localExpense.paid_by.uid)} text-white font-semibold`}
                         >
-                          {expense.paid_by.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                          {localExpense.paid_by.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
                         </AvatarFallback>
                       )}
                     </Avatar>
-                    <p className="font-semibold">{expense.paid_by.full_name}</p>
+                    <p className="font-semibold">{localExpense.paid_by.full_name}</p>
                   </div>
-                  <p className="text-sm text-gray-500">{expense.paid_by.email}</p>
+                  <p className="text-sm text-gray-500">{localExpense.paid_by.email}</p>
                 </div>
 
+                {localExpense.category && (
+                  <div className="p-4 bg-orange-50 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <PieChart className="h-4 w-4 text-orange-600" />
+                      <p className="text-sm text-gray-600">Category</p>
+                    </div>
+                    <p className="font-semibold">{localExpense.category.toLocaleUpperCase()}</p>
+                  </div>
+                )}
+
+                <div className="p-4 bg-pink-50 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <FileText className="h-4 w-4 text-rose-600" />
+                    <p className="text-sm text-gray-600">Event</p>
+                  </div>
+                  <p className="font-semibold">{localExpense.event.name}</p>
+                  <p className="text-sm text-gray-500">
+                    Event ID: {localExpense.event.uid}
+                  </p>
+                </div>
+              </div> 
+
+              <div className="space-y-4">
                 <div className="p-4 bg-blue-50 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
                     <User className="h-4 w-4 text-blue-600" />
@@ -259,51 +257,28 @@ export function ExpenseDetailDialog({
                   </div>
                   <div className="flex items-center gap-3 mb-1">
                     <Avatar className="size-7">
-                      {expense.creator.avatar_url?.public_url ? (
-                        <AvatarImage src={expense.creator.avatar_url.public_url} />
+                      {localExpense.creator.avatar_url?.public_url ? (
+                        <AvatarImage src={localExpense.creator.avatar_url.public_url} />
                       ) : (
                         <AvatarFallback
-                          className={`bg-gradient-to-br ${getAvatarGradient(expense.creator.uid)} text-white font-semibold`}
+                          className={`bg-gradient-to-br ${getAvatarGradient(localExpense.creator.uid)} text-white font-semibold`}
                         >
-                          {expense.creator.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                          {localExpense.creator.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
                         </AvatarFallback>
                       )}
                     </Avatar>
-                    <p className="font-semibold">{expense.creator.full_name}</p>
+                    <p className="font-semibold">{localExpense.creator.full_name}</p>
                   </div>
-                  <p className="text-sm text-gray-500">{expense.creator.email}</p>
+                  <p className="text-sm text-gray-500">{localExpense.creator.email}</p>
                 </div>
 
-                {expense.category && (
-                  <div className="p-4 bg-orange-50 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <PieChart className="h-4 w-4 text-orange-600" />
-                      <p className="text-sm text-gray-600">Category</p>
-                    </div>
-                    <p className="font-semibold">{expense.category}</p>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-4">
                 <div className="p-4 bg-green-50 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
                     <Calendar className="h-4 w-4 text-green-600" />
                     <p className="text-sm text-gray-600">Expense Date</p>
                   </div>
                   <p className="font-semibold">
-                    {formatDate(expense.expense_date)}
-                  </p>
-                </div>
-
-                <div className="p-4 bg-pink-50 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <FileText className="h-4 w-4 text-rose-600" />
-                    <p className="text-sm text-gray-600">Event</p>
-                  </div>
-                  <p className="font-semibold">{expense.event_name}</p>
-                  <p className="text-sm text-gray-500">
-                    Event ID: {expense.event_uid}
+                    {formatDate(localExpense.expense_date)}
                   </p>
                 </div>
 
@@ -313,23 +288,40 @@ export function ExpenseDetailDialog({
                     <p className="text-sm text-gray-600">Created At</p>
                   </div>
                   <p className="font-semibold text-sm">
-                    {formatDateTime(expense.created_at)}
+                    {formatDateTime(localExpense.expense_date)}
                   </p>
                 </div>
               </div>
             </div>
 
-            {expense.note && (
+            {localExpense.note && (
               <div className="p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <FileText className="h-4 w-4 text-gray-600" />
                   <p className="text-sm font-semibold text-gray-700">Note</p>
                 </div>
                 <p className="text-sm text-gray-700 leading-relaxed">
-                  {expense.note}
+                  {localExpense.note}
                 </p>
               </div>
             )}
+
+            {localExpense.status !== "ACTIVE" ? (
+              <Button size="sm" className="mt-3 bg-green-600 hover:bg-green-700 text-white"
+                onClick={handleActivateExpense}
+              >
+                <Unlock className="h-4 w-4 mr-2" />
+                Activate Expense
+              </Button>
+              ) : (
+              <Button size="sm" className="mt-3 bg-rose-600 hover:bg-rose-700 text-white"
+                onClick={handleDeactivateExpense}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Deactivate Expense
+              </Button>
+              )
+            }
           </TabsContent>
 
           <TabsContent value="splits">
@@ -338,7 +330,7 @@ export function ExpenseDetailDialog({
                 <div>
                   <p className="text-sm text-gray-600">Split Type</p>
                   <p className="text-lg font-bold text-gray-900">
-                    {getSplitTypeLabel(expense.split_type)}
+                    {getSplitTypeLabel(localExpense.split_type)}
                   </p>
                 </div>
                 <div className="text-right">
@@ -354,7 +346,7 @@ export function ExpenseDetailDialog({
                   const percentage = (share.amount / totalShares) * 100;
                   return (
                     <div
-                      key={share.uid}
+                      key={share.user.uid}
                       className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                     >
                       <div className="flex items-center justify-between mb-3">
@@ -380,7 +372,7 @@ export function ExpenseDetailDialog({
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-lg">
-                            {formatCurrency(share.amount, expense.currency)}
+                            {formatCurrency(share.amount, localExpense.currency)}
                           </p>
                           <p className="text-xs text-gray-500">
                             {percentage.toFixed(1)}% of total
@@ -397,7 +389,7 @@ export function ExpenseDetailDialog({
                 <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
                   <p className="font-semibold">Total Split Amount</p>
                   <p className="font-bold text-xl">
-                    {formatCurrency(totalShares, expense.currency)}
+                    {formatCurrency(totalShares, localExpense.currency)}
                   </p>
                 </div>
               </div>
@@ -410,10 +402,6 @@ export function ExpenseDetailDialog({
                 <p className="text-sm text-gray-600">
                   Total Attachments: {attachments.length}
                 </p>
-                <Button size="sm" variant="outline">
-                  <Receipt className="h-4 w-4 mr-2" />
-                  Upload Receipt
-                </Button>
               </div>
 
               <div className="grid grid-cols-1 gap-3">
@@ -424,35 +412,17 @@ export function ExpenseDetailDialog({
                   >
                     <div className="flex items-center gap-4">
                       <div
-                        className={`p-3 rounded-lg ${
-                          attachment.type === "image"
-                            ? "bg-blue-100"
-                            : "bg-red-100"
-                        }`}
+                        className="p-3 rounded-lg bg-blue-100"
                       >
-                        {attachment.type === "image" ? (
-                          <Image
-                            className={`h-6 w-6 ${
-                              attachment.type === "image"
-                                ? "text-blue-600"
-                                : "text-red-600"
-                            }`}
-                          />
-                        ) : (
-                          <FileText
-                            className={`h-6 w-6 ${
-                              attachment.type === "image"
-                                ? "text-blue-600"
-                                : "text-red-600"
-                            }`}
-                          />
-                        )}
+                        <Image
+                          className="h-6 w-6 text-blue-600"
+                        />
                       </div>
                       <div>
-                        <p className="font-semibold">{attachment.name}</p>
+                        <p className="font-semibold">{attachment.original_name}</p>
                         <p className="text-sm text-gray-500">
                           {attachment.size} •{" "}
-                          {formatDateTime(attachment.uploaded_at)}
+                          {formatDateTime(attachment.created_at)}
                         </p>
                       </div>
                     </div>

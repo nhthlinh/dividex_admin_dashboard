@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
@@ -16,179 +16,54 @@ import type { Expense } from "./expense.types";
 import { ExpenseDetailDialog } from "./ExpenseDetailDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { getAvatarGradient } from "../../components/Header";
+import { Spin } from "antd";
 import { router } from "../../app/router";
-
-const expenseStats = [
-  {
-    icon: DollarSign,
-    label: "Total Expenses",
-    value: "$45,230",
-    change: "+22% from last month",
-    bgColor: "bg-pink-50",
-    iconColor: "text-pink-500",
-  },
-  {
-    icon: Receipt,
-    label: "Active Expenses",
-    value: "156",
-    change: "+18% from last month",
-    bgColor: "bg-orange-50",
-    iconColor: "text-orange-500",
-  },
-  {
-    icon: TrendingUp,
-    label: "Settled Expenses",
-    value: "89",
-    change: "+12% from last month",
-    bgColor: "bg-green-50",
-    iconColor: "text-green-500",
-  },
-  {
-    icon: PieChart,
-    label: "Avg per Expense",
-    value: "$290",
-    change: "+8% from last month",
-    bgColor: "bg-purple-50",
-    iconColor: "text-purple-500",
-  },
-];
-
-const mockExpenses: Expense[] = [
-  {
-    uid: "exp-001",
-    name: "Team Dinner at Restaurant",
-    event_uid: "evt-001",
-    event_name: "Team Building 2024",
-    currency: "USD",
-    total_amount: 500.0,
-    paid_by: {
-      uid: "usr-001",
-      full_name: "Amy Roo",
-      email: "amy.roo@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    creator: {
-      uid: "usr-001",
-      full_name: "Amy Roo",
-      email: "amy.roo@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    split_type: "EQUAL",
-    note: "Team dinner after the team building activities. Great food and conversation!",
-    category: "Food & Dining",
-    expense_date: "2024-03-15T19:30:00Z",
-    status: "ACTIVE",
-    created_at: "2024-03-15T20:00:00Z",
-    updated_at: "2024-03-15T20:00:00Z",
-  },
-  {
-    uid: "exp-002",
-    name: "Hotel Accommodation",
-    event_uid: "evt-001",
-    event_name: "Team Building 2024",
-    currency: "USD",
-    total_amount: 1200.0,
-    paid_by: {
-      uid: "usr-002",
-      full_name: "Hana Ghoghly",
-      email: "hana.g@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    creator: {
-      uid: "usr-002",
-      full_name: "Hana Ghoghly",
-      email: "hana.g@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    split_type: "EQUAL",
-    note: "3 nights accommodation for 4 people at Mountain View Resort",
-    category: "Accommodation",
-    expense_date: "2024-03-14T15:00:00Z",
-    status: "SETTLED",
-    created_at: "2024-03-14T16:00:00Z",
-    updated_at: "2024-03-18T10:00:00Z",
-  },
-  {
-    uid: "exp-003",
-    name: "Transportation & Gas",
-    event_uid: "evt-001",
-    event_name: "Team Building 2024",
-    currency: "USD",
-    total_amount: 180.0,
-    paid_by: {
-      uid: "usr-003",
-      full_name: "Nguyễn Hồ Thúy Linh",
-      email: "linh.nguyen@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    creator: {
-      uid: "usr-003",
-      full_name: "Nguyễn Hồ Thúy Linh",
-      email: "linh.nguyen@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    split_type: "EQUAL",
-    note: "Gas and toll fees for the road trip",
-    category: "Transportation",
-    expense_date: "2024-03-14T09:00:00Z",
-    status: "ACTIVE",
-    created_at: "2024-03-14T18:00:00Z",
-    updated_at: "2024-03-14T18:00:00Z",
-  },
-];
-
-const event = {
-    uid: "evt-001",
-    name: "Team Building 2024",
-    description: "Annual team building event for all company employees.",
-    start_date: "2024-03-14T08:00:00Z",
-}
+import { EventAPI } from "../events/event.api";
 
 const PAGE_SIZE = 2;
 
 export function ExpenseInEventPage() {
   const eventId = router.state.location.pathname.split("/").pop();
-  console.log("Event ID from URL:", eventId);
+
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<string>("ALL");
   const [filterCategory, setFilterCategory] = useState<string>("ALL");
 
   const [page, setPage] = useState(1);
-  const [total] = useState(mockExpenses.length);
+  const [total, setTotal] = useState(0);
   const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  const [loading, setLoading] = useState(false);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+
+  useEffect(() => {
+    if (!eventId) return;
+    const fetchExpenses = async () => {
+      setLoading(true);
+      try {
+        const res = await EventAPI.getExpensesInEvent(eventId);
+
+        setExpenses(res.expenses);
+        setTotal(res.expenses.length);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExpenses();
+  }, [page]);
 
   const handleExpenseClick = (expense: Expense) => {
     setSelectedExpense(expense);
     setIsDialogOpen(true);
   };
 
-  const formatCurrency = (amount: number, currency: string) => {
+  const formatCurrency = (amount?: number, currency?: string) => {
+    if (amount === undefined || currency === undefined) {
+      return "";
+    }
+
     const currencySymbols: Record<string, string> = {
       USD: "$",
       VND: "₫",
@@ -198,14 +73,10 @@ export function ExpenseInEventPage() {
     };
     const symbol = currencySymbols[currency] || "$";
     
-    if (currency === "VND") {
-      return `${amount.toLocaleString("vi-VN")}${symbol}`;
-    }
-    
-    return `${symbol}${amount.toLocaleString("en-US", {
+    return `${amount.toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    })}`;
+    })} ${symbol}`;
   };
 
   const formatDate = (dateString: string) => {
@@ -248,15 +119,14 @@ export function ExpenseInEventPage() {
 
   // Get unique categories
   const categories = Array.from(
-    new Set(mockExpenses.map((exp) => exp.category).filter(Boolean))
+    new Set(expenses.map((exp) => exp.category).filter(Boolean))
   );
 
-  const filteredExpenses = mockExpenses.filter((expense) => {
+  const filteredExpenses = expenses.filter((expense) => {
     const matchesSearch = expense.name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      filterStatus === "ALL" || expense.status === filterStatus;
+    const matchesStatus = true;
     const matchesCategory =
       filterCategory === "ALL" || expense.category === filterCategory;
     return matchesSearch && matchesStatus && matchesCategory;
@@ -267,7 +137,10 @@ export function ExpenseInEventPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Expense Management for {event.name}</h1>
+          <h1 className="text-2xl font-semibold">Expense Management</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Track and manage all expenses
+          </p>
         </div>
         <div className="flex gap-3">
           <Button size="sm" className="text-white bg-rose-600 hover:bg-rose-700">
@@ -277,70 +150,11 @@ export function ExpenseInEventPage() {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-4">
-        {expenseStats.map((stat, index) => (
-          <Card key={index} className="border-0 shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-sm text-gray-600 mb-2">{stat.label}</p>
-                  <p className="text-2xl font-bold mb-2">{stat.value}</p>
-                  <div className="flex items-center gap-1 text-xs">
-                    <TrendingUp className="h-3 w-3 text-green-600" />
-                    <span className="text-green-600">{stat.change}</span>
-                  </div>
-                </div>
-                <div className={`p-3 ${stat.bgColor} rounded-lg`}>
-                  <stat.icon className={`h-6 w-6 ${stat.iconColor}`} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
       {/* Filters */}
       <Card className="border-0 shadow-sm">
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
             <div className="flex gap-3 flex-1 justify-end">
-              <div className="flex gap-2">
-                <Button
-                  variant={filterStatus === "ALL" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilterStatus("ALL")}
-                  className={
-                    filterStatus === "ALL" ? "bg-rose-600 hover:bg-rose-700 text-white" : ""
-                  }
-                >
-                  All
-                </Button>
-                <Button
-                  variant={filterStatus === "ACTIVE" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilterStatus("ACTIVE")}
-                  className={
-                    filterStatus === "ACTIVE"
-                      ? "bg-rose-600 hover:bg-rose-700 text-white"
-                      : ""
-                  }
-                >
-                  Active
-                </Button>
-                <Button
-                  variant={filterStatus === "SETTLED" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilterStatus("SETTLED")}
-                  className={
-                    filterStatus === "SETTLED"
-                      ? "bg-rose-600 hover:bg-rose-700 text-white"
-                      : ""
-                  }
-                >
-                  Settled
-                </Button>
-              </div>
               
               <select
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
@@ -350,7 +164,7 @@ export function ExpenseInEventPage() {
                 <option value="ALL">All Categories</option>
                 {categories.map((category) => (
                   <option key={category} value={category}>
-                    {category}
+                    {category?.toLocaleUpperCase()}
                   </option>
                 ))}
               </select>
@@ -368,6 +182,11 @@ export function ExpenseInEventPage() {
           </div>
         </CardHeader>
         <CardContent>
+          {loading && (
+            <div className="text-center py-12">
+              <Spin/>
+            </div>
+          )}
           <div className="space-y-3">
             {filteredExpenses.map((expense) => (
               <Card
@@ -413,7 +232,7 @@ export function ExpenseInEventPage() {
                               )}
                             </p>
                           </div>
-                          <div>
+                          <div className="w-[200px]">
                             <p className="text-xs text-gray-500">Paid By</p>
                             <div className="flex items-center gap-1">
                               <Avatar className="size-7">
@@ -427,13 +246,13 @@ export function ExpenseInEventPage() {
                                   </AvatarFallback>
                                 )}
                               </Avatar>
-                              <p className="font-semibold">{expense.paid_by.full_name}</p>
+                              <p className="font-semibold">{expense.paid_by.full_name.split(" ").slice(-2).map(n => n).join(" ")}</p>
                             </div>
                           </div>
                           <div>
                             <p className="text-xs text-gray-500">Event</p>
                             <p className="font-semibold text-sm truncate">
-                              {expense.event_name}
+                              {expense.event.name}
                             </p>
                           </div>
                           <div>

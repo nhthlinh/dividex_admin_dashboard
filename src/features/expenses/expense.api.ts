@@ -1,6 +1,11 @@
 import { api } from "../../config/api.config";
 import type { ApiResponse } from "../../config/api.types";
-import type { ExpenseListResponse, ExpenseStatistics } from "./expense.types";
+import type {
+  ExpenseListResponse,
+  ExpenseStatistics,
+  SplitExpenseResponse,
+  ExpenseAttachmentListResponse,
+} from "./expense.types";
 
 export const ExpenseAPI = {
   getExpenseStatistics: async (): Promise<ExpenseStatistics> => {
@@ -32,6 +37,35 @@ export const ExpenseAPI = {
   },
 
   activateExpense: async (expenseUid: string): Promise<void> => {
-    await api.patch(`/admin/expense/activate/${expenseUid}`);
+    await api.patch(`/admin/expense/active/${expenseUid}`);
+  },
+
+  getSplitExpense: async (
+    expenseUid: string
+  ): Promise<SplitExpenseResponse> => {
+    const res = await api.get<ApiResponse<SplitExpenseResponse>>(
+      `/admin/expenses/${expenseUid}`
+    );
+    return res.data.data;
+  },
+
+  getExpenseAttachments: async (
+    expenseUid: string,
+    params?: {
+      page?: number;
+      page_size?: number;
+    }
+  ): Promise<ExpenseAttachmentListResponse> => {
+    const res = await api.get<ApiResponse<ExpenseAttachmentListResponse>>(
+      `/admin/expense/${expenseUid}/attachments`,
+      {
+        params: {
+          page: params?.page ?? 1,
+          page_size: params?.page_size ?? 10,
+        },
+      }
+    );
+
+    return res.data.data;
   },
 };

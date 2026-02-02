@@ -5,7 +5,7 @@ import type { EventListResponse, EventMemberListResponse, EventStatistics, Expen
 export const EventAPI = {
   getEventStatistics: async (): Promise<EventStatistics> => {
     const res = await api.get<ApiResponse<EventStatistics>>(
-      "/admin/events-management"
+      "/admin/event-management"
     );
     return res.data.data;
   },

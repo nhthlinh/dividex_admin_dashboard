@@ -261,7 +261,7 @@ export function GroupPage() {
                         </Avatar>
                         <div>
                           <p className="text-sm font-medium">
-                            {group.leader.full_name}
+                            {group.leader.full_name.split(" ").slice(-2).map(n => n).join(" ")}
                           </p>
                           <p className="text-xs text-gray-500">
                             Group Leader
