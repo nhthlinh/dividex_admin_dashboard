@@ -40,6 +40,12 @@ export default function AdminLayout() {
           case "admin":
             window.location.href = "/admin";
             break;
+          case "system-logs":
+            window.location.href = "/system-logs";
+            break;
+          case "settings":
+            window.location.href = "/settings";
+            break;
           default:
             window.location.href = "/";
         }

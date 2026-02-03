@@ -1,15 +1,8 @@
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Badge } from "../../components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "../../components/ui/dialog";
 import {
   MessageSquare,
   Search,
@@ -17,345 +10,105 @@ import {
   Users,
   Send,
   Paperclip,
-  Trash2,
-  Pin,
-  Edit,
-  Calendar,
 } from "lucide-react";
-import type { GroupConversation, Message } from "./messages.types";
+import type { MessageGroupItem, MessageManagement, MessagesInGroupItem } from "./messages.types";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { getAvatarGradient } from "../../components/Header";
+import { MessageAPI } from "./messages.api"; 
 
-const messageStats = [
-  {
-    icon: MessageSquare,
-    label: "Total Messages",
-    value: "15,432",
-    change: "+28% from last month",
-    bgColor: "bg-blue-50",
-    iconColor: "text-blue-500",
-  },
-  {
-    icon: Users,
-    label: "Active Groups",
-    value: "234",
-    change: "+15% from last month",
-    bgColor: "bg-green-50",
-    iconColor: "text-green-500",
-  },
-  {
-    icon: Send,
-    label: "Messages Today",
-    value: "1,245",
-    change: "+32% from yesterday",
-    bgColor: "bg-purple-50",
-    iconColor: "text-purple-500",
-  },
-  {
-    icon: Paperclip,
-    label: "Attachments",
-    value: "3,456",
-    change: "+18% from last month",
-    bgColor: "bg-orange-50",
-    iconColor: "text-orange-500",
-  },
-];
-
-const mockGroupConversations: GroupConversation[] = [
-  {
-    group_uid: "grp-001",
-    group_name: "Weekend Trip Planning",
-    message_count: 245,
-    unread_count: 12,
-    participants: [
-      {
-        uid: "usr-001", full_name: "Amy Roo", email: "amy.roo@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      {
-        uid: "usr-002", full_name: "Hana Ghoghly", email: "hana.g@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      {
-        uid: "usr-003", full_name: "Nguyễn Hồ Thúy Linh", email: "linh.nguyen@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-    ],
-    last_message: {
-      uid: "msg-001",
-      content: "Don't forget to bring your cameras for the trip!",
-      user: {
-        uid: "usr-001",
-        full_name: "Amy Roo",
-        email: "amy.roo@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      status: "ACTIVE",
-      group_uid: "grp-001",
-      group_name: "Weekend Trip Planning",
-      created_at: "2024-03-20T10:30:00Z",
-      group_avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      },
-    },
-  },
-  {
-    group_uid: "grp-002",
-    group_name: "Office Party Organizers",
-    message_count: 189,
-    unread_count: 5,
-    participants: [
-      {
-        uid: "usr-002", full_name: "Hana Ghoghly", email: "hana.g@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      {
-        uid: "usr-004", full_name: "John Smith", email: "john.smith@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      {
-        uid: "usr-005", full_name: "Nguyễn Hồ Chi Vũ", email: "vu.nguyen@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-    ],
-    last_message: {
-      uid: "msg-002",
-      content: "I've booked the venue for next Friday",
-      user: {
-        uid: "usr-002",
-        full_name: "Hana Ghoghly",
-        email: "hana.g@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      status: "ACTIVE",
-      group_uid: "grp-002",
-      group_name: "Office Party Organizers",
-      created_at: "2024-03-20T09:15:00Z",
-    },
-  },
-  {
-    group_uid: "grp-003",
-    group_name: "Project Alpha Team",
-    message_count: 567,
-    unread_count: 28,
-    participants: [
-      {
-        uid: "usr-001", full_name: "Amy Roo", email: "amy.roo@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      {
-        uid: "usr-003", full_name: "Nguyễn Hồ Thúy Linh", email: "linh.nguyen@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      {
-        uid: "usr-004", full_name: "John Smith", email: "john.smith@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      {
-        uid: "usr-005", full_name: "Nguyễn Hồ Chi Vũ", email: "vu.nguyen@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-    ],
-    last_message: {
-      uid: "msg-003",
-      content: "Meeting rescheduled to 3 PM",
-      user: {
-        uid: "usr-004",
-        full_name: "John Smith",
-        email: "john.smith@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      status: "ACTIVE",
-      group_uid: "grp-003",
-      group_name: "Project Alpha Team",
-      created_at: "2024-03-20T08:45:00Z",
-    },
-  },
-];
-
-const mockMessages: Message[] = [
-  {
-    uid: "msg-101",
-    content: "Hey everyone! Just created the expense for our team dinner last night.",
-    user: {
-      uid: "usr-001",
-      full_name: "Amy Roo",
-      email: "amy.roo@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    status: "ACTIVE",
-    group_uid: "grp-001",
-    group_name: "Weekend Trip Planning",
-    created_at: "2024-03-20T10:30:00Z",
-    is_pinned: false,
-  },
-  {
-    uid: "msg-102",
-    content: "Thanks! I'll review it now.",
-    user: {
-      uid: "usr-002",
-      full_name: "Hana Ghoghly",
-      email: "hana.g@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    status: "ACTIVE",
-    group_uid: "grp-001",
-    group_name: "Weekend Trip Planning",
-    created_at: "2024-03-20T10:32:00Z",
-    is_pinned: false,
-  },
-  {
-    uid: "msg-103",
-    content: "Can we split the hotel costs equally?",
-    user: {
-      uid: "usr-003",
-      full_name: "Nguyễn Hồ Thúy Linh",
-      email: "linh.nguyen@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    status: "ACTIVE",
-    group_uid: "grp-001",
-    group_name: "Weekend Trip Planning",
-    created_at: "2024-03-20T10:35:00Z",
-    is_pinned: false,
-  },
-  {
-    uid: "msg-104",
-    content: "Sure, I'll update the expense to split equally.",
-    user: {
-      uid: "usr-001",
-      full_name: "Amy Roo",
-      email: "amy.roo@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    status: "ACTIVE",
-    group_uid: "grp-001",
-    group_name: "Weekend Trip Planning",
-    created_at: "2024-03-20T10:37:00Z",
-    is_pinned: true,
-  },
-  {
-    uid: "msg-105",
-    content: "Don't forget to bring your cameras for the trip!",
-    user: {
-      uid: "usr-001",
-      full_name: "Amy Roo",
-      email: "amy.roo@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    status: "ACTIVE",
-    group_uid: "grp-001",
-    group_name: "Weekend Trip Planning",
-    created_at: "2024-03-20T11:00:00Z",
-    is_pinned: false,
-    attachments: [
-      {
-        uid: "att-001",
-        url: "#",
-        name: "trip-itinerary.pdf",
-        type: "pdf",
-        size: "1.2 MB",
-      },
-    ],
-  },
-];
-
-export function MessagePage() {
-  const [selectedGroup, setSelectedGroup] = useState<GroupConversation | null>(
-    mockGroupConversations[0]
-  );
-  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
-  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+export function MessagePage() { 
+  const [allGroups, setAllGroups] = useState<MessageGroupItem[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<MessageGroupItem | null>(null);
+  const [messageGroups, setMessageGroups] = useState<MessagesInGroupItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleMessageClick = (message: Message) => {
-    setSelectedMessage(message);
-    setIsDetailDialogOpen(true);
-  };
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const handleDeleteMessage = (message: Message) => {
-    alert(`Deleted message: ${message.uid}`);
-    setIsDetailDialogOpen(false);
-  };
+  const [pageMessage, setPageMessage] = useState(1);
+  const [totalPagesMessage, setTotalPagesMessage] = useState(1);
 
-  const handlePinMessage = (message: Message) => {
-    alert(`${message.is_pinned ? "Unpinned" : "Pinned"} message: ${message.uid}`);
-    setIsDetailDialogOpen(false);
-  };
+  const [statistics, setStatistics] = useState<MessageManagement | null>(null);
+
+  useEffect(() => {
+    const fetchMessageGroups = async () => {
+      setLoading(true);
+      const groups = await MessageAPI.getMessageGroups({
+        page: page,
+        page_size: 10,
+      });
+      if (groups.content.length > 0) {
+        setAllGroups(groups.content);
+        setSelectedGroup(groups.content[0]);
+        setTotalPages(groups.total_pages);
+      }
+      setLoading(false);
+    }
+    fetchMessageGroups();
+  }, [page]);
+
+  useEffect(() => { 
+    const fetchMessagesInGroup = async () => {
+      if (selectedGroup) {
+        setLoading(true);
+        const messagesInGroup = await MessageAPI.getMessagesInGroup(selectedGroup.uid, {
+          page: pageMessage,
+          page_size: 50,
+        });
+        setLoading(false); 
+        setMessageGroups(messagesInGroup.content);
+        setTotalPagesMessage(messagesInGroup.total_pages);
+      }
+    }
+    fetchMessagesInGroup();
+  }, [selectedGroup, pageMessage]);
+
+  useEffect(() => {
+    const fetchMessageManagement = async () => {
+      setLoading(true);
+      await MessageAPI.getMessageManagement().then(setStatistics);
+      setLoading(false);
+    }
+    fetchMessageManagement();
+  }, []);
+
+  const messageStats = statistics
+    ? [
+        {
+        icon: MessageSquare,
+        label: "Total Messages",
+        value: statistics.total_messages,
+        change: statistics.percent_increase_messages + "% from last month",
+        bgColor: "bg-blue-50",
+        iconColor: "text-blue-500",
+      },
+      {
+        icon: Users,
+        label: "Active Groups",
+        value: statistics.active_groups,
+        change: statistics.percent_increase_active_groups + "% from last month",
+        bgColor: "bg-green-50",
+        iconColor: "text-green-500",
+      },
+      {
+        icon: Send,
+        label: "Messages Today",
+        value: statistics.message_today,
+        change: statistics.percent_increase_message_today + "% from yesterday",
+        bgColor: "bg-purple-50",
+        iconColor: "text-purple-500",
+      },
+      {
+        icon: Paperclip,
+        label: "Attachments",
+        value: statistics.attachments,
+        change: statistics.percent_increase_attachments + "% from last month",
+        bgColor: "bg-orange-50",
+        iconColor: "text-orange-500",
+      },
+    ] : [];
+
 
   const formatDateTime = (dateString: string) => {
     return new Date(dateString).toLocaleString("en-US", {
@@ -387,10 +140,9 @@ export function MessagePage() {
     }
   };
 
-  const filteredMessages = mockMessages.filter(
+  const filteredMessages = messageGroups.filter(
     (message) =>
-      message.group_uid === selectedGroup?.group_uid &&
-      message.content.toLowerCase().includes(searchQuery.toLowerCase())
+      message.messages.content.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -437,11 +189,12 @@ export function MessagePage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {mockGroupConversations.map((group) => (
-                <Card
-                  key={group.group_uid}
+              {allGroups.length === 0 && <p>No groups available.</p>}
+              {allGroups.map((group) => (
+                <Card 
+                  key={group.uid}
                   className={`cursor-pointer transition-all duration-200 ${
-                    selectedGroup?.group_uid === group.group_uid
+                    selectedGroup?.uid === group.uid
                       ? "border-pink-500 bg-pink-50"
                       : "hover:border-pink-200"
                   }`}
@@ -452,28 +205,57 @@ export function MessagePage() {
                       <h3 className="font-semibold text-sm">
                         {group.group_name}
                       </h3>
-                      {group.unread_count! > 0 && (
+                      {group.total_messages_unread! > 0 && (
                         <Badge className="bg-pink-600 text-white">
-                          {group.unread_count}
+                          {group.total_messages_unread}
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-gray-600 mb-2 line-clamp-2">
-                      {group.last_message?.content}
-                    </p>
+                    <div>
+                      <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+                        {group.last_message_content}
+                      </p>
+                      <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+                        {formatDateTime(group.last_message)}
+                      </p>
+                    </div>
                     <div className="flex items-center justify-between text-xs text-gray-500">
                       <div className="flex items-center gap-1">
                         <Users className="h-3 w-3" />
-                        <span>{group.participants.length} members</span>
+                        <span>{group.total_members} members</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <MessageSquare className="h-3 w-3" />
-                        <span>{group.message_count} messages</span>
+                        <span>{group.total_messages} messages</span>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
+            </div>
+            {/* Pagination */}
+            <div className="flex justify-between items-center mt-6">
+              <span className="text-sm text-gray-500">
+                Page {page} / {totalPages}
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={page === 1}
+                  onClick={() => setPage((p) => p - 1)}
+                >
+                  Previous
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  Next
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -485,8 +267,8 @@ export function MessagePage() {
               <div>
                 <CardTitle>{selectedGroup?.group_name}</CardTitle>
                 <p className="text-sm text-gray-500 mt-1">
-                  {selectedGroup?.participants.length} participants •{" "}
-                  {selectedGroup?.message_count} messages
+                  {selectedGroup?.total_members} participants •{" "}
+                  {selectedGroup?.total_messages} messages
                 </p>
               </div>
               <div className="relative w-64">
@@ -504,22 +286,19 @@ export function MessagePage() {
             <div className="space-y-3 max-h-[600px] overflow-y-auto">
               {filteredMessages.map((message) => (
                 <Card
-                  key={message.uid}
-                  className={`cursor-pointer hover:shadow-md transition-all duration-200 border hover:border-pink-200 ${
-                    message.is_pinned ? "border-blue-300 bg-blue-50" : ""
-                  }`}
-                  onClick={() => handleMessageClick(message)}
+                  key={message.messages.uid}
+                  className={`cursor-pointer hover:shadow-md transition-all duration-200 border hover:border-pink-200`}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
                       <Avatar className="size-7">
-                        {message.user.avatar_url?.public_url ? (
-                          <AvatarImage src={message.user.avatar_url.public_url} />
+                        {message.messages.sender.avatar_url?.public_url ? (
+                          <AvatarImage src={message.messages.sender.avatar_url.public_url} />
                         ) : (
                           <AvatarFallback
-                            className={`bg-gradient-to-br ${getAvatarGradient(message.user.uid)} text-white font-semibold`}
+                            className={`bg-gradient-to-br ${getAvatarGradient(message.messages.sender.uid)} text-white font-semibold`}
                           >
-                            {message.user.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                            {message.messages.sender.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
                           </AvatarFallback>
                         )}
                       </Avatar>
@@ -527,40 +306,34 @@ export function MessagePage() {
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2">
                             <p className="font-semibold text-sm">
-                              {message.user.full_name}
+                              {message.messages.sender.full_name}
                             </p>
-                            {message.is_pinned && (
-                              <Pin className="h-4 w-4 text-blue-600" />
-                            )}
                             <Badge
                               variant="secondary"
-                              className={getStatusColor(message.status)}
+                              className={getStatusColor(message.messages.status)}
                             >
-                              {message.status}
+                              {message.messages.status}
                             </Badge>
                           </div>
                           <p className="text-xs text-gray-500">
-                            {formatTime(message.created_at)}
+                            {formatTime(message.messages.created_at)}
                           </p>
                         </div>
 
                         <p className="text-sm text-gray-700 mb-2">
-                          {message.content}
+                          {message.messages.content}
                         </p>
 
-                        {message.attachments && message.attachments.length > 0 && (
+                        {message.messages.attachments && message.messages.attachments.length > 0 && (
                           <div className="flex items-center gap-2 mt-2">
-                            {message.attachments.map((attachment) => (
+                            {message.messages.attachments.map((attachment) => (
                               <div
                                 key={attachment.uid}
                                 className="flex items-center gap-2 p-2 bg-gray-100 rounded text-xs"
                               >
                                 <Paperclip className="h-3 w-3 text-gray-600" />
                                 <span className="font-medium">
-                                  {attachment.name}
-                                </span>
-                                <span className="text-gray-500">
-                                  ({attachment.size})
+                                  {attachment.original_name}
                                 </span>
                               </div>
                             ))}
@@ -579,147 +352,34 @@ export function MessagePage() {
                 <p className="text-gray-500">No messages found</p>
               </div>
             )}
+
+            {/* Pagination */}
+            <div className="flex justify-between items-center mt-6">
+              <span className="text-sm text-gray-500">
+                Page {pageMessage} / {totalPagesMessage}
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={pageMessage === 1}
+                  onClick={() => setPageMessage((p) => p - 1)}
+                >
+                  Previous
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={pageMessage >= totalPagesMessage}
+                  onClick={() => setPageMessage((p) => p + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Message Detail Dialog */}
-      {selectedMessage && (
-        <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Message Details</DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-4">
-              <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <Avatar className="size-7">
-                    {selectedMessage.user.avatar_url?.public_url ? (
-                      <AvatarImage src={selectedMessage.user.avatar_url.public_url} />
-                    ) : (
-                      <AvatarFallback
-                        className={`bg-gradient-to-br ${getAvatarGradient(selectedMessage.user.uid)} text-white font-semibold`}
-                      >
-                        {selectedMessage.user.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <p className="font-semibold">
-                        {selectedMessage.user.full_name}
-                      </p>
-                      {selectedMessage.is_pinned && (
-                        <Badge className="bg-blue-600">
-                          <Pin className="h-3 w-3 mr-1" />
-                          Pinned
-                        </Badge>
-                      )}
-                      <Badge
-                        variant="secondary"
-                        className={getStatusColor(selectedMessage.status)}
-                      >
-                        {selectedMessage.status}
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-gray-500">
-                      {selectedMessage.user.email}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-600 mb-2">Message Content</p>
-                <p className="text-gray-900">{selectedMessage.content}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Users className="h-4 w-4 text-gray-600" />
-                    <p className="text-sm text-gray-600">Group</p>
-                  </div>
-                  <p className="font-semibold">{selectedMessage.group_name}</p>
-                </div>
-
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Calendar className="h-4 w-4 text-gray-600" />
-                    <p className="text-sm text-gray-600">Sent At</p>
-                  </div>
-                  <p className="font-semibold">
-                    {formatDateTime(selectedMessage.created_at)}
-                  </p>
-                </div>
-              </div>
-
-              {selectedMessage.attachments &&
-                selectedMessage.attachments.length > 0 && (
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600 mb-3">
-                      Attachments ({selectedMessage.attachments.length})
-                    </p>
-                    <div className="space-y-2">
-                      {selectedMessage.attachments.map((attachment) => (
-                        <div
-                          key={attachment.uid}
-                          className="flex items-center justify-between p-3 bg-white rounded"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-blue-100 rounded">
-                              <Paperclip className="h-5 w-5 text-blue-600" />
-                            </div>
-                            <div>
-                              <p className="font-medium text-sm">
-                                {attachment.name}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {attachment.size} • {attachment.type}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-              {selectedMessage.updated_at && (
-                <div className="p-4 bg-yellow-50 rounded-lg flex items-center gap-2">
-                  <Edit className="h-4 w-4 text-yellow-600" />
-                  <p className="text-sm text-yellow-800">
-                    This message was edited on{" "}
-                    {formatDateTime(selectedMessage.updated_at)}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <DialogFooter className="gap-2">
-              <Button
-                variant="outline"
-                onClick={() => handlePinMessage(selectedMessage)}
-              >
-                <Pin className="h-4 w-4 mr-2" />
-                {selectedMessage.is_pinned ? "Unpin" : "Pin"} Message
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => handleDeleteMessage(selectedMessage)}
-                className="text-red-600 border-red-600 hover:bg-red-50"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
-              <Button variant="outline" onClick={() => setIsDetailDialogOpen(false)}>
-                Close
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
     </div>
   );
 }

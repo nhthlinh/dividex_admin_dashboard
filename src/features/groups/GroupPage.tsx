@@ -3,7 +3,6 @@ import {
   Users,
   Calendar,
   Search,
-  Plus,
   TrendingUp,
   TrendingDown,
   Group,

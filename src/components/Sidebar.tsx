@@ -12,6 +12,7 @@ import {
   LogOut,
   Menu,
   PlusSquare,
+  Activity,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { authStore } from "../features/auth/auth.store";
@@ -32,9 +33,11 @@ const menuItems = [
   { icon: Bell, label: "Notification", key: "notification" },
   { icon: MessageSquare, label: "Message", key: "message" },
   { icon: PlusSquare, label: "Admin", key: "admin" },
+  { icon: Activity, label: "System Logs", key: "system-logs" },
 ];
 
 export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
+  console.log("Current Page in Sidebar:", currentPage);
   const [collapsed, setCollapsed] = useState(false);
 
   const handleLogout = () => {
@@ -69,11 +72,12 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
           const Icon = item.icon;
           const pathname = router.state.location.pathname;
           const routeKey = pathname.split("/")[1]; // an toàn hơn slice(1)
-          console.log("Current routeKey:", routeKey, "Item key:", item.key);
 
-          const isActive = routeKey === item.key;
+          let isActive = routeKey === item.key;
 
-          console.log("isActive for", item.key, ":", isActive);
+          if (item.key === "dashboard" && pathname === "/") {
+            isActive = true;
+          }
 
           return (
             <Button
@@ -103,7 +107,12 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
           variant="ghost"
           className={`w-full ${
             collapsed ? "justify-center" : "justify-start"
+          } ${
+            router.state.location.pathname === "/settings" 
+            ? "bg-gradient-to-r from-rose-700 to-rose-600 text-white"
+            : "text-slate-600 hover:bg-slate-50"
           }`}
+          onClick={() => onNavigate("settings")}
         >
           <Settings className="size-4" />
           {!collapsed && <span className="ml-3">Settings</span>}
