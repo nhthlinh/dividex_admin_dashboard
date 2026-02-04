@@ -52,7 +52,7 @@ export interface MessagesInGroupItem {
   name: string;
   total_members: number;
   total_messages: number;
-  messages: Message; 
+  messages: Message[]; 
   avatar_url?: string;
 }
 

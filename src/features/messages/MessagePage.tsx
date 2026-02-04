@@ -23,9 +23,11 @@ export function MessagePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Số nhóm
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  // Số tin nhắn trong nhóm
   const [pageMessage, setPageMessage] = useState(1);
   const [totalPagesMessage, setTotalPagesMessage] = useState(1);
 
@@ -54,11 +56,11 @@ export function MessagePage() {
         setLoading(true);
         const messagesInGroup = await MessageAPI.getMessagesInGroup(selectedGroup.uid, {
           page: pageMessage,
-          page_size: 50,
+          page_size: 10,
         });
         setLoading(false); 
         setMessageGroups(messagesInGroup.content);
-        setTotalPagesMessage(messagesInGroup.total_pages);
+        setTotalPagesMessage(messagesInGroup.content[0].total_messages ? Math.ceil(messagesInGroup.content[0].total_messages / 10) : 1);
       }
     }
     fetchMessagesInGroup();
@@ -142,7 +144,9 @@ export function MessagePage() {
 
   const filteredMessages = messageGroups.filter(
     (message) =>
-      message.messages.content.toLowerCase().includes(searchQuery.toLowerCase())
+      message.messages.filter((msg) =>
+        msg.content.toLowerCase().includes(searchQuery.toLowerCase())
+      ).length > 0
   );
 
   return (
@@ -285,64 +289,67 @@ export function MessagePage() {
           <CardContent>
             <div className="space-y-3 max-h-[600px] overflow-y-auto">
               {filteredMessages.map((message) => (
-                <Card
-                  key={message.messages.uid}
-                  className={`cursor-pointer hover:shadow-md transition-all duration-200 border hover:border-pink-200`}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <Avatar className="size-7">
-                        {message.messages.sender.avatar_url?.public_url ? (
-                          <AvatarImage src={message.messages.sender.avatar_url.public_url} />
-                        ) : (
-                          <AvatarFallback
-                            className={`bg-gradient-to-br ${getAvatarGradient(message.messages.sender.uid)} text-white font-semibold`}
-                          >
-                            {message.messages.sender.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
-                          </AvatarFallback>
-                        )}
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <div className="flex items-center gap-2">
-                            <p className="font-semibold text-sm">
-                              {message.messages.sender.full_name}
-                            </p>
-                            <Badge
-                              variant="secondary"
-                              className={getStatusColor(message.messages.status)}
+                message.messages.map((msg) => (
+                  <Card
+                    key={msg.uid}
+                    className={`cursor-pointer hover:shadow-md transition-all duration-200 border hover:border-pink-200`}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <Avatar className="size-7">
+                          {msg.sender.avatar_url?.public_url ? (
+                            <AvatarImage src={msg.sender.avatar_url.public_url} />
+                          ) : (
+                            <AvatarFallback
+                              className={`bg-gradient-to-br ${getAvatarGradient(msg.sender.uid)} text-white font-semibold`}
                             >
-                              {message.messages.status}
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-gray-500">
-                            {formatTime(message.messages.created_at)}
-                          </p>
-                        </div>
-
-                        <p className="text-sm text-gray-700 mb-2">
-                          {message.messages.content}
-                        </p>
-
-                        {message.messages.attachments && message.messages.attachments.length > 0 && (
-                          <div className="flex items-center gap-2 mt-2">
-                            {message.messages.attachments.map((attachment) => (
-                              <div
-                                key={attachment.uid}
-                                className="flex items-center gap-2 p-2 bg-gray-100 rounded text-xs"
+                              {msg.sender.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold text-sm">
+                                {msg.sender.full_name}
+                              </p>
+                              <Badge
+                                variant="secondary"
+                                className={getStatusColor(msg.status)}
                               >
-                                <Paperclip className="h-3 w-3 text-gray-600" />
-                                <span className="font-medium">
-                                  {attachment.original_name}
-                                </span>
-                              </div>
-                            ))}
+                                {msg.status}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-gray-500">
+                              {formatTime(msg.created_at)}
+                            </p>
                           </div>
-                        )}
+
+                          <p className="text-sm text-gray-700 mb-2">
+                            {msg.content}
+                          </p>
+
+                          {msg.attachments && msg.attachments.length > 0 && (
+                            <div className="flex items-center gap-2 mt-2">
+                              {msg .attachments.map((attachment) => (
+                                <div
+                                  key={attachment.uid}
+                                  className="flex items-center gap-2 p-2 bg-gray-100 rounded text-xs"
+                                >
+                                  <Paperclip className="h-3 w-3 text-gray-600" />
+                                  <span className="font-medium">
+                                    {attachment.original_name}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                ))
+                
               ))}
             </div>
 

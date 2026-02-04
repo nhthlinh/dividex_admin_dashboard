@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/ca
 import { Button } from "../../components/ui/button";
 import { Users as UsersIcon, UserCheck, UserPlus, Plus, Search } from "lucide-react";
 import { Dialog, DialogContent } from "../../components/ui/dialog";
-import type { User } from "./user.types";
+import type { User, UserDetail } from "./user.types";
 import { UserAPI } from "./user.api";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { getAvatarGradient } from "../../components/Header";
@@ -47,14 +47,14 @@ export function UserPage() {
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
   const [isOverviewDialogOpen, setIsOverviewDialogOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const [inputValue, setInputValue] = useState("");
 
-  const handleUserClick = (user: User) => {
-    setSelectedUser(user);
+  const handleUserClick = async (user: User) => {
+    await UserAPI.getUserDetail(user.uid).then(setSelectedUser);
     setIsDialogOpen(true);
   };
 
