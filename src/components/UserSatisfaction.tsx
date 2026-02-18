@@ -10,17 +10,16 @@ import {
 } from "recharts";
 
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import type { RatingItem } from "../features/dashboard/dashboard.types";
 import { DashboardAPI } from "../features/dashboard/dashboard.api";
 
-const formatRatingData = (data: RatingItem[]) => {
-  return data.map((item) => ({
-    month: new Date(item.date).toLocaleString("en-US", {
-      month: "short",
-    }),
-    rating: item.rate,
-  }));
-};
+// const formatRatingData = (data: RatingItem[]) => {
+//   return data.map((item) => ({
+//     month: new Date(item.date).toLocaleString("en-US", {
+//       month: "short",
+//     }),
+//     rating: item.rate,
+//   }));
+// };
 
 export function UserSatisfaction() {
   const [data, setData] = useState<any[]>([]);

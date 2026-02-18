@@ -13,7 +13,6 @@ import {
 import {
   AlertTriangle,
   Search,
-  Download,
   TrendingUp,
   Activity,
   XCircle,
