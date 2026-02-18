@@ -1,11 +1,8 @@
-import { Search, ChevronDown, LogOut } from "lucide-react";
-import { Input } from "./ui/input";
+import { ChevronDown } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { authStore } from "../features/auth/auth.store";
 import {
   DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 

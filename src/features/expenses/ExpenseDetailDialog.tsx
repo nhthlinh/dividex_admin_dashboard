@@ -15,7 +15,6 @@ import {
   Unlock,
 } from "lucide-react";
 import type { Expense, ExpenseAttachment, SplitUserShare } from "./expense.types";
-import { Progress } from "../../components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { getAvatarGradient } from "../../components/Header";
 import { useEffect, useState } from "react";

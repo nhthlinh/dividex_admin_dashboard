@@ -5,12 +5,9 @@ import { Input } from "../../components/ui/input";
 import { Badge } from "../../components/ui/badge";
 
 import {
-  DollarSign,
-  TrendingUp,
   Search,
   Plus,
   Receipt,
-  PieChart,
 } from "lucide-react";
 import type { Expense } from "./expense.types";
 import { ExpenseDetailDialog } from "./ExpenseDetailDialog";

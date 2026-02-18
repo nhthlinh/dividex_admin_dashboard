@@ -1,4 +1,4 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -148,6 +148,10 @@ export function MessagePage() {
         msg.content.toLowerCase().includes(searchQuery.toLowerCase())
       ).length > 0
   );
+
+  if (loading) {
+    return <div></div>;
+  }
 
   return (
     <div className="p-8 space-y-6">

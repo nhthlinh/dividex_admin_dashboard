@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
-import { Users as UsersIcon, UserCheck, UserPlus, Plus, Search } from "lucide-react";
+import { Users as UsersIcon, UserCheck, UserPlus, Search } from "lucide-react";
 import { Dialog, DialogContent } from "../../components/ui/dialog";
 import type { User, UserDetail } from "./user.types";
 import { UserAPI } from "./user.api";
