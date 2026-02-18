@@ -76,7 +76,7 @@ export function RateChart() {
                 outerRadius={100}
                 paddingAngle={3}
                 dataKey="value"
-                activeIndex={activeIndex ?? undefined}
+                // activeIndex={activeIndex ?? undefined}
                 onMouseEnter={(_, index) => setActiveIndex(index)}
                 onMouseLeave={() => setActiveIndex(null)}
               >
