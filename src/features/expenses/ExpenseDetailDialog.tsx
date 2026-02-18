@@ -112,6 +112,7 @@ export function ExpenseDetailDialog({
 
   const getSplitTypeLabel = (splitType: string) => {
     const labels: Record<string, string> = {
+      CUSTOM: "Custom Split",
       EQUAL: "Split Equally",
       PERCENTAGE: "Split by Percentage",
       EXACT: "Exact Amount",
@@ -119,8 +120,6 @@ export function ExpenseDetailDialog({
     };
     return labels[splitType] || splitType;
   };
-
-  const totalShares = userShares.reduce((sum, share) => sum + share.amount, 0);
 
   const handleDeactivateExpense = async () => {
     try {
@@ -341,55 +340,56 @@ export function ExpenseDetailDialog({
                 </div>
               </div>
 
-              <div className="space-y-3">
-                {userShares.map((share) => {
-                  const percentage = (share.amount / totalShares) * 100;
-                  return (
-                    <div
-                      key={share.user.uid}
-                      className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="size-10">
-                            {share.user.avatar_url?.public_url ? (
-                              <AvatarImage src={share.user.avatar_url.public_url} />
-                            ) : (
-                              <AvatarFallback
-                                className={`bg-gradient-to-br ${getAvatarGradient(share.user.uid)} text-white font-semibold`}
-                              >
-                                {share.user.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
-                              </AvatarFallback>
-                            )}
-                          </Avatar>
-                          
-                          <div>
-                            <p className="font-semibold">{share.user.full_name}</p>
-                            <p className="text-sm text-gray-500">
-                              {share.user.email}
+              {localExpense && userShares !== null && (
+                <div className="space-y-3">
+                  {userShares.map((share) => {
+                    const percentage = (share.amount / localExpense.total_amount) * 100;
+                    return (
+                      <div
+                        key={share.user.uid}
+                        className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="size-10">
+                              {share.user.avatar_url?.public_url ? (
+                                <AvatarImage src={share.user.avatar_url.public_url} />
+                              ) : (
+                                <AvatarFallback
+                                  className={`bg-gradient-to-br ${getAvatarGradient(share.user.uid)} text-white font-semibold`}
+                                >
+                                  {share.user.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                                </AvatarFallback>
+                              )}
+                            </Avatar>
+                            
+                            <div>
+                              <p className="font-semibold">{share.user.full_name}</p>
+                              <p className="text-sm text-gray-500">
+                                {share.user.email}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-lg">
+                              {formatCurrency(share.amount, localExpense.currency)}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {percentage.toFixed(1)}% of total
                             </p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-bold text-lg">
-                            {formatCurrency(share.amount, localExpense.currency)}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {percentage.toFixed(1)}% of total
-                          </p>
-                        </div>
                       </div>
-                      <Progress value={percentage} className="h-2" />
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
 
               <div className="pt-4 border-t">
                 <div className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
                   <p className="font-semibold">Total Split Amount</p>
                   <p className="font-bold text-xl">
-                    {formatCurrency(totalShares, localExpense.currency)}
+                    {formatCurrency(localExpense.total_amount, localExpense.currency)}
                   </p>
                 </div>
               </div>
