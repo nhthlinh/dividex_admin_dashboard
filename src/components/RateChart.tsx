@@ -1,63 +1,119 @@
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { DashboardAPI } from "../features/dashboard/dashboard.api";
 
-const data = [
-  { name: "Completed", value: 58.5 },
-  { name: "Remain", value: 41.5 },
+interface ChartItem {
+  name: string;
+  value: number;
+  [key: string]: string | number;
+}
+
+const COLORS = [
+  "#3b82f6",
+  "#22c55e",
+  "#8b5cf6",
+  "#f97316",
+  "#ec4899",
+  "#14b8a6",
 ];
 
-const COLORS = ["#3b82f6", "#22c55e", "#8b5cf6"];
+const capitalizeWords = (text: string) => {
+  return text
+    .toLowerCase()
+    .split(" ")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
 
 export function RateChart() {
+  const [data, setData] = useState<ChartItem[]>([]);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await DashboardAPI.getExpenseCategories();
+
+      setData(
+        res.map((item) => ({
+          name: item.category,
+          value: item.total_amount,
+        }))
+      );
+    };
+
+    fetchData();
+  }, []);
+
+  const totalAmount = useMemo(
+    () => data.reduce((sum, i) => sum + i.value, 0),
+    [data]
+  );
+
+  const activeItem =
+    activeIndex !== null ? data[activeIndex] : null;
+
+  const percentage = activeItem
+    ? ((activeItem.value / totalAmount) * 100).toFixed(1)
+    : null;
+
   return (
     <Card className="h-full">
       <CardHeader className="pb-2">
-        <CardTitle>Rate</CardTitle>
+        <CardTitle>Expense Categories</CardTitle>
       </CardHeader>
 
-      <CardContent className="pt-0">
+      <CardContent className="-mt-6">
         <div className="relative flex justify-center">
-          <ResponsiveContainer width="100%" height={200}>
+          <ResponsiveContainer width="100%" height={240}>
             <PieChart>
               <Pie
                 data={data}
                 cx="50%"
-                cy="50%"              // 👈 đẩy pie xuống giữa card
-                innerRadius={50}      // 👈 to hơn
-                outerRadius={80}
-                paddingAngle={4}
+                cy="55%"
+                innerRadius={60}
+                outerRadius={100}
+                paddingAngle={3}
                 dataKey="value"
+                activeIndex={activeIndex ?? undefined}
+                onMouseEnter={(_, index) => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(null)}
               >
                 {data.map((_, index) => (
-                  <Cell key={index} fill={COLORS[index]} />
+                  <Cell
+                    key={index}
+                    fill={COLORS[index % COLORS.length]}
+                  />
                 ))}
               </Pie>
             </PieChart>
           </ResponsiveContainer>
 
           {/* Center text */}
-          <div className="absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-            <div className="text-3xl font-semibold text-slate-900">58.5%</div>
-            <div className="text-xs text-slate-500">Completed</div>
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className="flex justify-center gap-10">
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-blue-500" />
-            <div>
-              <div className="text-xs text-slate-500">Completed</div>
-              <div className="text-sm font-medium">3,004</div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-green-500" />
-            <div>
-              <div className="text-xs text-slate-500">Remain</div>
-              <div className="text-sm font-medium">4,504</div>
-            </div>
+          <div className="pointer-events-none absolute top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+            {activeItem ? (
+              <>
+                <div className="text-sm text-slate-500">
+                  {capitalizeWords(activeItem.name)}
+                </div>
+                <div className="text-xl font-semibold text-slate-900">
+                  {activeItem.value.toLocaleString()}
+                </div>
+                <div className="text-xs text-slate-400">
+                  {percentage}%
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="text-sm text-slate-500">
+                  Total Expense
+                </div>
+                <div className="text-xl font-semibold text-slate-900">
+                  {totalAmount.toLocaleString()}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </CardContent>

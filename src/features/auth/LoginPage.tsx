@@ -1,42 +1,50 @@
 import { useState } from 'react'
-import { Button, Input } from 'antd'
+import { Button, Input, message } from 'antd'
 import dividexLogo from '../../assets/dividex-logo.png'
-import { authStore } from './auth.store'
 import { useNavigate } from 'react-router-dom'
+import { AuthAPI } from './auth.api'
+import { authStore } from './auth.store'
+import type { ApiError } from './auth.types'
 
 const PRIMARY_COLOR = '#BB2649'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
 
-    const navigate = useNavigate()
+  const navigate = useNavigate()
 
-    const handleLogin = () => {
-        authStore.setToken('dummy-token')
-        navigate('/', { replace: true })
+  const handleLogin = async () => {
+    if (!email || !password) {
+      message.warning('Vui lòng nhập email và mật khẩu')
+      return
     }
 
+    try {
+      setLoading(true)
+
+      const res = await AuthAPI.login({ email, password })
+      authStore.setToken(res.access_token)
+      authStore.setUserInfo(res.user)
+
+      message.success('Đăng nhập thành công')
+      navigate('/', { replace: true })
+    } catch (err) {
+      const error = err as ApiError
+      message.error(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <div
-      style={{
-        height: '100vh',
-        display: 'flex',
-      }}
-    >
-      {/* LEFT: Gradient Branding */}
+    <div style={{ height: '100vh', display: 'flex' }}>
+      {/* LEFT */}
       <div
         style={{
           flex: 1,
-          background: `
-            linear-gradient(
-              135deg,
-              #BB2649 0%,
-              #9f1f3f 50%,
-              #7c182f 100%
-            )
-          `,
+          background: `linear-gradient(135deg,#BB2649,#7c182f)`,
           color: '#fff',
           padding: 48,
           display: 'flex',
@@ -45,18 +53,17 @@ export default function LoginPage() {
         }}
       >
         <img src={dividexLogo} alt="Dividex" style={{ width: 140 }} />
-
         <div>
-          <h1 style={{ fontSize: 32, fontWeight: 700, marginBottom: 12 }}>
+          <h1 style={{ fontSize: 32, fontWeight: 700 }}>
             Dividex Admin Dashboard
           </h1>
-          <p style={{ fontSize: 16, maxWidth: 400, opacity: 0.9 }}>
-            Secure platform to manage users, transactions, and system settings.
+          <p style={{ opacity: 0.9 }}>
+            Secure platform to manage users and system settings
           </p>
         </div>
       </div>
 
-      {/* RIGHT: Login Form */}
+      {/* RIGHT */}
       <div
         style={{
           flex: 1,
@@ -67,12 +74,7 @@ export default function LoginPage() {
         }}
       >
         <div style={{ width: 400 }}>
-          <h2 style={{ marginBottom: 8, color: PRIMARY_COLOR }}>
-            Welcome Back
-          </h2>
-          <p style={{ marginBottom: 24, color: '#888' }}>
-            Sign in to your admin account
-          </p>
+          <h2 style={{ color: PRIMARY_COLOR }}>Welcome Back</h2>
 
           <Input
             placeholder="Email"
@@ -92,10 +94,8 @@ export default function LoginPage() {
             type="primary"
             block
             size="large"
-            style={{
-              backgroundColor: PRIMARY_COLOR,
-              borderColor: PRIMARY_COLOR,
-            }}
+            loading={loading}
+            style={{ backgroundColor: PRIMARY_COLOR }}
             onClick={handleLogin}
           >
             Login

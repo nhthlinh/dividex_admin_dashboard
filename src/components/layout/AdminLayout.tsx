@@ -19,8 +19,32 @@ export default function AdminLayout() {
           case "user":
             window.location.href = "/user";
             break;
+          case "group":
+            window.location.href = "/group";
+            break;
+          case "event":
+            window.location.href = "/event";
+            break;
+          case "expense":
+            window.location.href = "/expense";
+            break;
+          case "transaction":
+            window.location.href = "/transaction";
+            break;
+          case "notification":
+            window.location.href = "/notification";
+            break;
+          case "message":
+            window.location.href = "/message";
+            break;
           case "admin":
             window.location.href = "/admin";
+            break;
+          case "system-logs":
+            window.location.href = "/system-logs";
+            break;
+          case "settings":
+            window.location.href = "/settings";
             break;
           default:
             window.location.href = "/";

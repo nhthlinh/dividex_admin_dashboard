@@ -12,8 +12,11 @@ import {
   LogOut,
   Menu,
   PlusSquare,
+  Activity,
 } from "lucide-react";
 import { Button } from "./ui/button";
+import { authStore } from "../features/auth/auth.store";
+import { router } from "../app/router";
 
 interface SidebarProps {
   currentPage: string;
@@ -26,14 +29,21 @@ const menuItems = [
   { icon: ShoppingCart, label: "Group", key: "group" },
   { icon: Calendar, label: "Event", key: "event" },
   { icon: TrendingDown, label: "Expense", key: "expense" },
-  { icon: CreditCard, label: "Payment", key: "payment" },
+  { icon: CreditCard, label: "Transaction", key: "transaction" },
   { icon: Bell, label: "Notification", key: "notification" },
-  { icon: MessageSquare, label: "Messages", key: "messages" },
+  { icon: MessageSquare, label: "Message", key: "message" },
   { icon: PlusSquare, label: "Admin", key: "admin" },
+  { icon: Activity, label: "System Logs", key: "system-logs" },
 ];
 
 export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
+  console.log("Current Page in Sidebar:", currentPage);
   const [collapsed, setCollapsed] = useState(false);
+
+  const handleLogout = () => {
+    authStore.logout(); // clear token + user
+    window.location.href = "/login";
+  };
 
   return (
     <aside
@@ -60,7 +70,14 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
       <nav className="flex-1 px-2">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = currentPage === item.key;
+          const pathname = router.state.location.pathname;
+          const routeKey = pathname.split("/")[1]; // an toàn hơn slice(1)
+
+          let isActive = routeKey === item.key;
+
+          if (item.key === "dashboard" && pathname === "/") {
+            isActive = true;
+          }
 
           return (
             <Button
@@ -90,7 +107,12 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
           variant="ghost"
           className={`w-full ${
             collapsed ? "justify-center" : "justify-start"
+          } ${
+            router.state.location.pathname === "/settings" 
+            ? "bg-gradient-to-r from-rose-700 to-rose-600 text-white"
+            : "text-slate-600 hover:bg-slate-50"
           }`}
+          onClick={() => onNavigate("settings")}
         >
           <Settings className="size-4" />
           {!collapsed && <span className="ml-3">Settings</span>}
@@ -101,9 +123,10 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
           className={`w-full ${
             collapsed ? "justify-center" : "justify-start"
           }`}
+          onClick={handleLogout}
         >
-          <LogOut className="size-4" />
-          {!collapsed && <span className="ml-3">Sign Out</span>}
+          <LogOut className="size-4 text-red-600" />
+          {!collapsed && <span className="ml-3 text-red-600">Sign Out</span>}
         </Button>
       </div>
     </aside>

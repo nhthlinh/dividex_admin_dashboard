@@ -1,39 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Button } from "./ui/button";
-import { Avatar, AvatarFallback } from "./ui/avatar";
-import { Badge } from "./ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+} from "../../components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
+import { Button } from "../../components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { Badge } from "../../components/ui/badge";
 import {
   Lock,
   Unlock,
-  Trash2,
-  KeyRound,
-  MoreVertical,
   Mail,
   Phone,
   MapPin,
   Calendar,
 } from "lucide-react";
+import type { UserDetail, UserExpense, UserGroup } from "./user.types";
+import { getAvatarGradient } from "../../components/Header";
+import { UserAPI } from "./user.api";
 
 interface UserDetailDialogProps {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    balance: string;
-  };
+  user: UserDetail;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -51,43 +40,100 @@ const activityLog = [
   { date: "2024-11-17 02:15 PM", action: "Logged in", status: "success" },
 ];
 
-const participatingGroups = [
-  { name: "Marketing Team", role: "Member", joinedDate: "2024-01-15" },
-  { name: "Design Department", role: "Admin", joinedDate: "2024-02-20" },
-  { name: "Project Alpha", role: "Member", joinedDate: "2024-03-10" },
-];
-
-const createdExpenses = [
-  { title: "Office Supplies", amount: "$234.50", date: "2024-11-15", status: "Approved" },
-  { title: "Team Lunch", amount: "$156.00", date: "2024-11-10", status: "Pending" },
-  { title: "Software License", amount: "$499.00", date: "2024-11-05", status: "Approved" },
-];
-
 export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProps) {
   const [isLocked, setIsLocked] = useState(false);
+  
+  const [participatingGroups, setParticipatingGroups] = useState<UserGroup[]>([]);
+  const [pageGroups, setPageGroups] = useState(1);
+  const [totalPagesGroups, setTotalPagesGroups] = useState(1);
+
+  const [createdExpenses, setCreatedExpenses] = useState<UserExpense[]>([]);
+  const [pageExpenses, setPageExpenses] = useState(1);
+  const [totalPagesExpenses, setTotalPagesExpenses] = useState(1);
 
   const handleLockToggle = () => {
-    setIsLocked(!isLocked);
-    console.log(`User ${isLocked ? "unlocked" : "locked"}`);
+    try {
+      if (isLocked) {
+        UserAPI.activateUser(user.uid);
+      } else {
+        UserAPI.activateUser(user.uid);
+      }
+      setIsLocked(!isLocked);
+    } catch (error) {
+      console.error("Error toggling user lock status:", error);
+    }
   };
 
-  const handleSoftDelete = () => {
-    console.log("Soft delete user");
+  const formatCurrency = (amount: number, currency: string = "USD") => {
+    const currencySymbols: Record<string, string> = {
+      USD: "$",
+      VND: "₫",
+      EUR: "€",
+      GBP: "£",
+      JPY: "¥",
+    };
+    const symbol = currencySymbols[currency] || "$";
+
+    if (currency === "VND") {
+      return `${amount.toLocaleString("vi-VN")}${symbol}`;
+    }
+
+    return `${symbol}${amount.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
   };
 
-  const handleResetPassword = () => {
-    console.log("Reset password");
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
+
+  useEffect(() => {
+    const fetchUserRelationships = async () => {
+      const group = await UserAPI.listUserGroups(user.uid, { page_size: 2, page: pageGroups });
+      setParticipatingGroups(group.content);
+      setPageGroups(group.current_page);
+      setTotalPagesGroups(group.total_pages);
+
+      const expense = await UserAPI.listUserExpenses(user.uid, { page_size: 2, page: pageExpenses });
+      setCreatedExpenses(expense.content);
+      setPageExpenses(expense.current_page);
+      setTotalPagesExpenses(expense.total_pages);
+
+      setIsLocked(!user.status);
+    };
+    fetchUserRelationships();
+  }, [user.uid, pageGroups, pageExpenses]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="min-w-[60vw] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl min-w-[60vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{user.name}</DialogTitle>
+          <div className="flex flex-row gap-2 items-center">
+            <Avatar className="size-10">
+              {user.avatar_url?.public_url ? (
+                <AvatarImage src={user.avatar_url.public_url} />
+              ) : (
+                <AvatarFallback
+                  className={`bg-gradient-to-br ${getAvatarGradient(user.uid)} text-white font-semibold`}
+                >
+                  {user.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                </AvatarFallback>
+              )}
+            </Avatar>
+            <DialogTitle>{user.full_name}</DialogTitle>
+          </div>
+          
         </DialogHeader>
 
         <Tabs defaultValue="profile" className="w-full border-b pb-4">
-          <TabsList className="grid w-full grid-cols-3 gap-4 mb-8">
+          <TabsList className="grid w-full grid-cols-3 gap-4 mb-2">
             <TabsTrigger value="profile">
               <div className="text-center">
                 <p className="text-sm font-semibold">Profile</p>
@@ -113,15 +159,21 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-4">
                 <Avatar className="size-20">
-                  <AvatarFallback className="text-lg bg-rose-100 text-rose-600">
-                    {user.name.split(" ").map(n => n[0]).join("")}
-                  </AvatarFallback>
+                  {user.avatar_url?.public_url ? (
+                    <AvatarImage src={user.avatar_url.public_url} />
+                  ) : (
+                    <AvatarFallback
+                      className={`bg-gradient-to-br ${getAvatarGradient(user.uid)} text-white font-semibold`}
+                    >
+                      {user.full_name.split(" ").map(n => n[0]).join("")}
+                    </AvatarFallback>
+                  )}
                 </Avatar>
                 <div>
-                  <h3 className="text-slate-900">{user.name}</h3>
-                  <p className="text-sm text-slate-500">ID: {user.id}</p>
-                  <Badge className="mt-2 bg-green-100 text-green-700 hover:bg-green-200">
-                    Active
+                  <h3 className="text-slate-900">{user.full_name}</h3>
+                  <p className="text-sm text-slate-500">ID: {user.uid}</p>
+                  <Badge className={`mt-2 ${user.status ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                    {user.status ? "Active" : "Inactive"}
                   </Badge>
                 </div>
               </div>
@@ -145,23 +197,6 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
                     </>
                   )}
                 </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <MoreVertical className="size-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleResetPassword}>
-                      <KeyRound className="size-4 mr-2" />
-                      Reset Password
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleSoftDelete} className="text-red-600">
-                      <Trash2 className="size-4 mr-2" />
-                      Soft Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
               </div>
             </div>
 
@@ -177,17 +212,17 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
                   <div className="flex items-center gap-3 text-sm">
                     <Phone className="size-4 text-slate-400" />
                     <span className="text-slate-500">Phone:</span>
-                    <span className="text-slate-900">+1 (555) 123-4567</span>
+                    <span className="text-slate-900">{user.phone_number || ""}</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <MapPin className="size-4 text-slate-400" />
-                    <span className="text-slate-500">Location:</span>
-                    <span className="text-slate-900">New York, US</span>
+                    <span className="text-slate-500">Role:</span>
+                    <span className="text-slate-900">{user.role || ""}</span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm">
+                  <div className="flex items-center gap-3 text-sm"> 
                     <Calendar className="size-4 text-slate-400" />
                     <span className="text-slate-500">Joined:</span>
-                    <span className="text-slate-900">January 15, 2024</span>
+                    <span className="text-slate-900">{formatDateTime(user.joined) || ""}</span>
                   </div>
                 </div>
               </div>
@@ -197,19 +232,19 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">Total Balance:</span>
-                    <span className="text-slate-900">{user.balance}</span>
+                    <span className="text-slate-900">{user.total_balance?.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">Total Expenses:</span>
-                    <span className="text-slate-900">$889.50</span>
+                    <span className="text-slate-900">{user.total_expenses?.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">Groups:</span>
-                    <span className="text-slate-900">3</span>
+                    <span className="text-slate-900">{user.total_groups?.toLocaleString() || ""}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">Last Login:</span>
-                    <span className="text-slate-900">Today, 10:30 AM</span>
+                    <span className="text-slate-900">{formatDateTime(user.last_login) || ""}</span>
                   </div>
                 </div>
               </div>
@@ -217,7 +252,7 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
           </TabsContent>
 
           {/* History Tab */}
-          <TabsContent value="history" className="space-y-6">
+          <TabsContent value="history" className="space-y-6"> 
             <div>
               <h4 className="text-sm text-slate-900 mb-3">Login History</h4>
               <div className="border rounded-lg overflow-hidden">
@@ -276,7 +311,7 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
           {/* Relationship Tab */}
           <TabsContent value="relationship" className="space-y-6">
             <div>
-              <h4 className="text-sm text-slate-900 mb-3">Participating Groups</h4>
+              <h2 className="text-slate-900 mb-3">Participating Groups</h2>
               <div className="border rounded-lg overflow-hidden">
                 <table className="w-full">
                   <thead className="bg-slate-50">
@@ -289,22 +324,47 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
                   <tbody>
                     {participatingGroups.map((group, index) => (
                       <tr key={index} className="border-t">
-                        <td className="px-4 py-3 text-sm text-slate-900">{group.name}</td>
+                        <td className="px-4 py-3 text-sm text-slate-900">{group.group_name}</td>
                         <td className="px-4 py-3">
                           <Badge variant={group.role === "Admin" ? "default" : "secondary"}>
                             {group.role}
                           </Badge>
                         </td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{group.joinedDate}</td>
+                        <td className="px-4 py-3 text-sm text-slate-600">{formatDateTime(group.joined_at)}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+
+              {/* Pagination */}
+              <div className="flex justify-between items-center mt-2">
+                <span className="text-sm text-gray-500">
+                  Page {pageGroups} / {totalPagesGroups || 1}
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={pageGroups === 1}
+                    onClick={() => setPageGroups((p) => p - 1)}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={pageGroups >= totalPagesGroups}
+                    onClick={() => setPageGroups((p) => p + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
             </div>
 
             <div>
-              <h4 className="text-sm text-slate-900 mb-3">Created Expenses</h4>
+              <h2 className="text-slate-900 mb-3">Created Expenses</h2>
               <div className="border rounded-lg overflow-hidden">
                 <table className="w-full">
                   <thead className="bg-slate-50">
@@ -318,18 +378,18 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
                   <tbody>
                     {createdExpenses.map((expense, index) => (
                       <tr key={index} className="border-t">
-                        <td className="px-4 py-3 text-sm text-slate-900">{expense.title}</td>
-                        <td className="px-4 py-3 text-sm text-slate-900">{expense.amount}</td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{expense.date}</td>
+                        <td className="px-4 py-3 text-sm text-slate-900">{expense.name}</td>
+                        <td className="px-4 py-3 text-sm text-slate-900">{formatCurrency(expense.amount, expense.currency)}</td>
+                        <td className="px-4 py-3 text-sm text-slate-600">{formatDateTime(expense.expense_date)}</td>
                         <td className="px-4 py-3">
                           <Badge
                             className={
-                              expense.status === "Approved"
+                              expense.end_date >= new Date().toISOString().split("T")[0]
                                 ? "bg-green-100 text-green-700"
                                 : "bg-yellow-100 text-yellow-700"
                             }
                           >
-                            {expense.status}
+                            {expense.end_date >= new Date().toISOString().split("T")[0] ? "Active" : "Expired"}
                           </Badge>
                         </td>
                       </tr>
@@ -337,131 +397,36 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
                   </tbody>
                 </table>
               </div>
+              {/* Pagination */}
+              <div className="flex justify-between items-center mt-2">
+                <span className="text-sm text-gray-500">
+                  Page {pageExpenses} / {totalPagesExpenses || 1}
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={pageExpenses === 1}
+                    onClick={() => setPageExpenses((p) => p - 1)}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={pageExpenses >= totalPagesExpenses}
+                    onClick={() => setPageExpenses((p) => p + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
       </DialogContent>
     </Dialog>
-    // <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto space-y-6">
-    //   <DialogHeader>
-    //     <DialogTitle>User Details</DialogTitle>
-    //   </DialogHeader>
-
-    //   {/* TOP: USER INFO */}
-    //   <UserProfileSection user={user} />
-
-    //   {/* BOTTOM: HISTORY */}
-    //   <UserHistorySection />
-    // </DialogContent>
 
   );
 }
-
-// function UserHistorySection() {
-//   return (
-//     <div className="grid grid-cols-1 gap-6">
-//       {/* Login History */}
-//       <HistoryTable
-//         title="Login History"
-//         headers={["Date & Time", "IP", "Location", "Device"]}
-//         rows={loginHistory.map(l => [
-//           l.date,
-//           l.ip,
-//           l.location,
-//           l.device,
-//         ])}
-//       />
-
-//       {/* Activity Log */}
-//       <HistoryTable
-//         title="Activity Log (Audit)"
-//         headers={["Date & Time", "Action", "Status"]}
-//         rows={activityLog.map(l => [
-//           l.date,
-//           l.action,
-//           <Badge className="bg-green-100 text-green-700">{l.status}</Badge>,
-//         ])}
-//       />
-//     </div>
-//   );
-// }
-
-// function UserActions() {
-//   return (
-//     <div className="flex items-center gap-2">
-//       <Button variant="outline" size="sm">
-//         <Lock className="size-4 mr-2" /> Lock
-//       </Button>
-
-//       <Button variant="outline" size="sm">
-//         <UserCog className="size-4 mr-2" /> Assign Role
-//       </Button>
-
-//       <DropdownMenu>
-//         <DropdownMenuTrigger asChild>
-//           <Button variant="outline" size="sm">
-//             <MoreVertical className="size-4" />
-//           </Button>
-//         </DropdownMenuTrigger>
-//         <DropdownMenuContent align="end">
-//           <DropdownMenuItem>
-//             <KeyRound className="size-4 mr-2" /> Reset Password
-//           </DropdownMenuItem>
-//           <DropdownMenuItem className="text-red-600">
-//             <Trash2 className="size-4 mr-2" /> Soft Delete
-//           </DropdownMenuItem>
-//         </DropdownMenuContent>
-//       </DropdownMenu>
-//     </div>
-//   );
-// }
-
-// function UserProfileSection({ user }: { user: any }) {
-//   return (
-//     <div className="border rounded-xl p-6 space-y-6">
-//       {/* Header */}
-//       <div className="flex items-start justify-between">
-//         <div className="flex gap-4">
-//           <Avatar className="size-20">
-//             <AvatarFallback className="text-lg bg-rose-100 text-rose-600">
-//               {user.name.split(" ").map((n: string) => n[0]).join("")}
-//             </AvatarFallback>
-//           </Avatar>
-
-//           <div>
-//             <h3 className="text-lg font-semibold">{user.name}</h3>
-//             <p className="text-sm text-slate-500">ID: {user.id}</p>
-//             <Badge className="mt-2 bg-green-100 text-green-700">Active</Badge>
-//           </div>
-//         </div>
-
-//         <UserActions />
-//       </div>
-
-//       {/* Info grid */}
-//       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
-//         {/* Basic Info */}
-//         <div className="space-y-3">
-//           <h4 className="text-sm font-medium">Basic Information</h4>
-
-//           <InfoRow icon={Mail} label="Email" value={user.email} />
-//           <InfoRow icon={Phone} label="Phone" value="+1 (555) 123-4567" />
-//           <InfoRow icon={MapPin} label="Location" value="New York, US" />
-//           <InfoRow icon={Calendar} label="Joined" value="Jan 15, 2024" />
-//         </div>
-
-//         {/* Stats */}
-//         <div className="space-y-3">
-//           <h4 className="text-sm font-medium">Statistics</h4>
-
-//           <StatRow label="Total Balance" value={user.balance} />
-//           <StatRow label="Total Expenses" value="$889.50" />
-//           <StatRow label="Groups" value="3" />
-//           <StatRow label="Last Login" value="Today, 10:30 AM" />
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
 

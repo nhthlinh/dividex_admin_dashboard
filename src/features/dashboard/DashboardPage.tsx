@@ -23,13 +23,13 @@ export function DashboardPage() {
       {/* Row 2 */}
       <div className="overflow-x-auto">
         <div className="flex gap-6 min-w-max">
-          <div className="min-w-[300px] lg:flex-1 lg:min-w-0">
+          <div className="min-w-[300px] max-w-[600px] lg:flex-1 lg:min-w-0">
             <CashFlowChart />
           </div>
-          <div className="min-w-[300px] lg:flex-1 lg:min-w-0">
+          <div className="min-w-[300px] max-w-[600px] lg:flex-1 lg:min-w-0">
             <UserSatisfaction />
           </div>
-          <div className="min-w-[300px] lg:flex-1 lg:min-w-0">
+          <div className="min-w-[300px] max-w-[600px] lg:flex-1 lg:min-w-0">
             <RateChart />
           </div>
         </div>
