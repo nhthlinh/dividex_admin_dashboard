@@ -1,45 +1,36 @@
-import type { CurrencyType } from "../expenses/expense.types";
-import type { User } from "../users/user.types";
+import type { PaginationParams, PaginationResponse, User } from "../users/user.types";
 
-export type TransactionType = "DEPOSIT" | "WITHDRAW";
-export type TransactionStatus = "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED";
-
-export interface WalletDeposit {
-  uid: string;
-  user: User;
-  amount: number;
-  currency: CurrencyType;
-  created_at: string;
-  code: string;
-  status?: TransactionStatus;
+export interface TransactionStats {
+  total_deposits: number;
+  total_withdrawals: number;
+  total_transactions: number;
+  percent_increase_transactions: number;
+  percent_increase_deposits: number;
+  percent_increase_withdrawals: number;
 }
 
-export interface BankAccount {
-  uid: string;
+export interface TransactionBankAccount {
   bank_name: string;
   account_number: string;
-  account_holder: string;
-  branch?: string;
 }
 
-export interface Withdraw {
+export interface TransactionItem {
   uid: string;
-  bank_account: BankAccount;
-  user: User;
+  type: "withdraw" | "deposit" | "in-app";
   amount: number;
-  code: string;
+  currency: string;
   created_at: string;
-  status?: TransactionStatus;
+  code: string;
+  user: User;
+  bank_account: TransactionBankAccount | null;
+  to_user: User | null;
+  group_uid: string | null;
 }
 
-export interface Transaction {
-  uid: string;
-  type: TransactionType;
-  user: User;
-  amount: number;
-  currency?: CurrencyType;
-  code: string;
-  created_at: string;
-  status: TransactionStatus;
-  bank_account?: BankAccount;
+export type TransactionListResponse =
+  PaginationResponse<TransactionItem>;
+
+export interface TransactionListParams extends PaginationParams {
+  search?: string;
+  type?: "withdraw" | "deposit" | "in_app";
 }

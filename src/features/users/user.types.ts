@@ -76,3 +76,34 @@ export interface PaginationResponse<T> {
   total_rows: number;
   total_pages: number;
 }
+
+export interface UserLoginHistoryItem {
+  uid: string;
+  created_at: string;
+  user: string;
+  platform: string;
+  divice_model: string;
+  os_version: string;
+  app_version: string;
+  location: string;
+}
+
+export type UserLoginHistoryResponse =
+  PaginationResponse<UserLoginHistoryItem>;
+
+export interface SearchUserItem {
+  uid: string;
+  full_name: string;
+  email: string;
+  balance: number;
+  avatar_url: unknown;
+  status: string;
+  date_joined: string;
+}
+
+export type SearchUserResponse =
+  PaginationResponse<SearchUserItem>;
+
+export interface SearchUserParams extends PaginationParams {
+  search: string;
+}

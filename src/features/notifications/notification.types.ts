@@ -1,34 +1,37 @@
-import type { User } from "../users/user.types";
+import type { PaginationParams, PaginationResponse, User } from "../users/user.types";
 
-export type NotificationType = 
-  | "SYSTEM" 
-  | "EVENT" 
-  | "EXPENSE" 
-  | "PAYMENT" 
-  | "GROUP" 
-  | "MESSAGE"
-  | "ANNOUNCEMENT"
-  | "REMINDER"
-  | "WARNING";
-
-export type NotificationStatus = "UNREAD" | "READ" | "ARCHIVED";
-
-export interface Notification {
-  uid: string;
-  from_user: User;
-  content: string;
-  type: NotificationType;
-  related_uid?: string;
-  to_users: User[];
-  created_at: string;
-  status?: NotificationStatus;
-  is_broadcast?: boolean;
+export interface NotificationStats {
+  total_notifications: number;
+  total_users: number;
+  notifications_today: number;
+  percent_increase_notifications_today: number;
+  percent_increase_total_notifications: number;
+  percent_increase_users: number;
 }
 
-export interface CreateNotificationRequest {
+export interface NotificationItem {
+  uid: string;
+  created_at: string;
   content: string;
-  type: NotificationType;
-  related_uid?: string;
-  to_user_uids?: string[];
-  is_broadcast?: boolean;
+  type: "System" | "Warning" | "Announcement" | "Reminder";
+  related_uid: string | null;
+  from_user: User;
+  to_users: User[];
+  is_broadcast: boolean;
+}
+
+export type NotificationListResponse =
+  PaginationResponse<NotificationItem>;
+
+export interface NotificationListParams extends PaginationParams {
+  search?: string;
+  type?: "System" | "Warning" | "Announcement" | "Reminder";
+}
+
+export interface CreateNotificationPayload {
+  related_uid?: string | null;
+  content: string;
+  type: "System" | "Warning" | "Announcement" | "Reminder";
+  to_user_uids: string[];
+  is_broadcast: boolean;
 }
