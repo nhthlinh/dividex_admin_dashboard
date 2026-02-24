@@ -26,7 +26,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 import { getAvatarGradient } from "../../components/Header";
 import type { CreateNotificationPayload, NotificationItem, NotificationStats } from "./notification.types";
 import { NotificationAPI } from "./notification.api";
-import { Spin } from "antd";
+import { Modal, Spin } from "antd";
 import type { SearchUserItem } from "../users/user.types";
 import { UserAPI } from "../users/user.api";
 
@@ -38,6 +38,7 @@ export function NotificationPage() {
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchUserQuery, setSearchUserQuery] = useState("");
   const [filterType, setFilterType] = useState<"System" | "Warning" | "Announcement" | "Reminder" | "ALL">("ALL");
 
   // Create notification form state
@@ -57,7 +58,12 @@ export function NotificationPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  const [pageUser, setPageUser] = useState(1);
+  const [totalUser, setTotalUser] = useState(0);
+  const [loadingUser, setLoadingUser] = useState(false);
+
   const totalPages = Math.ceil(total / PAGE_SIZE);
+  const totalUserPages = Math.ceil(totalUser / PAGE_SIZE);
  
   useEffect(() => {
     fetchNotifications();
@@ -69,6 +75,28 @@ export function NotificationPage() {
       setUsers(res.content);
     });
   }, []);
+
+    useEffect(() => {
+      setLoadingUser(true);
+      const fetchUsers = async () => {
+        setLoadingUser(true);
+        try {
+          const res = await UserAPI.searchUsers({
+            search: searchUserQuery,
+            page: pageUser,
+            page_size: PAGE_SIZE,
+          });
+
+          setUsers(res.content);
+          setTotalUser(res.total_rows);
+        } finally {
+          setLoadingUser(false);
+        }
+      };
+
+      fetchUsers();
+      setLoadingUser(false);  
+    }, [searchUserQuery, pageUser]);
 
   const notificationStats = stats
     ? [
@@ -122,30 +150,39 @@ export function NotificationPage() {
   };
 
   const handleCreateNotification = () => {
-    alert(
-      `Notification sent to ${
+    showCreateNotiConfirm({
+      title: "Confirm Create Notification",
+      content: `Notification sent to ${
         newNotification.is_broadcast
           ? "all users"
           : `${newNotification.to_user_uids.length} users`
-      }`
-    );
-    NotificationAPI.createNotification({
-      content: newNotification.content,
-      type: newNotification.type,
-      to_user_uids: newNotification.to_user_uids,
-      is_broadcast: newNotification.is_broadcast,
-    }).then(() => {
-      fetchNotifications();
-    });
-    setIsCreateDialogOpen(false);
+      }`,
+      onConfirm: () => {
+        NotificationAPI.createNotification({
+          content: newNotification.content,
+          type: newNotification.type,
+          to_user_uids: newNotification.to_user_uids,
+          is_broadcast: newNotification.is_broadcast,
+        }).then(() => {
+          fetchNotifications();
+        });
+        setIsCreateDialogOpen(false);
+      }
+    })
+    
   };
 
   const handleDeleteNotification = (notification: NotificationItem) => {
-    alert(`Deleted notification: ${notification.uid}`);
-    NotificationAPI.deleteNotification(notification.uid).then(() => {
-      fetchNotifications();
+    showDeleteConfirm({
+      title: "Are you sure you want to delete this notification?",
+      content: "This action cannot be undone.",
+      onConfirm: () => {
+        NotificationAPI.deleteNotification(notification.uid).then(() => {
+          fetchNotifications();
+        });
+        setIsDetailDialogOpen(false);
+      },
     });
-    setIsDetailDialogOpen(false);
   };
 
   const formatDateTime = (dateString: string) => {
@@ -175,6 +212,7 @@ export function NotificationPage() {
         ? prev.to_user_uids.filter((u) => u !== uid)
         : [...prev.to_user_uids, uid],
     }));
+    console.log(newNotification.to_user_uids);
   };
 
   const filteredNotifications = notis.filter((notification) => {
@@ -185,16 +223,6 @@ export function NotificationPage() {
       filterType === "ALL" || notification.type === filterType;
     return matchesSearch && matchesType;
   });
-
-  if (loading || !filteredNotifications) {
-    return (
-      <Card>
-        <CardContent className="flex justify-center py-10">
-          <Spin />
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <div className="p-8 space-y-6">
@@ -271,6 +299,14 @@ export function NotificationPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
+            {loading || !filteredNotifications && (
+              <Card>
+                <CardContent className="flex justify-center py-10">
+                  <Spin />
+                </CardContent>
+              </Card>
+            )}
+
             {filteredNotifications.map((notification) => (
               <Card
                 key={notification.uid}
@@ -343,14 +379,14 @@ export function NotificationPage() {
                 </CardContent>
               </Card>
             ))}
-          </div>
 
-          {filteredNotifications.length === 0 && (
-            <div className="text-center py-12">
-              <Bell className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">No notifications found</p>
-            </div>
-          )}
+            {filteredNotifications.length === 0 && (
+              <div className="text-center py-12">
+                <Bell className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">No notifications found</p>
+              </div>
+            )}
+          </div>
           
           {/* Pagination */}
           <div className="flex items-center justify-between mt-6">
@@ -484,6 +520,33 @@ export function NotificationPage() {
                     </div>
                   ))}
                 </div>
+
+                {/* Pagination */}
+                <div className="flex items-center justify-between mt-6">
+                  <span className="text-sm text-slate-500">
+                    Page {pageUser} / {totalUserPages || 1}
+                  </span>
+
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={pageUser === 1}
+                      onClick={() => setPageUser((p) => p - 1)}
+                    >
+                      Previous
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={pageUser >= totalUserPages}
+                      onClick={() => setPageUser((p) => p + 1)}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
               </div>
 
               {selectedNotification.related_uid && (
@@ -504,9 +567,6 @@ export function NotificationPage() {
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
-              </Button>
-              <Button variant="outline" onClick={() => setIsDetailDialogOpen(false)}>
-                Close
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -579,11 +639,27 @@ export function NotificationPage() {
 
             {!newNotification.is_broadcast && (
               <div>
-                <label className="text-sm font-medium mb-2 block">
-                  Select Recipients
-                </label>
+                <div className="flex flex-row items-center justify-between mb-2">
+                  <label className="text-sm font-medium mb-2 block">
+                    Select Recipients
+                  </label>
+                  <div className="relative w-72">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      placeholder="Search events..."
+                      className="pl-9"
+                      value={searchUserQuery}
+                      onChange={(e) => setSearchUserQuery(e.target.value)}
+                    />
+                  </div>
+                </div>
                 <div className="border border-gray-300 rounded-md p-3 max-h-64 overflow-y-auto">
                   <div className="space-y-2">
+                    {loadingUser && (
+                      <div className="flex justify-center py-10">
+                        <Spin />
+                      </div>
+                    )}
                     {users.map((user) => (
                       <div
                         key={user.uid}
@@ -599,8 +675,8 @@ export function NotificationPage() {
                           checked={newNotification.to_user_uids.includes(
                             user.uid
                           )}
-                          onChange={() => toggleUserSelection(user.uid)}
                           className="h-4 w-4"
+                          readOnly
                         />
                         <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-semibold">
                           {user.full_name.charAt(0)}
@@ -611,6 +687,11 @@ export function NotificationPage() {
                         </div>
                       </div>
                     ))}
+                    {!loadingUser && users.length === 0 && (
+                      <p className="text-center text-gray-500 py-10">
+                        No users found
+                      </p>
+                    )}
                   </div>
                 </div>
                 <p className="text-sm text-gray-500 mt-2">
@@ -644,4 +725,45 @@ export function NotificationPage() {
       </Dialog>
     </div>
   );
+}
+
+function showDeleteConfirm({
+  title,
+  content,
+  onConfirm,
+}: {
+  title: string;
+  content: string;
+  onConfirm: () => void;
+}) {
+  Modal.confirm({
+    title,
+    content,
+    okText: "Xóa",
+    cancelText: "Hủy",
+    okType: "danger",
+    centered: true,
+    onOk: onConfirm,
+  });
+}
+
+
+function showCreateNotiConfirm({
+  title,
+  content,
+  onConfirm,
+}: {
+  title: string;
+  content: string;
+  onConfirm: () => void;
+}) {
+  Modal.confirm({
+    title,
+    content,
+    okText: "Xác nhận",
+    cancelText: "Hủy",
+    okType: "primary",
+    centered: true,
+    onOk: onConfirm,
+  });
 }

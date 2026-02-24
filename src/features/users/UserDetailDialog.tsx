@@ -264,7 +264,7 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
                         <td className="px-4 py-3 text-sm text-slate-900">{log.created_at}</td>
                         <td className="px-4 py-3 text-sm text-slate-600">{log.platform}</td>
                         <td className="px-4 py-3 text-sm text-slate-600">{log.location}</td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{log.divice_model}</td>
+                        <td className="px-4 py-3 text-sm text-slate-600">{log.device_model}</td>
                         <td className="px-4 py-3 text-sm text-slate-600">{log.os_version}</td>
                       </tr>
                     ))}

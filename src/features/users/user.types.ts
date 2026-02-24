@@ -82,7 +82,7 @@ export interface UserLoginHistoryItem {
   created_at: string;
   user: string;
   platform: string;
-  divice_model: string;
+  device_model: string;
   os_version: string;
   app_version: string;
   location: string;

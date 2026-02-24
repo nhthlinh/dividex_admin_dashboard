@@ -8,7 +8,6 @@ import {
   DollarSign,
   TrendingUp,
   Search,
-  Plus,
   Receipt,
   PieChart,
 } from "lucide-react";
@@ -180,12 +179,6 @@ export function ExpensePage() {
           <p className="text-sm text-gray-500 mt-1">
             Track and manage all expenses
           </p>
-        </div>
-        <div className="flex gap-3">
-          <Button size="sm" className="text-white bg-rose-600 hover:bg-rose-700">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Expense
-          </Button>
         </div>
       </div>
 

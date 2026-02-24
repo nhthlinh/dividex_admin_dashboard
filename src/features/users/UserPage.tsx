@@ -9,33 +9,6 @@ import { getAvatarGradient } from "../../components/Header";
 import { UserDetailDialog } from "./UserDetailDialog";
 import { Input } from "../../components/ui/input";
 
-// const userStats = [
-//   {
-//     icon: UsersIcon,
-//     label: "Total User",
-//     value: "300",
-//     change: "+8% from yesterday",
-//     bgColor: "bg-pink-50",
-//     iconColor: "text-pink-500",
-//   },
-//   {
-//     icon: UserCheck,
-//     label: "Total Active User",
-//     value: "300",
-//     change: "+5% from yesterday",
-//     bgColor: "bg-orange-50",
-//     iconColor: "text-orange-500",
-//   },
-//   {
-//     icon: UserPlus,
-//     label: "New User",
-//     value: "8",
-//     change: "0.5% from yesterday",
-//     bgColor: "bg-purple-50",
-//     iconColor: "text-purple-500",
-//   },
-// ];
-
 const PAGE_SIZE = 2;
 
 export function UserPage() {

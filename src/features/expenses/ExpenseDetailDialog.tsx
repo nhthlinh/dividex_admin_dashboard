@@ -36,21 +36,25 @@ export function ExpenseDetailDialog({
   const [userShares, setUserShares] = useState<SplitUserShare[]>([]); 
 
   useEffect(() => {
-    const fetchExpenseDetails = async () => {
+    const fetchExpenseSplits = async () => {
       setLocalExpense(expense);
       const split = await ExpenseAPI.getSplitExpense(expense!.uid);
 
+      setUserShares(split.list_user_shares);
+    };
+
+    const fetchExpenseAttachments = async () => {
       const attachments = await ExpenseAPI.getExpenseAttachments(expense!.uid, {
         page: 1,
         page_size: 10,
       });
 
-      setUserShares(split.list_user_shares);
       setAttachments(attachments.content);
     };
 
     if (expense) {
-      fetchExpenseDetails();
+      fetchExpenseSplits();
+      fetchExpenseAttachments();
     }
   }, [expense]);
 
