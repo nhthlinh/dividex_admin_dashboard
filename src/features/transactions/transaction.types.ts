@@ -16,7 +16,7 @@ export interface TransactionBankAccount {
 
 export interface TransactionItem {
   uid: string;
-  type: "withdraw" | "deposit" | "in-app";
+  type: "withdraw" | "deposit" | "transaction";
   amount: number;
   currency: string;
   created_at: string;
@@ -32,5 +32,5 @@ export type TransactionListResponse =
 
 export interface TransactionListParams extends PaginationParams {
   search?: string;
-  type?: "withdraw" | "deposit" | "in_app";
+  type?: "withdraw" | "deposit" | "transaction";
 }

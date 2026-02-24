@@ -17,6 +17,7 @@ import {
   Calendar,
   CreditCard,
   ArrowLeftRight,
+  LucideArrowDownUp,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { getAvatarGradient } from "../../components/Header";
@@ -31,7 +32,7 @@ export function TransactionPage() {
     useState<TransactionItem | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState<"ALL" | "withdraw" | "deposit" | "in_app">("ALL");
+  const [filterType, setFilterType] = useState<"ALL" | "withdraw" | "deposit" | "transaction">("ALL");
 
   const [transactions, setTransactions] = useState<TransactionItem[]>([]);
   const [stats, setStats] = useState<TransactionStats>();
@@ -146,7 +147,7 @@ export function TransactionPage() {
       amountSign: "-",
       Icon: ArrowUpCircle,
     },
-    "in-app": {
+    "transaction": {
       label: "In-app Transfer",
       bg: "bg-blue-100",
       text: "text-blue-600",
@@ -200,7 +201,7 @@ export function TransactionPage() {
       </div>
 
       {/* Filters */}
-      <Card className="border-0 shadow-sm">
+      <Card className="border-0 shadow-sm p-5">
         <CardHeader>
           <div className="flex items-center justify-between gap-4">
             <div className="flex gap-3 flex-1 justify-end">
@@ -243,6 +244,19 @@ export function TransactionPage() {
                   <ArrowUpCircle className="h-4 w-4 mr-1" />
                   Withdrawals
                 </Button>
+                <Button
+                  variant={filterType === "transaction" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setFilterType("transaction")}
+                  className={
+                    filterType === "transaction"
+                      ? "bg-rose-600 hover:bg-rose-700 text-white"
+                      : ""
+                  }
+                >
+                  <LucideArrowDownUp className="h-4 w-4 mr-1" />
+                  In-app
+                </Button>
               </div>
 
               <div className="relative w-72">
@@ -257,106 +271,6 @@ export function TransactionPage() {
             </div>
           </div>
         </CardHeader>
-        {/* <CardContent>
-          <div className="space-y-3">
-            {filteredTransactions.map((transaction) => (
-              <Card
-                key={transaction.uid}
-                className="cursor-pointer hover:shadow-md transition-all duration-200 border hover:border-rose-200"
-                onClick={() => handleTransactionClick(transaction)}
-              >
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 flex-1">
-                      <div
-                        className={`p-3 rounded-lg ${
-                          transaction.type === "deposit"
-                            ? "bg-green-100"
-                            : "bg-red-100"
-                        }`}
-                      >
-                        {transaction.type === "deposit" ? (
-                          <ArrowDownCircle className="h-6 w-6 text-green-600" />
-                        ) : (
-                          <ArrowUpCircle className="h-6 w-6 text-red-600" />
-                        )}
-                      </div>
-
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold">
-                            {transaction.type === "deposit"
-                              ? "Deposit"
-                              : "Withdrawal"}
-                          </h3>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-2">
-                          Code: {transaction.code}
-                        </p>
-                        <div className="flex flex-row items-center gap-6 text-sm">
-                          <span className="text-gray-500">User: </span>
-                          <div className="flex flex-row gap-3">
-                            <Avatar className="size-7">
-                              {transaction.user.avatar_url?.public_url ? (
-                                <AvatarImage src={transaction.user.avatar_url.public_url} />
-                              ) : (
-                                <AvatarFallback
-                                  className={`bg-gradient-to-br ${getAvatarGradient(transaction.user.uid)} text-white font-semibold`}
-                                >
-                                  {transaction.user.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
-                                </AvatarFallback>
-                              )}
-                            </Avatar>
-                            <span className="font-medium">
-                              {transaction.user.full_name.split(" ").slice(-2).map(n => n).join(" ")}
-                            </span>
-                          </div>
-                          <div>
-                            <span className="text-gray-500">Date: </span>
-                            <span className="font-medium">
-                              {formatDateTime(transaction.created_at)}
-                            </span>
-                          </div>
-                          {transaction.bank_account && (
-                            <div>
-                              <span className="text-gray-500">Bank: </span>
-                              <span className="font-medium">
-                                {transaction.bank_account.bank_name}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="text-right">
-                      <p
-                        className={`text-2xl font-bold ${
-                          transaction.type === "deposit"
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
-                      >
-                        {transaction.type === "deposit" ? "+" : "-"}
-                        {formatCurrency(
-                          transaction.amount,
-                          transaction.currency
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {filteredTransactions.length === 0 && (
-            <div className="text-center py-12">
-              <DollarSign className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">No transactions found</p>
-            </div>
-          )}
-        </CardContent> */}
 
         {filteredTransactions.map((transaction) => {
           const ui = TRANSACTION_UI[transaction.type];
@@ -373,7 +287,7 @@ export function TransactionPage() {
           return (
             <Card
               key={transaction.uid}
-              className="cursor-pointer hover:shadow-md transition-all duration-200 border hover:border-rose-200"
+              className="cursor-pointer hover:shadow-md transition-all duration-200 border hover:border-rose-200 mx-3"
               onClick={() => handleTransactionClick(transaction)}
             >
               <CardContent className="p-5">
@@ -434,7 +348,7 @@ export function TransactionPage() {
                           </div>
                         )}
 
-                        {transaction.type === "in-app" && transaction.to_user && (
+                        {transaction.type === "transaction" && transaction.to_user && (
                           <div>
                             <span className="text-gray-500">To: </span>
                             <span className="font-medium">
@@ -453,37 +367,37 @@ export function TransactionPage() {
                     </p>
                   </div>
                 </div>
-                
-                {/* Pagination */}
-                <div className="flex items-center justify-between mt-6">
-                  <span className="text-sm text-slate-500">
-                    Page {page} / {totalPages || 1}
-                  </span>
-
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={page === 1}
-                      onClick={() => setPage((p) => p - 1)}
-                    >
-                      Previous
-                    </Button>
-
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      disabled={page >= totalPages}
-                      onClick={() => setPage((p) => p + 1)}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
               </CardContent>
             </Card>
           );
         })}
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-slate-500">
+            Page {page} / {totalPages || 1}
+          </span>
+
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={page === 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              Previous
+            </Button>
+
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
       </Card>
 
       {/* Transaction Detail Dialog */}
@@ -508,7 +422,7 @@ export function TransactionPage() {
                   amountSign: "-",
                   Icon: ArrowUpCircle,
                 },
-                "in-app": {
+                "transaction": {
                   label: "In-app Transfer",
                   text: "text-blue-600",
                   amountSign: "",
@@ -596,7 +510,7 @@ export function TransactionPage() {
                   </div>
 
                   {/* In-app: To User */}
-                  {selectedTransaction.type === "in-app" &&
+                  {selectedTransaction.type === "transaction" &&
                     selectedTransaction.to_user && (
                       <div className="p-4 bg-indigo-50 rounded-lg">
                         <p className="text-sm text-gray-600 mb-2">To User</p>
@@ -663,150 +577,3 @@ export function TransactionPage() {
     </div>
   );
 }
-
-//  {/* Transaction Detail Dialog */}
-//       {selectedTransaction && (
-//         <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
-//           <DialogContent className="max-h-[90vh] overflow-y-auto">
-//             <DialogHeader>
-//               <DialogTitle>Transaction Details</DialogTitle>
-//             </DialogHeader>
-
-//             <div className="space-y-3">
-//               <div className="flex items-center justify-between p-4 bg-gradient-to-r from-rose-50 to-purple-50 rounded-lg">
-//                 <div>
-//                   <p className="text-sm text-gray-600 mb-1">Amount</p>
-//                   <p
-//                     className={`text-3xl font-bold ${
-//                       selectedTransaction.type === "in-app"
-//                         ? "text-gray-600"
-//                         : selectedTransaction.type === "deposit"
-//                         ? "text-green-600"
-//                         : "text-red-600"
-//                     }`}
-//                   >
-//                     {selectedTransaction.type === "deposit" ? "+" : "-"}
-//                     {formatCurrency(
-//                       selectedTransaction.amount,
-//                       selectedTransaction.currency
-//                     )}
-//                   </p>
-//                 </div>
-//               </div>
-
-//               <div className="grid grid-cols-2 gap-4">
-//                 <div className="p-4 bg-gray-50 rounded-lg">
-//                   <div className="flex items-center gap-2 mb-2">
-//                     <CreditCard className="h-4 w-4 text-gray-600" />
-//                     <p className="text-sm text-gray-600">Transaction Code</p>
-//                   </div>
-//                   <p className="font-semibold">{selectedTransaction.code}</p>
-//                 </div>
-
-//                 <div className="p-4 bg-gray-50 rounded-lg">
-//                   <div className="flex items-center gap-2 mb-2">
-//                     <Calendar className="h-4 w-4 text-gray-600" />
-//                     <p className="text-sm text-gray-600">Created At</p>
-//                   </div>
-//                   <p className="font-semibold">
-//                     {formatDateTime(selectedTransaction.created_at)}
-//                   </p>
-//                 </div>
-
-//                 <div className="p-4 bg-purple-50 rounded-lg">
-//                   <p className="text-sm text-gray-600 mb-2">User</p>
-//                   <div className="flex items-center gap-3 mb-1">
-//                     <Avatar className="size-7">
-//                       {selectedTransaction.user.avatar_url?.public_url ? (
-//                         <AvatarImage src={selectedTransaction.user.avatar_url.public_url} />
-//                       ) : (
-//                         <AvatarFallback
-//                           className={`bg-gradient-to-br ${getAvatarGradient(selectedTransaction.user.uid)} text-white font-semibold`}
-//                         >
-//                           {selectedTransaction.user.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
-//                         </AvatarFallback>
-//                       )}
-//                     </Avatar>
-//                     <p className="font-semibold">
-//                       {selectedTransaction.user.full_name}
-//                     </p>
-//                   </div>
-//                   <p className="text-sm text-gray-500">
-//                     {selectedTransaction.user.email}
-//                   </p>
-//                 </div>
-
-//                 <div className="p-4 bg-blue-50 rounded-lg">
-//                   <p className="text-sm text-gray-600 mb-2">Type</p>
-//                   {selectedTransaction.type === 'deposit' ? (
-//                     <ArrowDownCircle className="h-4 w-4 inline-block mr-2" />
-//                   ) : (
-//                     <ArrowUpCircle className="h-4 w-4 inline-block mr-2" />
-//                   )}
-//                   <p className="font-semibold">{selectedTransaction.type}</p>
-//                 </div>
-//               </div>
-
-//               {selectedTransaction.bank_account && (
-//                 <div className="p-4 bg-orange-50 rounded-lg">
-//                   <p className="text-sm text-gray-600 mb-3">Bank Account</p>
-//                   <div className="grid grid-cols-2 gap-3">
-//                     <div>
-//                       <p className="text-xs text-gray-500">Bank Name</p>
-//                       <p className="font-semibold">
-//                         {selectedTransaction.bank_account.bank_name}
-//                       </p>
-//                     </div>
-//                     <div>
-//                       <p className="text-xs text-gray-500">Account Number</p>
-//                       <p className="font-semibold">
-//                         {selectedTransaction.bank_account.account_number}
-//                       </p>
-//                     </div>
-//                     {selectedTransaction.bank_account.bank_name && (
-//                       <div>
-//                         <p className="text-xs text-gray-500">Branch</p>
-//                         <p className="font-semibold">
-//                           {selectedTransaction.bank_account.bank_name}
-//                         </p>
-//                       </div>
-//                     )}
-//                   </div>
-//                 </div>
-//               )}
-//             </div>
-
-//             {/* <DialogFooter className="gap-2 flex-wrap">
-//               {selectedTransaction.status === "PENDING" && (
-//                 <>
-//                   <Button
-//                     variant="outline"
-//                     onClick={() => handleReject(selectedTransaction)}
-//                     className="text-red-600 border-red-600 hover:bg-red-50"
-//                   >
-//                     <XCircle className="h-4 w-4 mr-2" />
-//                     Reject
-//                   </Button>
-//                   <Button
-//                     onClick={() => handleApprove(selectedTransaction)}
-//                     className="bg-green-600 hover:bg-green-700 text-white"
-//                   >
-//                     <CheckCircle className="h-4 w-4 mr-2" />
-//                     Approve
-//                   </Button>
-//                 </>
-//               )}
-//               {(selectedTransaction.status === "COMPLETED" ||
-//                 selectedTransaction.status === "PENDING") && (
-//                 <Button
-//                   variant="outline"
-//                   onClick={() => handleCancel(selectedTransaction)}
-//                 >
-//                   <Ban className="h-4 w-4 mr-2" />
-//                   Cancel Transaction
-//                 </Button>
-//               )}
-//             </DialogFooter> */}
-//           </DialogContent>
-//         </Dialog>
-//       )}
