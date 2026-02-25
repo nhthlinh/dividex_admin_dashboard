@@ -32,5 +32,5 @@ export type TransactionListResponse =
 
 export interface TransactionListParams extends PaginationParams {
   search?: string;
-  type?: "withdraw" | "deposit" | "transaction";
+  type?: "withdraw" | "deposit" | "in_app";
 }

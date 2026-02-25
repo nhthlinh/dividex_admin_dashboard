@@ -1,4 +1,3 @@
-// NOT DONE
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
@@ -87,7 +86,7 @@ export function TransactionPage() {
         page,
         page_size: PAGE_SIZE,
         search: searchQuery,
-        type: filterType === "ALL" ? undefined : filterType,
+        type: filterType === "ALL" ? undefined : filterType === 'transaction' ? 'in_app' : filterType, // chỉ gửi type nếu không phải ALL
       });
 
       setTransactions(res.content);
@@ -504,8 +503,10 @@ export function TransactionPage() {
                     {/* Type */}
                     <div className="p-4 bg-blue-50 rounded-lg">
                       <p className="text-sm text-gray-600 mb-2">Type</p>
-                      <ui.Icon className="h-4 w-4 inline-block mr-2" />
-                      <p className="font-semibold">{ui.label}</p>
+                      <div className="flex items-center gap-2">
+                        <ui.Icon className="h-4 w-4 inline-block mr-2" />
+                        <p className="font-semibold">{ui.label}</p>
+                      </div>
                     </div>
                   </div>
 

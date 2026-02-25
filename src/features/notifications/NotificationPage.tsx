@@ -646,7 +646,7 @@ export function NotificationPage() {
                   <div className="relative w-72">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
-                      placeholder="Search events..."
+                      placeholder="Search users..."
                       className="pl-9"
                       value={searchUserQuery}
                       onChange={(e) => setSearchUserQuery(e.target.value)}

@@ -23,10 +23,14 @@ export const AdminAPI = {
   },
 
   deleteAdmin: async (adminUid: string): Promise<void> => {
-    await api.delete(`/api/admin/${adminUid}`)
+    await api.delete(`/admin/${adminUid}`)
   },
 
   activateAdmin: async (data: ActivateAdminRequest): Promise<void> => {
     await api.patch<Admin>("/admin/activate", data);
+  },
+
+  deActivateAdmin: async (adminUid: string): Promise<void> => {
+    await api.patch(`/admin/${adminUid}`)
   },
 }

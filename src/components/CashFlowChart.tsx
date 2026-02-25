@@ -1,19 +1,32 @@
-// NOT DONE
-
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
+import { DashboardAPI } from "../features/dashboard/dashboard.api";
 
-const data = [
-  { day: "Mon", deposit: 15, withdraw: 12 },
-  { day: "Tue", deposit: 18, withdraw: 10 },
-  { day: "Wed", deposit: 22, withdraw: 8 },
-  { day: "Thu", deposit: 16, withdraw: 12 },
-  { day: "Fri", deposit: 14, withdraw: 10 },
-  { day: "Sat", deposit: 18, withdraw: 14 },
-  { day: "Sun", deposit: 20, withdraw: 16 },
-];
+export interface CashItem {
+  deposit: number;
+  withdraw: number;
+  day: string;
+}
 
 export function CashFlowChart() {
+  const [data, setData] = useState<CashItem[]>([]);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await DashboardAPI.getCashData();
+
+      setData(
+        res.map(item => ({
+          ...item,
+          day: new Date(item.day).getDate() + ' ' + new Date(item.day).getMonth, // chuyển thành số ngày trong tháng + tên tháng
+        }))
+      );
+    };
+
+    fetchData();
+  }, []);
+  
   return (
     <Card>
       <CardHeader>
@@ -31,7 +44,7 @@ export function CashFlowChart() {
               angle={0}
               textAnchor="middle"
               height={60}
-              tickFormatter={(value) => value.slice(0, 3)}
+              tickFormatter={(value) => value}
             />
             <YAxis 
               stroke="#94a3b8"
