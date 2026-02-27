@@ -1,5 +1,5 @@
-import { use, useEffect, useState, type SetStateAction } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { useEffect, useState, type SetStateAction } from "react";
+import { Card, CardContent, CardHeader } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Badge } from "../../components/ui/badge";
@@ -8,7 +8,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "../../components/ui/dialog";
 import {
   AlertTriangle,
@@ -16,13 +15,10 @@ import {
   TrendingUp,
   Activity,
   XCircle,
-  AlertCircle,
-  Info,
   Clock,
   User,
   Globe,
   Code,
-  Database,
   RefreshCw,
   Calendar,
 } from "lucide-react";
@@ -292,6 +288,15 @@ export function SystemLogPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
+                {loading && (
+                  <tr>
+                    <td colSpan={7} className="text-center py-12">
+                      <Activity className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500">Loading logs...</p>
+                    </td>
+                  </tr>
+                )}
+
                 {systemLogs.map((log) => (
                   <tr
                     key={log.uid}
