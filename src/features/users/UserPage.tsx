@@ -1,41 +1,13 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
-import { Users as UsersIcon, UserCheck, UserPlus, Search } from "lucide-react";
-import { Dialog, DialogContent } from "../../components/ui/dialog";
+import { Search } from "lucide-react";
 import type { User, UserDetail } from "./user.types";
 import { UserAPI } from "./user.api";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { getAvatarGradient } from "../../components/Header";
 import { UserDetailDialog } from "./UserDetailDialog";
 import { Input } from "../../components/ui/input";
-
-const userStats = [
-  {
-    icon: UsersIcon,
-    label: "Total User",
-    value: "300",
-    change: "+8% from yesterday",
-    bgColor: "bg-pink-50",
-    iconColor: "text-pink-500",
-  },
-  {
-    icon: UserCheck,
-    label: "Total Active User",
-    value: "300",
-    change: "+5% from yesterday",
-    bgColor: "bg-orange-50",
-    iconColor: "text-orange-500",
-  },
-  {
-    icon: UserPlus,
-    label: "New User",
-    value: "8",
-    change: "0.5% from yesterday",
-    bgColor: "bg-purple-50",
-    iconColor: "text-purple-500",
-  },
-];
 
 const PAGE_SIZE = 2;
 
@@ -48,7 +20,7 @@ export function UserPage() {
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
-  const [isOverviewDialogOpen, setIsOverviewDialogOpen] = useState(false);
+  // const [isOverviewDialogOpen, setIsOverviewDialogOpen] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const [inputValue, setInputValue] = useState("");
@@ -108,12 +80,12 @@ export function UserPage() {
                 />
               </div>
             </div>
-            <Button 
+            {/* <Button 
               variant="link" className="text-sm px-0 mt-1"
               onClick={() => setIsOverviewDialogOpen(true)}
             >
               Today's overview
-            </Button>
+            </Button> */}
           </CardHeader>
           <CardContent>
             {/* Header */}
@@ -210,7 +182,7 @@ export function UserPage() {
       )}
 
       {/* Overview Dialog */}
-      {isOverviewDialogOpen && (
+      {/* {isOverviewDialogOpen && (
         <Dialog open={isOverviewDialogOpen} onOpenChange={() => setIsOverviewDialogOpen(false)}>
           <DialogContent className="min-w-[60vw] max-h-[90vh] overflow-y-auto">
             <Card>
@@ -244,7 +216,7 @@ export function UserPage() {
           </DialogContent>
         </Dialog>
         )
-      }
+      } */}
     </div>
   );
 }

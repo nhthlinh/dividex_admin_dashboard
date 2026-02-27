@@ -12,17 +12,13 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { DashboardAPI } from "../features/dashboard/dashboard.api";
 
-// const formatRatingData = (data: RatingItem[]) => {
-//   return data.map((item) => ({
-//     month: new Date(item.date).toLocaleString("en-US", {
-//       month: "short",
-//     }),
-//     rating: item.rate,
-//   }));
-// };
+type UserSatisfactionData = {
+  month: string;
+  rating: number;
+};
 
 export function UserSatisfaction() {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<UserSatisfactionData[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {

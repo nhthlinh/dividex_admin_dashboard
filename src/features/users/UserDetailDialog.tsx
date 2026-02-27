@@ -17,7 +17,7 @@ import {
   MapPin,
   Calendar,
 } from "lucide-react";
-import type { UserDetail, UserExpense, UserGroup } from "./user.types";
+import type { UserDetail, UserExpense, UserGroup, UserLoginHistoryItem } from "./user.types";
 import { getAvatarGradient } from "../../components/Header";
 import { UserAPI } from "./user.api";
 
@@ -26,19 +26,6 @@ interface UserDetailDialogProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-const loginHistory = [
-  { date: "2024-11-18 10:30 AM", ip: "192.168.1.1", location: "New York, US", device: "Chrome on Windows" },
-  { date: "2024-11-17 02:15 PM", ip: "192.168.1.2", location: "New York, US", device: "Safari on iPhone" },
-  { date: "2024-11-16 09:45 AM", ip: "192.168.1.1", location: "New York, US", device: "Chrome on Windows" },
-];
-
-const activityLog = [
-  { date: "2024-11-18 11:00 AM", action: "Updated profile information", status: "success" },
-  { date: "2024-11-18 10:30 AM", action: "Logged in", status: "success" },
-  { date: "2024-11-17 03:20 PM", action: "Created new expense", status: "success" },
-  { date: "2024-11-17 02:15 PM", action: "Logged in", status: "success" },
-];
 
 export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProps) {
   const [isLocked, setIsLocked] = useState(false);
@@ -51,12 +38,14 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
   const [pageExpenses, setPageExpenses] = useState(1);
   const [totalPagesExpenses, setTotalPagesExpenses] = useState(1);
 
+  const [historyLogins, setHistoryLogins] = useState<UserLoginHistoryItem[]>([]);
+
   const handleLockToggle = () => {
     try {
       if (isLocked) {
         UserAPI.activateUser(user.uid);
       } else {
-        UserAPI.activateUser(user.uid);
+        UserAPI.deActivateUser(user.uid);
       }
       setIsLocked(!isLocked);
     } catch (error) {
@@ -105,6 +94,9 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
       setCreatedExpenses(expense.content);
       setPageExpenses(expense.current_page);
       setTotalPagesExpenses(expense.total_pages);
+
+      const loginHistory = await UserAPI.getUserLoginHistory(user.uid);
+      setHistoryLogins(loginHistory.content);
 
       setIsLocked(!user.status);
     };
@@ -260,46 +252,20 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
                   <thead className="bg-slate-50">
                     <tr>
                       <th className="px-4 py-2 text-left text-xs text-slate-500">Date & Time</th>
-                      <th className="px-4 py-2 text-left text-xs text-slate-500">IP Address</th>
+                      <th className="px-4 py-2 text-left text-xs text-slate-500">Platform</th>
                       <th className="px-4 py-2 text-left text-xs text-slate-500">Location</th>
                       <th className="px-4 py-2 text-left text-xs text-slate-500">Device</th>
+                      <th className="px-4 py-2 text-left text-xs text-slate-500">IP Address</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {loginHistory.map((log, index) => (
+                    {historyLogins.map((log, index) => (
                       <tr key={index} className="border-t">
-                        <td className="px-4 py-3 text-sm text-slate-900">{log.date}</td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{log.ip}</td>
+                        <td className="px-4 py-3 text-sm text-slate-900">{log.created_at}</td>
+                        <td className="px-4 py-3 text-sm text-slate-600">{log.platform}</td>
                         <td className="px-4 py-3 text-sm text-slate-600">{log.location}</td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{log.device}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="text-sm text-slate-900 mb-3">Activity Log (Audit Log)</h4>
-              <div className="border rounded-lg overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-slate-50">
-                    <tr>
-                      <th className="px-4 py-2 text-left text-xs text-slate-500">Date & Time</th>
-                      <th className="px-4 py-2 text-left text-xs text-slate-500">Action</th>
-                      <th className="px-4 py-2 text-left text-xs text-slate-500">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {activityLog.map((log, index) => (
-                      <tr key={index} className="border-t">
-                        <td className="px-4 py-3 text-sm text-slate-900">{log.date}</td>
-                        <td className="px-4 py-3 text-sm text-slate-600">{log.action}</td>
-                        <td className="px-4 py-3">
-                          <Badge className="bg-green-100 text-green-700">
-                            {log.status}
-                          </Badge>
-                        </td>
+                        <td className="px-4 py-3 text-sm text-slate-600">{log.device_model}</td>
+                        <td className="px-4 py-3 text-sm text-slate-600">{log.os_version}</td>
                       </tr>
                     ))}
                   </tbody>

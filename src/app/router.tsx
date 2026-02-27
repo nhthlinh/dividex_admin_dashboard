@@ -35,7 +35,6 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardPage /> },
       { path: "user", element: <UserPage /> },
-      { path: "admin", element: <AdminManagementPage /> },
       { path: "group", element: <GroupPage /> },
       { path: "event", element: <EventPage /> },
       { path: "event/group/:group_uid", element: <EventInGroupPage /> },
@@ -45,6 +44,7 @@ export const router = createBrowserRouter([
       { path: "notification", element: <NotificationPage />},
       { path: "message", element: <MessagePage />},
       { path: "system-logs", element: <SystemLogPage />},
+      { path: "admin", element: <AdminManagementPage /> },
       { path: "settings", element: <SettingsPage /> }
     ],
   },

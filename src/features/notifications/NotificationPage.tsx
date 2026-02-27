@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -13,7 +13,6 @@ import {
 } from "../../components/ui/dialog";
 import {
   Bell,
-  BellRing,
   Send,
   Search,
   Plus,
@@ -23,375 +22,167 @@ import {
   Trash2,
   Megaphone,
 } from "lucide-react";
-import type { Notification, NotificationType } from "./notification.types";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { getAvatarGradient } from "../../components/Header";
+import type { CreateNotificationPayload, NotificationItem, NotificationStats } from "./notification.types";
+import { NotificationAPI } from "./notification.api";
+import { Modal, Spin } from "antd";
+import type { SearchUserItem } from "../users/user.types";
+import { UserAPI } from "../users/user.api";
 
-const notificationStats = [
-  {
-    icon: Bell,
-    label: "Total Notifications",
-    value: "2,456",
-    change: "+18% from last month",
-    bgColor: "bg-blue-50",
-    iconColor: "text-blue-500",
-  },
-  {
-    icon: BellRing,
-    label: "Active Notifications",
-    value: "1,234",
-    change: "+12% from last month",
-    bgColor: "bg-green-50",
-    iconColor: "text-green-500",
-  },
-  {
-    icon: Users,
-    label: "Total Recipients",
-    value: "8,945",
-    change: "+25% from last month",
-    bgColor: "bg-purple-50",
-    iconColor: "text-purple-500",
-  },
-  {
-    icon: Send,
-    label: "Sent Today",
-    value: "156",
-    change: "+8% from yesterday",
-    bgColor: "bg-rose-50",
-    iconColor: "text-rose-500",
-  },
-];
-
-const mockNotifications: Notification[] = [
-  {
-    uid: "notif-001",
-    from_user: {
-      uid: "admin-001",
-      full_name: "System Admin",
-      email: "admin@dividex.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    content: "New event 'Team Building 2024' has been created. Check it out!",
-    type: "EVENT",
-    related_uid: "evt-001",
-    to_users: [
-      {
-        uid: "usr-001", full_name: "Amy Roo", email: "amy.roo@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      {
-        uid: "usr-002", full_name: "Hana Ghoghly", email: "hana.g@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-    ],
-    created_at: "2024-03-15T10:30:00Z",
-    is_broadcast: false,
-  },
-  {
-    uid: "notif-002",
-    from_user: {
-      uid: "admin-001",
-      full_name: "System Admin",
-      email: "admin@dividex.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    content:
-      "System maintenance scheduled for tomorrow at 2:00 AM. Expected downtime: 2 hours.",
-    type: "SYSTEM",
-    to_users: [
-      {
-        uid: "usr-001", full_name: "Amy Roo", email: "amy.roo@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      {
-        uid: "usr-002", full_name: "Hana Ghoghly", email: "hana.g@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      {
-        uid: "usr-003", full_name: "Nguyễn Hồ Thúy Linh", email: "linh.nguyen@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      {
-        uid: "usr-004", full_name: "John Smith", email: "john.smith@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-    ],
-    created_at: "2024-03-16T09:00:00Z",
-    is_broadcast: true,
-  },
-  {
-    uid: "notif-003",
-    from_user: {
-      uid: "usr-002",
-      full_name: "Hana Ghoghly",
-      email: "hana.g@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    content: "You have been added to expense 'Team Dinner at Restaurant'",
-    type: "EXPENSE",
-    related_uid: "exp-001",
-    to_users: [
-      {
-        uid: "usr-001", full_name: "Amy Roo", email: "amy.roo@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      {
-        uid: "usr-003", full_name: "Nguyễn Hồ Thúy Linh", email: "linh.nguyen@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-    ],
-    created_at: "2024-03-17T14:20:00Z",
-    is_broadcast: false,
-  },
-  {
-    uid: "notif-004",
-    from_user: {
-      uid: "admin-001",
-      full_name: "System Admin",
-      email: "admin@dividex.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    content: "Payment settlement for Event 'Marketing Campaign Launch' is complete",
-    type: "PAYMENT",
-    related_uid: "evt-002",
-    to_users: [
-      {
-        uid: "usr-002", full_name: "Hana Ghoghly", email: "hana.g@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-    ],
-    created_at: "2024-03-18T11:45:00Z",
-    is_broadcast: false,
-  },
-  {
-    uid: "notif-005",
-    from_user: {
-      uid: "admin-001",
-      full_name: "System Admin",
-      email: "admin@dividex.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    content:
-      "Welcome to Dividex! Complete your profile to get started with expense sharing.",
-    type: "ANNOUNCEMENT",
-    to_users: [
-      {
-        uid: "usr-001", full_name: "Amy Roo", email: "amy.roo@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      {
-        uid: "usr-002", full_name: "Hana Ghoghly", email: "hana.g@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      {
-        uid: "usr-003", full_name: "Nguyễn Hồ Thúy Linh", email: "linh.nguyen@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-    ],
-    created_at: "2024-03-10T08:00:00Z",
-    is_broadcast: true,
-  },
-  {
-    uid: "notif-006",
-    from_user: {
-      uid: "usr-003",
-      full_name: "Nguyễn Hồ Thúy Linh",
-      email: "linh.nguyen@example.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    content: "You have been added to group 'Weekend Trip Planning'",
-    type: "GROUP",
-    related_uid: "grp-003",
-    to_users: [
-      {
-        uid: "usr-001", full_name: "Amy Roo", email: "amy.roo@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      {
-        uid: "usr-004", full_name: "John Smith", email: "john.smith@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-    ],
-    created_at: "2024-03-19T16:30:00Z",
-    is_broadcast: false,
-  },
-  {
-    uid: "notif-007",
-    from_user: {
-      uid: "admin-001",
-      full_name: "System Admin",
-      email: "admin@dividex.com",
-      avatar_url: {
-        uid: "",
-        original_name: undefined,
-        public_url: undefined
-      }
-    },
-    content:
-      "Reminder: Event 'Team Building 2024' starts tomorrow. Don't forget to check your expenses!",
-    type: "REMINDER",
-    related_uid: "evt-001",
-    to_users: [
-      {
-        uid: "usr-001", full_name: "Amy Roo", email: "amy.roo@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      {
-        uid: "usr-002", full_name: "Hana Ghoghly", email: "hana.g@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-      {
-        uid: "usr-003", full_name: "Nguyễn Hồ Thúy Linh", email: "linh.nguyen@example.com",
-        avatar_url: {
-          uid: "",
-          original_name: undefined,
-          public_url: undefined
-        }
-      },
-    ],
-    created_at: "2024-03-20T09:00:00Z",
-    is_broadcast: false,
-  },
-];
-
-// Mock users for selecting recipients
-const mockUsers = [
-  { uid: "usr-001", name: "Amy Roo", email: "amy.roo@example.com" },
-  { uid: "usr-002", name: "Hana Ghoghly", email: "hana.g@example.com" },
-  { uid: "usr-003", name: "Nguyễn Hồ Thúy Linh", email: "linh.nguyen@example.com" },
-  { uid: "usr-004", name: "John Smith", email: "john.smith@example.com" },
-  { uid: "usr-005", name: "Nguyễn Hồ Chi Vũ", email: "vu.nguyen@example.com" },
-];
+const PAGE_SIZE = 10;
 
 export function NotificationPage() {
   const [selectedNotification, setSelectedNotification] =
-    useState<Notification | null>(null);
+    useState<NotificationItem | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState<string>("ALL");
+  const [searchUserQuery, setSearchUserQuery] = useState("");
+  const [filterType, setFilterType] = useState<"System" | "Warning" | "Announcement" | "Reminder" | "ALL">("ALL");
 
   // Create notification form state
-  const [newNotification, setNewNotification] = useState({
+  const [newNotification, setNewNotification] = useState<CreateNotificationPayload>({
+    related_uid: null,
     content: "",
-    type: "ANNOUNCEMENT" as NotificationType,
-    isBroadcast: false,
-    selectedUsers: [] as string[],
+    type: "System",
+    to_user_uids: [],
+    is_broadcast: false,
   });
 
-  const handleNotificationClick = (notification: Notification) => {
+  const [notis, setNotis] = useState<NotificationItem[]>([]);
+  const [stats, setStats] = useState<NotificationStats>();
+  const [users, setUsers] = useState<SearchUserItem[]>([]);
+
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const [pageUser, setPageUser] = useState(1);
+  const [totalUser, setTotalUser] = useState(0);
+  const [loadingUser, setLoadingUser] = useState(false);
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const totalUserPages = Math.ceil(totalUser / PAGE_SIZE);
+ 
+  useEffect(() => {
+    fetchNotifications();
+  }, [page, filterType, searchQuery]);
+
+  useEffect(() => {
+    NotificationAPI.getNotificationStats().then(setStats);
+    UserAPI.searchUsers({ search: "", page: 1, page_size: 100 }).then((res) => {
+      setUsers(res.content);
+    });
+  }, []);
+
+    useEffect(() => {
+      setLoadingUser(true);
+      const fetchUsers = async () => {
+        setLoadingUser(true);
+        try {
+          const res = await UserAPI.searchUsers({
+            search: searchUserQuery,
+            page: pageUser,
+            page_size: PAGE_SIZE,
+          });
+
+          setUsers(res.content);
+          setTotalUser(res.total_rows);
+        } finally {
+          setLoadingUser(false);
+        }
+      };
+
+      fetchUsers();
+      setLoadingUser(false);  
+    }, [searchUserQuery, pageUser]);
+
+  const notificationStats = stats
+    ? [
+        {
+          label: "Total Notifications",
+          value: stats.total_notifications,
+          change: `${stats.percent_increase_total_notifications}%`,
+          icon: Bell,
+          bgColor: "bg-blue-100",
+          iconColor: "text-blue-600",
+        },
+        {
+          label: "Total Users",
+          value: stats.total_users,
+          change: `${stats.percent_increase_users}%`,
+          icon: Users,
+          bgColor: "bg-green-100",
+          iconColor: "text-green-600",
+        },
+        {
+          label: "Notifications Today",
+          value: stats.notifications_today,
+          change: `${stats.percent_increase_notifications_today}%`,
+          icon: TrendingUp,
+          bgColor: "bg-blue-100",
+          iconColor: "text-blue-600",
+        },
+      ]
+    : [];
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const res = await NotificationAPI.listNotifications({
+        page,
+        page_size: PAGE_SIZE,
+        search: searchQuery,
+        type: filterType === "ALL" ? undefined : filterType,
+      });
+
+      setNotis(res.content);
+      setTotal(res.total_rows);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNotificationClick = (notification: NotificationItem) => {
     setSelectedNotification(notification);
     setIsDetailDialogOpen(true);
   };
 
   const handleCreateNotification = () => {
-    alert(
-      `Notification sent to ${
-        newNotification.isBroadcast
+    showCreateNotiConfirm({
+      title: "Confirm Create Notification",
+      content: `Notification sent to ${
+        newNotification.is_broadcast
           ? "all users"
-          : `${newNotification.selectedUsers.length} users`
-      }`
-    );
-    setIsCreateDialogOpen(false);
-    setNewNotification({
-      content: "",
-      type: "ANNOUNCEMENT",
-      isBroadcast: false,
-      selectedUsers: [],
-    });
+          : `${newNotification.to_user_uids.length} users`
+      }`,
+      onConfirm: () => {
+        NotificationAPI.createNotification({
+          content: newNotification.content,
+          type: newNotification.type,
+          to_user_uids: newNotification.to_user_uids,
+          is_broadcast: newNotification.is_broadcast,
+        }).then(() => {
+          fetchNotifications();
+        });
+        setIsCreateDialogOpen(false);
+      }
+    })
+    
   };
 
-  const handleDeleteNotification = (notification: Notification) => {
-    alert(`Deleted notification: ${notification.uid}`);
-    setIsDetailDialogOpen(false);
+  const handleDeleteNotification = (notification: NotificationItem) => {
+    showDeleteConfirm({
+      title: "Are you sure you want to delete this notification?",
+      content: "This action cannot be undone.",
+      onConfirm: () => {
+        NotificationAPI.deleteNotification(notification.uid).then(() => {
+          fetchNotifications();
+        });
+        setIsDetailDialogOpen(false);
+      },
+    });
   };
 
   const formatDateTime = (dateString: string) => {
@@ -406,15 +197,10 @@ export function NotificationPage() {
 
   const getTypeColor = (type: string) => {
     const colors: Record<string, string> = {
-      SYSTEM: "bg-blue-100 text-blue-800",
-      EVENT: "bg-purple-100 text-purple-800",
-      EXPENSE: "bg-orange-100 text-orange-800",
-      PAYMENT: "bg-green-100 text-green-800",
-      GROUP: "bg-rose-100 text-rose-800",
-      MESSAGE: "bg-indigo-100 text-indigo-800",
-      ANNOUNCEMENT: "bg-yellow-100 text-yellow-800",
-      REMINDER: "bg-red-100 text-red-800",
-      WARNING: "bg-red-100 text-red-800",
+      System: "bg-blue-100 text-blue-800",
+      Warning: "bg-yellow-100 text-yellow-800",
+      Announcement: "bg-purple-100 text-purple-800",
+      Reminder: "bg-red-100 text-red-800",
     };
     return colors[type] || "bg-gray-100 text-gray-800";
   };
@@ -422,13 +208,14 @@ export function NotificationPage() {
   const toggleUserSelection = (uid: string) => {
     setNewNotification((prev) => ({
       ...prev,
-      selectedUsers: prev.selectedUsers.includes(uid)
-        ? prev.selectedUsers.filter((u) => u !== uid)
-        : [...prev.selectedUsers, uid],
+      to_user_uids: prev.to_user_uids.includes(uid)
+        ? prev.to_user_uids.filter((u) => u !== uid)
+        : [...prev.to_user_uids, uid],
     }));
+    console.log(newNotification.to_user_uids);
   };
 
-  const filteredNotifications = mockNotifications.filter((notification) => {
+  const filteredNotifications = notis.filter((notification) => {
     const matchesSearch = notification.content
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
@@ -489,17 +276,13 @@ export function NotificationPage() {
               <select
                 className="px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500"
                 value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
+                onChange={(e) => setFilterType(e.target.value as "System" | "Warning" | "Announcement" | "Reminder" | "ALL")}
               >
-                <option value="ALL">All Types</option>
-                <option value="SYSTEM">System</option>
-                <option value="EVENT">Event</option>
-                <option value="EXPENSE">Expense</option>
-                <option value="PAYMENT">Payment</option>
-                <option value="GROUP">Group</option>
-                <option value="ANNOUNCEMENT">Announcement</option>
-                <option value="REMINDER">Reminder</option>
-                <option value="WARNING">Warning</option>
+                <option value="ALL">All</option>
+                <option value="System">System</option>
+                <option value="Announcement">Announcement</option>
+                <option value="Reminder">Reminder</option>
+                <option value="Warning">Warning</option>
               </select>
 
               <div className="relative w-72">
@@ -516,6 +299,14 @@ export function NotificationPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
+            {loading || !filteredNotifications && (
+              <Card>
+                <CardContent className="flex justify-center py-10">
+                  <Spin />
+                </CardContent>
+              </Card>
+            )}
+
             {filteredNotifications.map((notification) => (
               <Card
                 key={notification.uid}
@@ -532,7 +323,6 @@ export function NotificationPage() {
                           <Bell className="h-6 w-6 text-blue-600" />
                         )}
                       </div>
-
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <Badge
@@ -589,14 +379,41 @@ export function NotificationPage() {
                 </CardContent>
               </Card>
             ))}
-          </div>
 
-          {filteredNotifications.length === 0 && (
-            <div className="text-center py-12">
-              <Bell className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">No notifications found</p>
+            {filteredNotifications.length === 0 && (
+              <div className="text-center py-12">
+                <Bell className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500">No notifications found</p>
+              </div>
+            )}
+          </div>
+          
+          {/* Pagination */}
+          <div className="flex items-center justify-between mt-6">
+            <span className="text-sm text-slate-500">
+              Page {page} / {totalPages || 1}
+            </span>
+
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                Previous
+              </Button>
+
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={page >= totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Next
+              </Button>
             </div>
-          )}
+          </div>
         </CardContent>
       </Card>
 
@@ -703,6 +520,33 @@ export function NotificationPage() {
                     </div>
                   ))}
                 </div>
+
+                {/* Pagination */}
+                <div className="flex items-center justify-between mt-6">
+                  <span className="text-sm text-slate-500">
+                    Page {pageUser} / {totalUserPages || 1}
+                  </span>
+
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={pageUser === 1}
+                      onClick={() => setPageUser((p) => p - 1)}
+                    >
+                      Previous
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={pageUser >= totalUserPages}
+                      onClick={() => setPageUser((p) => p + 1)}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
               </div>
 
               {selectedNotification.related_uid && (
@@ -723,9 +567,6 @@ export function NotificationPage() {
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
-              </Button>
-              <Button variant="outline" onClick={() => setIsDetailDialogOpen(false)}>
-                Close
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -750,18 +591,14 @@ export function NotificationPage() {
                 onChange={(e) =>
                   setNewNotification({
                     ...newNotification,
-                    type: e.target.value as NotificationType,
+                    type: e.target.value as "System" | "Warning" | "Announcement" | "Reminder",
                   })
                 }
               >
-                <option value="ANNOUNCEMENT">Announcement</option>
-                <option value="SYSTEM">System</option>
-                <option value="EVENT">Event</option>
-                <option value="EXPENSE">Expense</option>
-                <option value="PAYMENT">Payment</option>
-                <option value="GROUP">Group</option>
-                <option value="REMINDER">Reminder</option>
-                <option value="WARNING">Warning</option>
+                <option value="Announcement">Announcement</option>
+                <option value="System">System</option>
+                <option value="Reminder">Reminder</option>
+                <option value="Warning">Warning</option>
               </select>
             </div>
 
@@ -784,12 +621,12 @@ export function NotificationPage() {
               <input
                 type="checkbox"
                 id="broadcast"
-                checked={newNotification.isBroadcast}
+                checked={newNotification.is_broadcast}
                 onChange={(e) =>
                   setNewNotification({
                     ...newNotification,
-                    isBroadcast: e.target.checked,
-                    selectedUsers: e.target.checked ? [] : newNotification.selectedUsers,
+                    is_broadcast: e.target.checked,
+                    to_user_uids: e.target.checked ? [] : newNotification.to_user_uids,
                   })
                 }
                 className="h-4 w-4"
@@ -800,18 +637,34 @@ export function NotificationPage() {
               </label>
             </div>
 
-            {!newNotification.isBroadcast && (
+            {!newNotification.is_broadcast && (
               <div>
-                <label className="text-sm font-medium mb-2 block">
-                  Select Recipients
-                </label>
+                <div className="flex flex-row items-center justify-between mb-2">
+                  <label className="text-sm font-medium mb-2 block">
+                    Select Recipients
+                  </label>
+                  <div className="relative w-72">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      placeholder="Search users..."
+                      className="pl-9"
+                      value={searchUserQuery}
+                      onChange={(e) => setSearchUserQuery(e.target.value)}
+                    />
+                  </div>
+                </div>
                 <div className="border border-gray-300 rounded-md p-3 max-h-64 overflow-y-auto">
                   <div className="space-y-2">
-                    {mockUsers.map((user) => (
+                    {loadingUser && (
+                      <div className="flex justify-center py-10">
+                        <Spin />
+                      </div>
+                    )}
+                    {users.map((user) => (
                       <div
                         key={user.uid}
                         className={`flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-100 ${
-                          newNotification.selectedUsers.includes(user.uid)
+                          newNotification.to_user_uids.includes(user.uid)
                             ? "bg-rose-50 border border-rose-200"
                             : ""
                         }`}
@@ -819,25 +672,30 @@ export function NotificationPage() {
                       >
                         <input
                           type="checkbox"
-                          checked={newNotification.selectedUsers.includes(
+                          checked={newNotification.to_user_uids.includes(
                             user.uid
                           )}
-                          onChange={() => toggleUserSelection(user.uid)}
                           className="h-4 w-4"
+                          readOnly
                         />
                         <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-semibold">
-                          {user.name.charAt(0)}
+                          {user.full_name.charAt(0)}
                         </div>
                         <div>
-                          <p className="font-medium text-sm">{user.name}</p>
+                          <p className="font-medium text-sm">{user.full_name}</p>
                           <p className="text-xs text-gray-500">{user.email}</p>
                         </div>
                       </div>
                     ))}
+                    {!loadingUser && users.length === 0 && (
+                      <p className="text-center text-gray-500 py-10">
+                        No users found
+                      </p>
+                    )}
                   </div>
                 </div>
                 <p className="text-sm text-gray-500 mt-2">
-                  {newNotification.selectedUsers.length} user(s) selected
+                  {newNotification.to_user_uids.length} user(s) selected
                 </p>
               </div>
             )}
@@ -855,8 +713,8 @@ export function NotificationPage() {
               className="bg-rose-600 hover:bg-rose-700 text-white"
               disabled={
                 !newNotification.content ||
-                (!newNotification.isBroadcast &&
-                  newNotification.selectedUsers.length === 0)
+                (!newNotification.is_broadcast &&
+                  newNotification.to_user_uids.length === 0)
               }
             >
               <Send className="h-4 w-4 mr-2" />
@@ -867,4 +725,45 @@ export function NotificationPage() {
       </Dialog>
     </div>
   );
+}
+
+function showDeleteConfirm({
+  title,
+  content,
+  onConfirm,
+}: {
+  title: string;
+  content: string;
+  onConfirm: () => void;
+}) {
+  Modal.confirm({
+    title,
+    content,
+    okText: "Xóa",
+    cancelText: "Hủy",
+    okType: "danger",
+    centered: true,
+    onOk: onConfirm,
+  });
+}
+
+
+function showCreateNotiConfirm({
+  title,
+  content,
+  onConfirm,
+}: {
+  title: string;
+  content: string;
+  onConfirm: () => void;
+}) {
+  Modal.confirm({
+    title,
+    content,
+    okText: "Xác nhận",
+    cancelText: "Hủy",
+    okType: "primary",
+    centered: true,
+    onOk: onConfirm,
+  });
 }

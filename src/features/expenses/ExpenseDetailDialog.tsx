@@ -8,11 +8,11 @@ import {
   Calendar,
   FileText,
   Trash2,
-  Download,
   Image,
   Receipt,
   PieChart,
   Unlock,
+  View,
 } from "lucide-react";
 import type { Expense, ExpenseAttachment, SplitUserShare } from "./expense.types";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
@@ -36,21 +36,25 @@ export function ExpenseDetailDialog({
   const [userShares, setUserShares] = useState<SplitUserShare[]>([]); 
 
   useEffect(() => {
-    const fetchExpenseDetails = async () => {
+    const fetchExpenseSplits = async () => {
       setLocalExpense(expense);
       const split = await ExpenseAPI.getSplitExpense(expense!.uid);
 
+      setUserShares(split.list_user_shares);
+    };
+
+    const fetchExpenseAttachments = async () => {
       const attachments = await ExpenseAPI.getExpenseAttachments(expense!.uid, {
         page: 1,
         page_size: 10,
       });
 
-      setUserShares(split.list_user_shares);
       setAttachments(attachments.content);
     };
 
     if (expense) {
-      fetchExpenseDetails();
+      fetchExpenseSplits();
+      fetchExpenseAttachments();
     }
   }, [expense]);
 
@@ -426,11 +430,10 @@ export function ExpenseDetailDialog({
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="ghost" size="sm">
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-red-600">
-                        <Trash2 className="h-4 w-4" />
+                      <Button variant="outline" size="sm" onClick={() => {
+                        window.open(attachment.public_url, "_blank");
+                      }}>
+                        <View className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>

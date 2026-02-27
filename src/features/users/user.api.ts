@@ -8,6 +8,9 @@ import type {
   UserExpense,
   PaginationParams,
   PaginationResponse,
+  UserLoginHistoryResponse,
+  SearchUserParams,
+  SearchUserResponse,
 } from "./user.types";
 
 export const UserAPI = {
@@ -27,6 +30,23 @@ export const UserAPI = {
     return res.data.data;
   },
 
+  searchUsers: async (
+    params: SearchUserParams
+  ): Promise<SearchUserResponse> => {
+    const res = await api.get<ApiResponse<SearchUserResponse>>(
+      "/users",
+      {
+        params: {
+          search: params.search,
+          page: params.page ?? 1,
+          page_size: params.page_size ?? 10,
+        },
+      }
+    );
+
+    return res.data.data;
+  },
+
   getUserDetail: async (userUid: string): Promise<UserDetail> => {
     const res = await api.get<ApiResponse<UserDetail>>(
       `/admin/users/${userUid}`
@@ -38,6 +58,14 @@ export const UserAPI = {
   activateUser: async (userUid: string): Promise<boolean> => {
     const res = await api.patch<ApiResponse<boolean>>(
       `/admin/users/${userUid}/activate`
+    );
+
+    return res.data.data;
+  },
+
+  deActivateUser: async (userUid: string): Promise<boolean> => {
+    const res = await api.patch<ApiResponse<boolean>>(
+      `/admin/${userUid}`
     );
 
     return res.data.data;
@@ -70,6 +98,23 @@ export const UserAPI = {
       {
         params: {
           search: params.search,
+          page: params.page ?? 1,
+          page_size: params.page_size ?? 10,
+        },
+      }
+    );
+
+    return res.data.data;
+  },
+
+  getUserLoginHistory: async (
+    user_uid: string,
+    params: PaginationParams = {}
+  ): Promise<UserLoginHistoryResponse> => {
+    const res = await api.get<ApiResponse<UserLoginHistoryResponse>>(
+      `/admin/users/${user_uid}/login-history`,
+      {
+        params: {
           page: params.page ?? 1,
           page_size: params.page_size ?? 10,
         },
