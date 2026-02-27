@@ -30,3 +30,31 @@ export interface GroupListResponse {
   total_rows: number;
   total_pages: number;
 }
+
+export interface GroupMember {
+  group_members_uid: string;
+  user: {
+    full_name: string;
+    email: string;
+    balance: number;
+    avatar_url: any; // hoặc string | null tùy BE
+    uid: string;
+  };
+  joined_at: string;
+}
+
+export interface GroupMembersResponse {
+  content: GroupMember[];
+  current_page: number;
+  page_size: number;
+  total_rows: number;
+  total_pages: number;
+}
+
+export interface GetGroupMembersParams {
+  search?: string | null;
+  order_by?: "updated_at" | "full_name";
+  sort_type?: "asc" | "desc";
+  page_size?: number;
+  page?: number;
+}

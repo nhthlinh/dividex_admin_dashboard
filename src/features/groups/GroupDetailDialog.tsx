@@ -1,11 +1,11 @@
-//NOT DONE
+//NOT DONE còn activity
 import {
   Users,
   Calendar,
   Unlock,
   Trash2,
 } from "lucide-react";
-import type { GroupItem } from "./group.types";
+import type { GroupItem, GroupMember } from "./group.types";
 import { Badge } from "../../components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
@@ -24,10 +24,30 @@ import { useEffect, useState } from "react";
 
 export function GroupDetailDialog({ group, open, onOpenChange }: GroupDetailDialogProps) {
   const [localGroup, setLocalGroup] = useState<GroupItem | null>(group);
+  const [members, setMembers] = useState<GroupMember[]>([]);
 
   useEffect(() => {
     setLocalGroup(group);
   }, [group]);
+
+  useEffect(() => {
+    if (!localGroup) return;
+    const fetchMembers = async () => {
+      try {
+        const res = await GroupAPI.getGroupMembers(localGroup.uid, {
+          page_size: 100,
+        });
+        setMembers(res.content);
+      } catch (error) {
+        console.error("Failed to fetch group members:", error);
+      }
+    };
+
+    if (localGroup) {
+      fetchMembers();
+    } 
+  }, [localGroup]);
+
 
   if (!localGroup) return null;
 
@@ -45,40 +65,6 @@ export function GroupDetailDialog({ group, open, onOpenChange }: GroupDetailDial
       day: "numeric",
     });
   };
-
-  // Mock members data
-  const members = [
-    {
-      uid: "1",
-      name: "Amy Roo",
-      email: "amy.roo@example.com",
-      role: "Leader",
-      joined_at: "2024-01-15",
-      avatar_url: {
-        public_url: "",
-      }
-    },
-    {
-      uid: "2",
-      name: "Hana Ghoghly",
-      email: "hana.g@example.com",
-      role: "Member",
-      joined_at: "2024-02-20",
-      avatar_url: {
-        public_url: "",
-      }
-    },
-    {
-      uid: "3",
-      name: "Nguyễn Hồ Thúy Linh",
-      email: "linh.nguyen@example.com",
-      role: "Member",
-      joined_at: "2024-03-10",
-      avatar_url: {
-        public_url: "",
-      }
-    },
-  ];
 
   // Mock activities
   const activities = [
@@ -284,28 +270,27 @@ export function GroupDetailDialog({ group, open, onOpenChange }: GroupDetailDial
             <div className="space-y-3">
               {members.map((member) => (
                 <div
-                  key={member.uid}
+                  key={member.group_members_uid}
                   className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   <div className="flex items-center gap-4">
                     <Avatar className="size-7">
-                      {member.avatar_url?.public_url ? (
-                        <AvatarImage src={member.avatar_url.public_url} />
+                      {member.user.avatar_url?.public_url ? (
+                        <AvatarImage src={member.user.avatar_url.public_url} />
                       ) : (
                         <AvatarFallback
-                          className={`bg-gradient-to-br ${getAvatarGradient(member.uid)} text-white font-semibold`}
+                          className={`bg-gradient-to-br ${getAvatarGradient(member.user.uid)} text-white font-semibold`}
                         >
-                          {member.name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                          {member.user.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
                         </AvatarFallback>
                       )}
                     </Avatar>
                     <div>
-                      <p className="font-semibold">{member.name}</p>
-                      <p className="text-sm text-gray-500">{member.email}</p>
+                      <p className="font-semibold">{member.user.full_name}</p>
+                      <p className="text-sm text-gray-500">{member.user.email}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <Badge variant="secondary">{member.role}</Badge>
                     <p className="text-xs text-gray-500 mt-1">
                       Joined {formatDate(member.joined_at)}
                     </p>

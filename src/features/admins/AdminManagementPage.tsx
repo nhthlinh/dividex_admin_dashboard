@@ -119,10 +119,10 @@ export function AdminManagementPage() {
                         : "bg-yellow-100 text-yellow-700"
                     }`}
                   >
-                    {admin.status === "active" ? "Active" : "Invited"}
+                    {admin.status === "ACTIVE" ? "Active" : "Inactive"}
                   </span>
 
-                  {admin.status === "active" && (
+                  {admin.status === "ACTIVE" && (
                     <Popconfirm
                       title="Deactivate admin"
                       description="Are you sure you want to deactivate this admin?"
@@ -140,9 +140,9 @@ export function AdminManagementPage() {
                     </Popconfirm>
                   )}
 
-                  {admin.status === "invited" && (
+                  {admin.status === "INACTIVE" && (
                     <Popconfirm
-                      title="Delete invitation"
+                      title="Delete admin/invitation"
                       description="Are you sure you want to remove this admin?"
                       okText="Delete"
                       cancelText="Cancel"
