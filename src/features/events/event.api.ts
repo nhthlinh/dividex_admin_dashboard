@@ -56,17 +56,21 @@ export const EventAPI = {
     search?: string;
     page?: number;
     page_size?: number;
+    type?: "all" | "active" | "finished";
   }): Promise<EventListResponse> => {
     const res = await api.get<ApiResponse<EventListResponse>>(
-      "/groups/" + params?.group_uid + "/events",
+      "/admin/events",
       {
         params: {
           search: params?.search ?? null,
+          type: params?.type ?? null,
           page: params?.page ?? 1,
           page_size: params?.page_size ?? 10,
+          group_uid: params?.group_uid ?? null,
         },
       }
     );
+
     return res.data.data;
   },
 

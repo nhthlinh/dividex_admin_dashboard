@@ -19,7 +19,7 @@ export function CashFlowChart() {
       setData(
         res.map(item => ({
           ...item,
-          day: new Date(item.day).getDate() + ' ' + new Date(item.day).getMonth, // chuyển thành số ngày trong tháng + tên tháng
+          day: new Date(item.day).getDate() + '/' + new Date(item.day).getMonth, // chuyển thành số ngày trong tháng + tên tháng
         }))
       );
     };

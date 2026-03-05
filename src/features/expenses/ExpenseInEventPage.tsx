@@ -16,7 +16,7 @@ import { Spin } from "antd";
 import { router } from "../../app/router";
 import { EventAPI } from "../events/event.api";
 
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 10;
 
 export function ExpenseInEventPage() {
   const eventId = router.state.location.pathname.split("/").pop();
