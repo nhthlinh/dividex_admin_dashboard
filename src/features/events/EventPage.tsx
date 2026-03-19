@@ -20,7 +20,7 @@ import { getAvatarGradient } from "../../components/Header";
 import { EventAPI } from "./event.api";
 import { Spin } from "antd";
 
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 10;
 
 export function EventPage() {
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
@@ -66,7 +66,7 @@ export function EventPage() {
           icon: Calendar,
           label: "Total Events",
           value: stats.total_events.toString(),
-          change: `+${stats.percent_increase_events}% from last month`,
+          change: `+${stats.percent_increase_events.toFixed(2)}% from last month`,
           bgColor: "bg-pink-50",
           iconColor: "text-pink-500",
         },
@@ -74,7 +74,7 @@ export function EventPage() {
           icon: Clock,
           label: "Active Events",
           value: stats.active_events.toString(),
-          change: `+${stats.percent_increase_active_events}% from last month`,
+          change: `+${stats.percent_increase_active_events.toFixed(2)}% from last month`,
           bgColor: "bg-orange-50",
           iconColor: "text-orange-500",
         },
@@ -82,7 +82,7 @@ export function EventPage() {
           icon: CheckCircle,
           label: "Completed Events",
           value: stats.total_finished_events.toString(),
-          change: `+${stats.percent_increase_finished_events}% from last month`,
+          change: `+${stats.percent_increase_finished_events.toFixed(2)}% from last month`,
           bgColor: "bg-green-50",
           iconColor: "text-green-500",
         },
@@ -90,7 +90,7 @@ export function EventPage() {
           icon: Users,
           label: "Total Participants",
           value: stats.total_members.toString(),
-          change: `+${stats.percent_increase_members}% from last month`,
+          change: `+${stats.percent_increase_members.toFixed(2)}% from last month`,
           bgColor: "bg-purple-50",
           iconColor: "text-purple-500",
         },

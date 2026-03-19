@@ -18,7 +18,7 @@ import { getAvatarGradient } from "../../components/Header";
 import { ExpenseAPI } from "./expense.api";
 import { Spin } from "antd";
 
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 10;
 
 export function ExpensePage() {
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
@@ -125,7 +125,7 @@ export function ExpensePage() {
       icon: DollarSign,
       label: "Total Expenses",
       value: stats.total_expenses,
-      change: stats.percent_increase_expenses + "% from last month",
+      change: `${stats.percent_increase_expenses.toFixed(2)}% from last month`,
       bgColor: "bg-pink-50",
       iconColor: "text-pink-500",
     },
@@ -133,7 +133,7 @@ export function ExpensePage() {
       icon: Receipt,
       label: "Active Expenses",
       value: stats.active_expenses,
-      change: stats.percent_increase_active_expenses + "% from last month",
+      change: `${stats.percent_increase_active_expenses.toFixed(2)}% from last month`,
       bgColor: "bg-orange-50",
       iconColor: "text-orange-500",
     },
@@ -141,7 +141,7 @@ export function ExpensePage() {
       icon: TrendingUp,
       label: "Expired Expenses",
       value: stats.total_expired_expenses,
-      change: stats.percent_increase_expired_expenses + "% from last month",
+      change: `${stats.percent_increase_expired_expenses.toFixed(2)}% from last month`,
       bgColor: "bg-green-50",
       iconColor: "text-green-500",
     },
@@ -149,7 +149,7 @@ export function ExpensePage() {
       icon: PieChart,
       label: "Avg per Expense",
       value: formatCurrency(stats.total_avg_amount, "VND"),
-      change: stats.percent_increase_avg_amount + "% from last month",
+      change: `${stats.percent_increase_avg_amount.toFixed(2)}% from last month`,
       bgColor: "bg-purple-50",
       iconColor: "text-purple-500",
     },

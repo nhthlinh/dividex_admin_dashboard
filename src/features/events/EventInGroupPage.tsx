@@ -19,7 +19,7 @@ import { router } from "../../app/router";
 import { EventAPI } from "./event.api";
 import { Spin } from "antd";
 
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 10;
 
 export function EventInGroupPage() {
   const groupId = router.state.location.pathname.split("/").pop();

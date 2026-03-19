@@ -58,3 +58,20 @@ export interface GetGroupMembersParams {
   page_size?: number;
   page?: number;
 }
+
+export interface GroupActivity {
+  uid: string;
+  created_at: string;
+  content: string;
+  type: string;
+  related_uid: string;
+  from_user: any;
+}
+
+export interface GroupActivityListResponse {
+  content: GroupActivity[];
+  current_page: number;
+  page_size: number;
+  total_rows: number;
+  total_pages: number;
+}

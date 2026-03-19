@@ -1,6 +1,6 @@
 import { api } from "../../config/api.config";
 import type { ApiResponse } from "../../config/api.types";
-import type { GetGroupMembersParams, GroupListResponse, GroupMembersResponse, GroupStatistics } from "./group.types";
+import type { GetGroupMembersParams, GroupActivityListResponse, GroupListResponse, GroupMembersResponse, GroupStatistics } from "./group.types";
 
 export const GroupAPI = {
   getGroupStatistics: async (): Promise<GroupStatistics> => {
@@ -45,6 +45,21 @@ export const GroupAPI = {
     const res = await api.get<ApiResponse<GroupMembersResponse>>(
       `/groups/${group_uid}/members`,
       { params }
+    );
+
+    return res.data.data;
+  },
+
+  getGroupActivity: async (
+    group_uid: string,
+    page: number = 1,
+    page_size: number = 2
+  ): Promise<GroupActivityListResponse> => {
+    const res = await api.get<ApiResponse<GroupActivityListResponse>>(
+      `/admin/group/${group_uid}/activity`,
+      {
+        params: { page, page_size },
+      }
     );
 
     return res.data.data;

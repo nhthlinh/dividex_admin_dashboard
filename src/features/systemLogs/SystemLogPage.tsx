@@ -25,7 +25,7 @@ import {
 import type { HttpMethod, SystemLogItem } from "./systemLog.types";
 import { SystemLogAPI } from "./systemLog.api";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 200;
 
 export function SystemLogPage() {
   const [selectedLog, setSelectedLog] = useState<SystemLogItem | null>(null);
@@ -81,7 +81,7 @@ export function SystemLogPage() {
             icon: AlertTriangle,
             label: "Total Errors",
             value: statsData.total_errors.toLocaleString(),
-            change: statsData.percent_increase_errors + "% from last month",
+            change: `${statsData.percent_increase_errors.toFixed(2)}% from last month`,
             bgColor: "bg-red-50",
             iconColor: "text-red-500",
             trend: statsData.percent_increase_errors >= 0 ? "up" : "down",
@@ -90,7 +90,7 @@ export function SystemLogPage() {
             icon: XCircle,
             label: "Errors Today",
             value: statsData.today_errors.toLocaleString(),
-            change: statsData.percent_increase_today_errors + "% from yesterday",
+            change: `${statsData.percent_increase_today_errors.toFixed(2)}% from yesterday`,
             bgColor: "bg-orange-50",
             iconColor: "text-orange-500",
             trend: statsData.percent_increase_today_errors >= 0 ? "up" : "down",
@@ -99,7 +99,7 @@ export function SystemLogPage() {
             icon: Clock,
             label: "Avg Response Time",
             value: statsData.avg_response_time.toFixed(2) + "ms",
-            change: statsData.percent_increase_avg_response_time.toFixed(2) + "% from last week",
+            change: `${statsData.percent_increase_avg_response_time.toFixed(2)}% from last week`,
             bgColor: "bg-blue-50",
             iconColor: "text-blue-500",
             trend: statsData.percent_increase_avg_response_time >= 0 ? "up" : "down",
@@ -467,13 +467,27 @@ export function SystemLogPage() {
 
                 {selectedLog.log_message && (
                   <div className="col-span-2 p-4 bg-orange-50 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-3">
                       <Code className="h-4 w-4 text-orange-600" />
                       <p className="text-sm text-gray-600">Log Message</p>
                     </div>
-                    <p className="font-semibold text-orange-700">
-                      {selectedLog.log_message}
-                    </p>
+
+                    <div className="space-y-1 text-sm">
+                      {selectedLog.log_message
+                        ?.split("\n")
+                        .filter(line => !/^[-\s]+$/.test(line))
+                        .join("\n")
+                        .split("\n")
+                        .filter(Boolean)
+                        .map((line, index) => (
+                          <div
+                            key={index}
+                            className="bg-white px-3 py-2 rounded border font-mono text-gray-700"
+                          >
+                            {line}
+                          </div>
+                        ))}
+                    </div>
                   </div>
                 )}
               </div>

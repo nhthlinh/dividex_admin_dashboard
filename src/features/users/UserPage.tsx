@@ -9,7 +9,7 @@ import { getAvatarGradient } from "../../components/Header";
 import { UserDetailDialog } from "./UserDetailDialog";
 import { Input } from "../../components/ui/input";
 
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 10;
 
 export function UserPage() {
   const [users, setUsers] = useState<User[]>([]);
