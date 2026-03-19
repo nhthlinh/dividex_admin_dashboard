@@ -20,7 +20,7 @@ interface GroupDetailDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { CardContent } from "../../components/ui/card";
 import { Spin } from "antd";
 
