@@ -27,10 +27,10 @@ export const AdminAPI = {
   },
 
   activateAdmin: async (data: ActivateAdminRequest): Promise<void> => {
-    await api.patch<Admin>("/admin/activate", data);
+    await api.patch<Admin>("/admins/activate", data);
   },
-
+  
   deActivateAdmin: async (adminUid: string): Promise<void> => {
-    await api.patch(`/admin/${adminUid}`)
+    await api.delete(`/admin/${adminUid}/deactivate`)
   },
 }
