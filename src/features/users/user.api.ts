@@ -1,4 +1,5 @@
 import { api } from "../../config/api.config";
+import { mockApi, USE_MOCK } from "../../services/mockApi";
 import type { ApiResponse } from "../../config/api.types";
 import type {
   ListUsersData,
@@ -17,6 +18,10 @@ export const UserAPI = {
   listUsers: async (
     params: ListUsersParams = {}
   ): Promise<ListUsersData> => {
+    if (USE_MOCK) {
+      return mockApi.listUsers(params);
+    }
+
     const res = await api.get<ApiResponse<ListUsersData>>("/admin/users", {
       params: {
         search: params.search,
@@ -33,6 +38,10 @@ export const UserAPI = {
   searchUsers: async (
     params: SearchUserParams
   ): Promise<SearchUserResponse> => {
+    if (USE_MOCK) {
+      return mockApi.searchUsers(params);
+    }
+
     const res = await api.get<ApiResponse<SearchUserResponse>>(
       "/users",
       {
@@ -48,6 +57,10 @@ export const UserAPI = {
   },
 
   getUserDetail: async (userUid: string): Promise<UserDetail> => {
+    if (USE_MOCK) {
+      return mockApi.getUserDetail(userUid);
+    }
+
     const res = await api.get<ApiResponse<UserDetail>>(
       `/admin/users/${userUid}`
     );
@@ -56,6 +69,10 @@ export const UserAPI = {
   },
 
   activateUser: async (userUid: string): Promise<boolean> => {
+    if (USE_MOCK) {
+      return mockApi.activateUser(userUid);
+    }
+
     const res = await api.patch<ApiResponse<boolean>>(
       `/admin/users/${userUid}/activate`
     );
@@ -64,6 +81,10 @@ export const UserAPI = {
   },
 
   deActivateUser: async (userUid: string): Promise<boolean> => {
+    if (USE_MOCK) {
+      return mockApi.deActivateUser(userUid);
+    }
+
     const res = await api.patch<ApiResponse<boolean>>(
       `/admin/${userUid}`
     );
@@ -75,6 +96,10 @@ export const UserAPI = {
     userUid: string,
     params: PaginationParams = {}
   ): Promise<PaginationResponse<UserGroup>> => {
+    if (USE_MOCK) {
+      return mockApi.listUserGroups(userUid, params);
+    }
+
     const res = await api.get<ApiResponse<PaginationResponse<UserGroup>>>(
       `/admin/users/${userUid}/groups`,
       {
@@ -93,6 +118,10 @@ export const UserAPI = {
     userUid: string,
     params: PaginationParams = {}
   ): Promise<PaginationResponse<UserExpense>> => {
+    if (USE_MOCK) {
+      return mockApi.listUserExpenses(userUid, params);
+    }
+
     const res = await api.get<ApiResponse<PaginationResponse<UserExpense>>>(
       `/admin/users/${userUid}/expenses`,
       {
@@ -111,6 +140,10 @@ export const UserAPI = {
     user_uid: string,
     params: PaginationParams = {}
   ): Promise<UserLoginHistoryResponse> => {
+    if (USE_MOCK) {
+      return mockApi.getUserLoginHistory(user_uid, params);
+    }
+
     const res = await api.get<ApiResponse<UserLoginHistoryResponse>>(
       `/admin/users/${user_uid}/login-history`,
       {
