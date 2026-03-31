@@ -53,7 +53,7 @@ export function UserPage() {
   };
 
   return (
-    <div className="grid gap-6">
+    <div data-testid="user-page" className="grid gap-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

@@ -150,11 +150,11 @@ export function MessagePage() {
   );
 
   if (loading) {
-    return <div></div>;
+    return <div data-testid="message-page"></div>;
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div data-testid="message-page" className="p-8 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

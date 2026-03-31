@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // NOT DONE
 import { useEffect, useState } from "react";
 import { Mail, UserPlus } from "lucide-react";
@@ -68,7 +69,7 @@ export function AdminManagementPage() {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div data-testid="admin-management-page" className="space-y-6">
       {/* Invite admin */}
       <Card>
         <CardHeader>
