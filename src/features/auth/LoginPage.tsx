@@ -39,7 +39,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div style={{ height: '100vh', display: 'flex' }}>
+    <div data-testid="login-page" style={{ height: '100vh', display: 'flex' }}>
       {/* LEFT */}
       <div
         style={{

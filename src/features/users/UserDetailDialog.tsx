@@ -108,7 +108,7 @@ export function UserDetailDialog({ user, isOpen, onClose }: UserDetailDialogProp
       <DialogContent className="max-w-2xl min-w-[60vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex flex-row gap-2 items-center">
-            <Avatar className="size-10">
+            <Avatar data-testid="avatar" className="size-10">
               {user.avatar_url?.public_url ? (
                 <AvatarImage src={user.avatar_url.public_url} />
               ) : (

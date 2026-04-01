@@ -1,4 +1,5 @@
 import { api } from "../../config/api.config";
+import { mockApi, USE_MOCK } from "../../services/mockApi";
 import type { ApiResponse } from "../../config/api.types";
 import type {
   MessageGroupListResponse,
@@ -11,6 +12,17 @@ export const MessageAPI = {
     page?: number;
     page_size?: number;
   }): Promise<MessageGroupListResponse> => {
+    if (USE_MOCK) {
+      const groups = await mockApi.getMessageGroups();
+      return {
+        content: groups,
+        current_page: params?.page ?? 1,
+        page_size: params?.page_size ?? 10,
+        total_rows: groups.length,
+        total_pages: 1,
+      } as MessageGroupListResponse;
+    }
+
     const res = await api.get<ApiResponse<MessageGroupListResponse>>(
       "/admin/messages/group",
       {
@@ -25,6 +37,19 @@ export const MessageAPI = {
   },
 
   getMessageManagement: async (): Promise<MessageManagement> => {
+    if (USE_MOCK) {
+      return { 
+        total_messages: 100,
+        active_groups: 12,
+        message_today: 20,
+        attachments: 30,
+        percent_increase_messages: 0,
+        percent_increase_active_groups: 0,
+        percent_increase_message_today: 0,
+        percent_increase_attachments: 0,
+      } as MessageManagement;
+    }
+
     const res = await api.get<ApiResponse<MessageManagement>>(
       "/admin/message-management"
     );
@@ -40,6 +65,10 @@ export const MessageAPI = {
       page_size?: number;
     }
   ): Promise<MessagesInGroupResponse> => {
+    if (USE_MOCK) {
+      return mockApi.listMessages(groupUid, params);
+    }
+
     const res = await api.get<ApiResponse<MessagesInGroupResponse>>(
       `/admin/message/group/${groupUid}`,
       {
@@ -54,3 +83,4 @@ export const MessageAPI = {
     return res.data.data;
   },
 };
+

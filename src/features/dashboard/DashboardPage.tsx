@@ -7,7 +7,7 @@ import { RateChart } from "../../components/RateChart";
 
 export function DashboardPage() {
   return (
-    <div className="space-y-6">
+    <div data-testid="dashboard-page" className="space-y-6">
       {/* Row 1 */}
       <div className="overflow-x-auto">
         <div className="flex gap-6 min-w-max">

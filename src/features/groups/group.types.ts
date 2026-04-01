@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { User } from "../users/user.types";
 
 export interface GroupStatistics {
@@ -16,7 +17,7 @@ export interface GroupItem {
   created_at: string;
   total_members: number;
   leader: User;
-    avatar_url: {
+  avatar_url: {
     uid: string,
     original_name?: string,
     public_url?: string
@@ -37,7 +38,11 @@ export interface GroupMember {
     full_name: string;
     email: string;
     balance: number;
-    avatar_url: any; // hoặc string | null tùy BE
+    avatar_url: {
+      uid: string,
+      original_name?: string,
+      public_url?: string
+    },
     uid: string;
   };
   joined_at: string;

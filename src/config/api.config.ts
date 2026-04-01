@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // api.config.ts
 import axios, { AxiosError } from 'axios'
 import { authStore } from '../features/auth/auth.store'

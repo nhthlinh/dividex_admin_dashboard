@@ -19,7 +19,12 @@ export function CashFlowChart() {
       setData(
         res.map(item => ({
           ...item,
-          day: new Date(item.day).getDate() + '/' + new Date(item.day).getMonth, // chuyển thành số ngày trong tháng + tên tháng
+          day: (() => {
+            const ymd = item.day.split('T')[0]; // Extract "YYYY-MM-DD" from ISO string
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const [_year, month, date] = ymd.split('-');
+            return `${date}/${month}`; // Return "DD/MM"
+          })(),
         }))
       );
     };

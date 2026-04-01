@@ -9,8 +9,8 @@ export default function AdminLayout() {
   const [currentPage, setCurrentPage] = useState(url === "/" ? "dashboard" : url.substring(1));
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
-      <Sidebar currentPage={currentPage} onNavigate={(page) => {
+    <div data-testid="admin-layout" className="flex h-screen bg-slate-50 overflow-hidden">
+      <Sidebar data-testid="admin-nav" currentPage={currentPage} onNavigate={(page) => {
         setCurrentPage(page);
         switch (page) {
           case "dashboard":
@@ -52,9 +52,9 @@ export default function AdminLayout() {
       }} />
       
       <div className="flex-1 overflow-x-auto flex flex-col">
-        <Header />
+        <Header data-testid="admin-header" />
         
-        <main className="p-6">
+        <main data-testid="admin-main" className="p-6">
           <Outlet />
         </main>
       </div>

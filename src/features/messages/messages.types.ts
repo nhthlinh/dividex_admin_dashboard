@@ -53,7 +53,11 @@ export interface MessagesInGroupItem {
   total_members: number;
   total_messages: number;
   messages: Message[]; 
-  avatar_url?: string;
+  avatar_url?: {
+    uid: string;
+    original_name?: string;
+    public_url?: string;
+  };
 }
 
 export interface MessagesInGroupResponse {

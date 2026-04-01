@@ -1,10 +1,15 @@
 import { api } from "../../config/api.config";
+import { mockApi, USE_MOCK } from "../../services/mockApi";
 import type { ApiResponse } from "../../config/api.types";
 import type { CreateNotificationPayload, NotificationItem, NotificationListParams, NotificationListResponse, NotificationStats } from "./notification.types";
 
 export const NotificationAPI = {
   // Thống kê notification
   getNotificationStats: async (): Promise<NotificationStats> => {
+    if (USE_MOCK) {
+      return mockApi.getNotificationStats();
+    }
+
     const res = await api.get<ApiResponse<NotificationStats>>(
       "/admin/notifications-management"
     );
@@ -15,6 +20,10 @@ export const NotificationAPI = {
   listNotifications: async (
     params: NotificationListParams = {}
   ): Promise<NotificationListResponse> => {
+    if (USE_MOCK) {
+      return mockApi.listNotifications(params);
+    }
+
     const res = await api.get<ApiResponse<NotificationListResponse>>(
       "/admin/notifications",
       {
@@ -33,6 +42,10 @@ export const NotificationAPI = {
   createNotification: async (
     payload: CreateNotificationPayload
   ): Promise<NotificationItem> => {
+    if (USE_MOCK) {
+      return mockApi.createNotification(payload);
+    }
+
     const res = await api.post<ApiResponse<NotificationItem>>(
       "/admin/notifications",
       payload
@@ -44,6 +57,10 @@ export const NotificationAPI = {
   deleteNotification: async (
     notification_uid: string
   ): Promise<boolean> => {
+    if (USE_MOCK) {
+      return mockApi.deleteNotification(notification_uid);
+    }
+
     const res = await api.delete<ApiResponse<boolean>>(
       `/admin/notifications/${notification_uid}`
     );

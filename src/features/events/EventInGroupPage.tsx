@@ -113,7 +113,7 @@ export function EventInGroupPage() {
   });
 
   return (
-    <div className="p-8 space-y-6">
+    <div data-testid="event-in-group-page" className="p-8 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -220,6 +220,7 @@ export function EventInGroupPage() {
                             </h3>
                             {isEventUpcoming(event.event_start) && (
                               <Badge
+                                data-testid="badge"
                                 variant="secondary"
                                 className="bg-orange-100 text-orange-800 text-xs"
                               >
@@ -232,6 +233,7 @@ export function EventInGroupPage() {
                           </p>
                         </div>
                         <Badge
+                          data-testid="badge"
                           variant="secondary"
                           className={`flex items-center gap-1 ${getStatusColor(
                             event.status
@@ -246,7 +248,7 @@ export function EventInGroupPage() {
                         <div className="p-3 bg-blue-50 rounded-lg">
                           <p className="text-xs text-gray-600 mb-1">Group</p>
                           <div className="flex items-center gap-2">
-                            <Avatar className="size-7">
+                            <Avatar className="size-7" data-testid="avatar">
                               {event.group.avatar_url?.public_url ? (
                                 <AvatarImage src={event.group.avatar_url.public_url} />
                               ) : (

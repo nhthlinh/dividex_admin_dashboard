@@ -35,7 +35,11 @@ export function ExpensePage() {
   const [stats, setStats] = useState<ExpenseStatistics | null>(null);
 
   useEffect(() => {
-    ExpenseAPI.getExpenseStatistics().then(setStats);
+    ExpenseAPI.getExpenseStatistics()
+      .then(setStats)
+      .catch(() => {
+        // Silently handle stats error
+      });
   }, []);
 
   useEffect(() => {
@@ -49,6 +53,8 @@ export function ExpensePage() {
 
         setExpenses(res.content);
         setTotal(res.total_pages);
+      } catch {
+        // Silently handle fetch error
       } finally {
         setLoading(false);
       }
@@ -171,7 +177,7 @@ export function ExpensePage() {
   });
 
   return (
-    <div className="p-8 space-y-6">
+    <div data-testid="expense-page" className="p-8 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -291,23 +297,23 @@ export function ExpensePage() {
                             <p className="text-xs text-gray-500">Paid By</p>
                             <div className="flex items-center gap-1">
                               <Avatar className="size-7">
-                                {expense.paid_by.avatar_url?.public_url ? (
+                                {expense.paid_by?.avatar_url?.public_url ? (
                                   <AvatarImage src={expense.paid_by.avatar_url.public_url} />
                                 ) : (
                                   <AvatarFallback
-                                    className={`bg-gradient-to-br ${getAvatarGradient(expense.paid_by.uid)} text-white font-semibold`}
+                                    className={`bg-gradient-to-br ${expense.paid_by ? getAvatarGradient(expense.paid_by.uid) : ''} text-white font-semibold`}
                                   >
-                                    {expense.paid_by.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                                    {expense.paid_by?.full_name?.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
                                   </AvatarFallback>
                                 )}
                               </Avatar>
-                              <p className="font-semibold">{expense.paid_by.full_name.split(" ").slice(-2).map(n => n).join(" ")}</p>
+                              <p className="font-semibold">{expense.paid_by?.full_name?.split(" ").slice(-2).map(n => n).join(" ") ?? 'Unknown'}</p>
                             </div>
                           </div>
                           <div>
                             <p className="text-xs text-gray-500">Event</p>
                             <p className="font-semibold text-sm truncate">
-                              {expense.event.name}
+                              {expense.event?.name ?? 'N/A'}
                             </p>
                           </div>
                           <div>
