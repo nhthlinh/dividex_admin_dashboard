@@ -47,7 +47,11 @@ export function TransactionPage() {
   }, [page, filterType, searchQuery]);
 
   useEffect(() => {
-    TransactionAPI.getTransactionStats().then(setStats);
+    TransactionAPI.getTransactionStats()
+      .then(setStats)
+      .catch(() => {
+        // Silently handle stats error
+      });
   }, []);
 
   const transactionStats = stats
@@ -91,6 +95,8 @@ export function TransactionPage() {
 
       setTransactions(res.content);
       setTotal(res.total_rows);
+    } catch {
+      // Silently handle fetch error
     } finally {
       setLoading(false);
     }

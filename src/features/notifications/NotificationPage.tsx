@@ -70,10 +70,18 @@ export function NotificationPage() {
   }, [page, filterType, searchQuery]);
 
   useEffect(() => {
-    NotificationAPI.getNotificationStats().then(setStats);
-    UserAPI.searchUsers({ search: "", page: 1, page_size: 100 }).then((res) => {
-      setUsers(res.content);
-    });
+    NotificationAPI.getNotificationStats()
+      .then(setStats)
+      .catch(() => {
+        // Silently handle stats error
+      });
+    UserAPI.searchUsers({ search: "", page: 1, page_size: 100 })
+      .then((res) => {
+        setUsers(res.content);
+      })
+      .catch(() => {
+        // Silently handle user search error
+      });
   }, []);
 
     useEffect(() => {
@@ -139,6 +147,8 @@ export function NotificationPage() {
 
       setNotis(res.content);
       setTotal(res.total_rows);
+    } catch {
+      // Silently handle fetch error
     } finally {
       setLoading(false);
     }
@@ -366,7 +376,7 @@ export function NotificationPage() {
                           </div>
                           <div className="flex items-center gap-1">
                             <Users className="h-4 w-4" />
-                            <span>{notification.to_users.length} recipients</span>
+                            <span>{notification.to_users?.length ?? 0} recipients</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />

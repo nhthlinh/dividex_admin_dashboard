@@ -37,7 +37,11 @@ export function EventPage() {
   const [stats, setStats] = useState<EventStatistics | null>(null);
 
   useEffect(() => {
-    EventAPI.getEventStatistics().then(setStats);
+    EventAPI.getEventStatistics()
+      .then(setStats)
+      .catch(() => {
+        // Silently handle stats error
+      });
   }, []);
 
   useEffect(() => {
@@ -52,6 +56,8 @@ export function EventPage() {
 
         setEvents(res.content);
         setTotal(res.total_pages);
+      } catch {
+        // Silently handle fetch error
       } finally {
         setLoading(false);
       }
@@ -311,13 +317,13 @@ export function EventPage() {
                           <p className="text-xs text-gray-600 mb-1">Creator</p>
                           <div className="flex items-center gap-2">
                             <Avatar className="size-7">
-                              {event.creator.avatar_url?.public_url ? (
+                              {event.creator?.avatar_url?.public_url ? (
                                 <AvatarImage src={event.creator.avatar_url.public_url} />
                               ) : (
                                 <AvatarFallback
-                                  className={`bg-gradient-to-br ${getAvatarGradient(event.creator.uid)} text-white font-semibold`}
+                                  className={`bg-gradient-to-br ${event.creator ? getAvatarGradient(event.creator.uid) : ''} text-white font-semibold`}
                                 >
-                                  {event.creator.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                                  {event.creator?.full_name?.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
                                 </AvatarFallback>
                               )}
                             </Avatar>

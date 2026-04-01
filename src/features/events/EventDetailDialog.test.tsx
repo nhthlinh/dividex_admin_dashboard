@@ -9,6 +9,17 @@ vi.mock('./event.api', () => ({
     getEventDetail: vi.fn(),
     updateEvent: vi.fn(),
     deleteEvent: vi.fn(),
+    getEventMembers: vi.fn().mockResolvedValue({
+      content: [],
+      total_rows: 0,
+      current_page: 1,
+    }),
+    getExpensesInEvent: vi.fn().mockResolvedValue({
+      total_amount: 0,
+      expenses: [],
+    }),
+    deactivateEvent: vi.fn(),
+    activateEvent: vi.fn(),
   },
 }));
 
@@ -36,9 +47,33 @@ vi.mock('../../components/ui/badge', () => ({
 
 vi.mock('lucide-react', () => ({
   Calendar: () => <span>CalendarIcon</span>,
+  User: () => <span>UserIcon</span>,
   Users: () => <span>UsersIcon</span>,
   DollarSign: () => <span>DollarIcon</span>,
   Clock: () => <span>ClockIcon</span>,
+  FileText: () => <span>FileTextIcon</span>,
+  Trash2: () => <span>Trash2Icon</span>,
+  Unlock: () => <span>UnlockIcon</span>,
+}));
+
+vi.mock('../../components/ui/avatar', () => ({
+  Avatar: ({ children }: any) => <div data-testid="avatar">{children}</div>,
+  AvatarImage: ({ src }: any) => <img src={src} alt="avatar" />,
+  AvatarFallback: ({ children }: any) => <span>{children}</span>,
+}));
+
+vi.mock('../../components/ui/input', () => ({
+  Input: ({ value, onChange, placeholder }: any) => (
+    <input value={value} onChange={onChange} placeholder={placeholder} />
+  ),
+}));
+
+vi.mock('../../components/Header', () => ({
+  getAvatarGradient: vi.fn().mockReturnValue('from-blue-400 to-blue-600'),
+}));
+
+vi.mock('antd', () => ({
+  Spin: () => <div data-testid="spinner">Loading...</div>,
 }));
 
 // import { EventAPI } from './event.api';

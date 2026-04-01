@@ -13,7 +13,13 @@ vi.mock('../features/auth/auth.store', () => ({
 
 // Mock router
 vi.mock('../app/router', () => ({
-  router: {},
+  router: {
+    state: {
+      location: {
+        pathname: '/',
+      },
+    },
+  },
 }));
 
 // Mock lucide-react icons
@@ -30,6 +36,7 @@ vi.mock('lucide-react', () => ({
   Activity: () => <span>SystemLogsIcon</span>,
   Menu: () => <span>MenuIcon</span>,
   LogOut: () => <span>LogOutIcon</span>,
+  Settings: () => <span>SettingsIcon</span>,
 }));
 
 // Mock UI components
@@ -59,9 +66,9 @@ describe('Sidebar', () => {
   it('should render menu items', () => {
     render(<Sidebar currentPage="dashboard" onNavigate={mockOnNavigate} />);
 
-    expect(screen.getByText(/Dashboard/i)).toBeInTheDocument();
-    expect(screen.getByText(/User/i)).toBeInTheDocument();
-    expect(screen.getByText(/Group/i)).toBeInTheDocument();
+    expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    expect(screen.getByText('User')).toBeInTheDocument();
+    expect(screen.getByText('Group')).toBeInTheDocument();
   });
 
   it('should display current page', () => {
@@ -75,7 +82,7 @@ describe('Sidebar', () => {
     const user = userEvent.setup();
     render(<Sidebar currentPage="dashboard" onNavigate={mockOnNavigate} />);
 
-    const dashboardButton = screen.getByText(/Dashboard/i);
+    const dashboardButton = screen.getByText('Dashboard');
     await user.click(dashboardButton);
 
     expect(mockOnNavigate).toHaveBeenCalled();
@@ -126,7 +133,8 @@ describe('Sidebar', () => {
     ];
 
     menuItems.forEach((item) => {
-      expect(screen.getByText(new RegExp(item, 'i'))).toBeInTheDocument();
+      const elements = screen.queryAllByText(new RegExp(`^${item}$`, 'i'));
+      expect(elements.length).toBeGreaterThan(0);
     });
   });
 
@@ -144,9 +152,13 @@ describe('Sidebar', () => {
     render(<Sidebar currentPage="dashboard" onNavigate={mockOnNavigate} />);
 
     const buttons = screen.getAllByRole('button');
-    // Click first menu item
-    if (buttons.length > 0) {
-      await user.click(buttons[0]);
+    // Should have sidebar buttons (menu items + collapse + settings + logout)
+    expect(buttons.length).toBeGreaterThan(1);
+    
+    // Click any menu button and verify onNavigate is called
+    const menuButton = buttons.find((btn) => btn.textContent?.includes('Dashboard'));
+    if (menuButton) {
+      await user.click(menuButton);
       expect(mockOnNavigate).toHaveBeenCalled();
     }
   });

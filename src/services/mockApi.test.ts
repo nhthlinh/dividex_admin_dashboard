@@ -1,239 +1,515 @@
-// /* eslint-disable @typescript-eslint/no-explicit-any */
-// import { describe, it, expect } from 'vitest';
-// import { mockApi } from './mockApi';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, it, expect } from 'vitest';
+import { mockApi, USE_MOCK } from './mockApi';
 
-// describe('mockApi Service', () => {
-//   describe('API Response Structure', () => {
-//     it('should have users array', () => {
-//       expect(mockApi.listUsers).toBeDefined();
-//       expect(Array.isArray(mockApi.listUsers())).toBe(true);
-//     });
+describe('mockApi', () => {
+  // ===== USERS TESTS =====
+  describe('listUsers', () => {
+    it('should list users with default pagination', async () => {
+      const result = await mockApi.listUsers();
+      expect(result.content).toBeDefined();
+      expect(result.current_page).toBe(1);
+      expect(result.page_size).toBe(10);
+      expect(result.total_rows).toBeGreaterThan(0);
+      expect(result.total_pages).toBeGreaterThan(0);
+    });
 
-//     it('should have groups array', () => {
-//       expect(mockApi.listGroups).toBeDefined();
-//       expect(Array.isArray(mockApi.listGroups())).toBe(true);
-//     });
+    it('should filter users by search', async () => {
+      const result = await mockApi.listUsers({ search: 'john' });
+      expect(result.content).toBeDefined();
+      expect(Array.isArray(result.content)).toBe(true);
+    });
 
-//     it('should have events array', () => {
-//       expect(mockApi.listEvents).toBeDefined();
-//       expect(Array.isArray(mockApi.listEvents())).toBe(true);
-//     });
+    it('should handle custom pagination', async () => {
+      const result = await mockApi.listUsers({ page: 2, page_size: 5 });
+      expect(result.current_page).toBe(2);
+      expect(result.page_size).toBe(5);
+    });
 
-//     it('should have expenses array', () => {
-//       expect(mockApi.listExpenses).toBeDefined();
-//       expect(Array.isArray(mockApi.listExpenses())).toBe(true);
-//     });
+    it('should return paginated results correctly', async () => {
+      const result = await mockApi.listUsers({ page: 1, page_size: 3 });
+      expect(result.content.length).toBeLessThanOrEqual(3);
+    });
+  });
 
-//     it('should have transactions array', () => {
-//       expect(mockApi.listTransactions).toBeDefined();
-//       expect(Array.isArray(mockApi.listTransactions())).toBe(true);
-//     });
+  describe('searchUsers', () => {
+    it('should search users', async () => {
+      const result = await mockApi.searchUsers({ search: 'john' });
+      expect(result.content).toBeDefined();
+      expect(result.current_page).toBe(1);
+    });
 
-//     it('should have notifications array', () => {
-//       expect(mockApi.listNotifications).toBeDefined();
-//       expect(Array.isArray(mockApi.listNotifications())).toBe(true);
-//     });
+    it('should return active status for users', async () => {
+      const result = await mockApi.searchUsers({ search: 'a' });
+      if (result.content.length > 0) {
+        expect(result.content[0].status).toMatch(/^(active|inactive)$/);
+      }
+    });
+  });
 
-//     it('should have messages array', () => {
-//       expect(mockApi.listMessages).toBeDefined();
-//       expect(Array.isArray(mockApi.listMessages())).toBe(true);
-//     });
+  describe('getUserDetail', () => {
+    it('should get user detail', async () => {
+      const listResult = await mockApi.listUsers({ page_size: 1 });
+      if (listResult.content.length > 0) {
+        const userUid = listResult.content[0].uid;
+        const detail = await mockApi.getUserDetail(userUid);
+        expect(detail.uid).toBe(userUid);
+        expect(detail.email).toBeDefined();
+        expect(detail.full_name).toBeDefined();
+      }
+    });
 
-//     it('should have system logs array', () => {
-//       expect(mockApi.listSystemLogs).toBeDefined();
-//       expect(Array.isArray(mockApi.listSystemLogs())).toBe(true);
-//     });
-//   });
+    it('should throw error for non-existent user', async () => {
+      await expect(mockApi.getUserDetail('invalid-uid')).rejects.toThrow('User not found');
+    });
+  });
 
-//   describe('User Mock Data', () => {
-//     it('should have users with required properties', () => {
-//       if (mockApi.listUsers.length > 0) {
-//         const user = mockApi.listUsers.con;
-//         expect(user).toHaveProperty('id');
-//         expect(user).toHaveProperty('email');
-//         expect(user).toHaveProperty('name');
-//       }
-//     });
+  describe('activateUser', () => {
+    it('should activate user', async () => {
+      const listResult = await mockApi.listUsers({ page_size: 1 });
+      if (listResult.content.length > 0) {
+        const result = await mockApi.activateUser(listResult.content[0].uid);
+        expect(result).toBe(true);
+      }
+    });
+  });
 
-//     it('should have valid user emails', () => {
-//       mockApi.listUsers.forEach((user: any) => {
-//         expect(user.email).toMatch(/@/);
-//       });
-//     });
+  describe('deActivateUser', () => {
+    it('should deactivate user', async () => {
+      const listResult = await mockApi.listUsers({ page_size: 1 });
+      if (listResult.content.length > 0) {
+        const result = await mockApi.deActivateUser(listResult.content[0].uid);
+        expect(result).toBe(true);
+      }
+    });
+  });
 
-//     it('should have valid user names', () => {
-//       mockApi.listUsers.forEach((user: any) => {
-//         expect(typeof user.name).toBe('string');
-//         expect(user.name.length).toBeGreaterThan(0);
-//       });
-//     });
-//   });
+  describe('listUserGroups', () => {
+    it('should list user groups', async () => {
+      const listResult = await mockApi.listUsers({ page_size: 1 });
+      if (listResult.content.length > 0) {
+        const userUid = listResult.content[0].uid;
+        const result = await mockApi.listUserGroups(userUid);
+        expect(result.content).toBeDefined();
+        expect(result.current_page).toBe(1);
+      }
+    });
+  });
 
-//   describe('Group Mock Data', () => {
-//     it('should have groups with required properties', () => {
-//       if (mockApi.listGroups.length > 0) {
-//         const group = mockApi.listGroups[0];
-//         expect(group).toHaveProperty('id');
-//         expect(group).toHaveProperty('name');
-//       }
-//     });
+  describe('listUserExpenses', () => {
+    it('should list user expenses', async () => {
+      const listResult = await mockApi.listUsers({ page_size: 1 });
+      if (listResult.content.length > 0) {
+        const result = await mockApi.listUserExpenses(listResult.content[0].uid);
+        expect(result.content).toBeDefined();
+        expect(Array.isArray(result.content)).toBe(true);
+      }
+    });
+  });
 
-//     it('should have valid group names', () => {
-//       mockApi.groups.forEach((group: any) => {
-//         expect(typeof group.name).toBe('string');
-//         expect(group.name.length).toBeGreaterThan(0);
-//       });
-//     });
-//   });
+  describe('getUserLoginHistory', () => {
+    it('should get user login history', async () => {
+      const listResult = await mockApi.listUsers({ page_size: 1 });
+      if (listResult.content.length > 0) {
+        const result = await mockApi.getUserLoginHistory(listResult.content[0].uid);
+        expect(result.content).toBeDefined();
+        expect(result.total_rows).toBeGreaterThan(0);
+      }
+    });
+  });
 
-//   describe('Event Mock Data', () => {
-//     it('should have events with required properties', () => {
-//       if (mockApi.events.length > 0) {
-//         const event = mockApi.events[0];
-//         expect(event).toHaveProperty('id');
-//         expect(event).toHaveProperty('name');
-//       }
-//     });
+  // ===== ADMINS TESTS =====
+  describe('listAdmins', () => {
+    it('should list admins', async () => {
+      const result = await mockApi.listAdmins();
+      expect(result.content).toBeDefined();
+      expect(result.current_page).toBe(1);
+      expect(result.page_size).toBe(10);
+    });
 
-//     it('should have valid event names', () => {
-//       mockApi.events.forEach((event: any) => {
-//         expect(typeof event.name).toBe('string');
-//       });
-//     });
-//   });
+    it('should filter admins by search', async () => {
+      const result = await mockApi.listAdmins({ search: 'admin' });
+      expect(result.content).toBeDefined();
+    });
 
-//   describe('Expense Mock Data', () => {
-//     it('should have expenses with required properties', () => {
-//       if (mockApi.expenses.length > 0) {
-//         const expense = mockApi.expenses[0];
-//         expect(expense).toHaveProperty('id');
-//         expect(expense).toHaveProperty('amount');
-//       }
-//     });
+    it('should handle custom pagination', async () => {
+      const result = await mockApi.listAdmins({ page: 2, page_size: 5 });
+      expect(result.current_page).toBe(2);
+      expect(result.page_size).toBe(5);
+    });
+  });
 
-//     it('should have valid expense amounts', () => {
-//       mockApi.expenses.forEach((expense: any) => {
-//         expect(typeof expense.amount).toBe('number');
-//         expect(expense.amount).toBeGreaterThanOrEqual(0);
-//       });
-//     });
-//   });
+  describe('createAdmin', () => {
+    it('should create new admin', async () => {
+      const result = await mockApi.createAdmin({ email: 'newadmin@test.com' });
+      expect(result.uid).toBeDefined();
+      expect(result.email).toBe('newadmin@test.com');
+      expect(result.status).toBe('active');
+      expect(result.created_at).toBeDefined();
+    });
+  });
 
-//   describe('Transaction Mock Data', () => {
-//     it('should have transactions with required properties', () => {
-//       if (mockApi.transactions.length > 0) {
-//         const transaction = mockApi.transactions[0];
-//         expect(transaction).toHaveProperty('id');
-//         expect(transaction).toHaveProperty('amount');
-//       }
-//     });
+  describe('deleteAdmin', () => {
+    it('should delete admin', async () => {
+      const created = await mockApi.createAdmin({ email: 'deltest@test.com' });
+      const result = await mockApi.deleteAdmin(created.uid);
+      expect(result).toBe(true);
+    });
+  });
 
-//     it('should have valid transaction amounts', () => {
-//       mockApi.transactions.forEach((transaction: any) => {
-//         expect(typeof transaction.amount).toBe('number');
-//       });
-//     });
-//   });
+  describe('deActivateAdmin', () => {
+    it('should deactivate admin', async () => {
+      const listResult = await mockApi.listAdmins({ page_size: 1 });
+      if (listResult.content.length > 0) {
+        const result = await mockApi.deActivateAdmin(listResult.content[0].uid);
+        expect(result).toBe(true);
+      }
+    });
+  });
 
-//   describe('Notification Mock Data', () => {
-//     it('should have notifications with required properties', () => {
-//       if (mockApi.notifications.length > 0) {
-//         const notification = mockApi.notifications[0];
-//         expect(notification).toHaveProperty('id');
-//         expect(notification).toHaveProperty('message');
-//       }
-//     });
+  // ===== DASHBOARD TESTS =====
+  describe('getTodayOverview', () => {
+    it('should get today overview', async () => {
+      const result = await mockApi.getTodayOverview();
+      expect(result).toBeDefined();
+    });
+  });
 
-//     it('should have valid notification messages', () => {
-//       mockApi.notifications.forEach((notification: any) => {
-//         expect(typeof notification.message).toBe('string');
-//       });
-//     });
-//   });
+  describe('getUserInsights', () => {
+    it('should get user insights', async () => {
+      const result = await mockApi.getUserInsights();
+      expect(result).toBeDefined();
+    });
+  });
 
-//   describe('Message Mock Data', () => {
-//     it('should have messages with required properties', () => {
-//       if (mockApi.messages.length > 0) {
-//         const message = mockApi.messages[0];
-//         expect(message).toHaveProperty('id');
-//         expect(message).toHaveProperty('content');
-//       }
-//     });
+  describe('getExpenseCategories', () => {
+    it('should get expense categories', async () => {
+      const result = await mockApi.getExpenseCategories();
+      expect(result).toBeDefined();
+    });
+  });
 
-//     it('should have valid message content', () => {
-//       mockApi.messages.forEach((message: any) => {
-//         expect(typeof message.content).toBe('string');
-//       });
-//     });
-//   });
+  describe('getCashData', () => {
+    it('should get cash data', async () => {
+      const result = await mockApi.getCashData();
+      expect(result).toBeDefined();
+    });
+  });
 
-//   describe('System Log Mock Data', () => {
-//     it('should have system logs with required properties', () => {
-//       if (mockApi.systemLogs.length > 0) {
-//         const log = mockApi.systemLogs[0];
-//         expect(log).toHaveProperty('id');
-//         expect(log).toHaveProperty('action');
-//       }
-//     });
+  describe('getRatings', () => {
+    it('should get ratings', async () => {
+      const result = await mockApi.getRatings();
+      expect(result).toBeDefined();
+    });
+  });
 
-//     it('should have valid log actions', () => {
-//       mockApi.systemLogs.forEach((log: any) => {
-//         expect(typeof log.action).toBe('string');
-//       });
-//     });
-//   });
+  // ===== GROUPS TESTS =====
+  describe('listGroups', () => {
+    it('should list groups', async () => {
+      const result = await mockApi.listGroups();
+      expect(result.content).toBeDefined();
+      expect(result.current_page).toBe(1);
+    });
 
-//   describe('Mock Data Consistency', () => {
-//     it('should have at least some mock data for testing', () => {
-//       const dataCount = 
-//         mockApi.users.length +
-//         mockApi.groups.length +
-//         mockApi.events.length +
-//         mockApi.expenses.length;
+    it('should search groups', async () => {
+      const result = await mockApi.listGroups({ search: 'test' });
+      expect(result.content).toBeDefined();
+    });
 
-//       expect(dataCount).toBeGreaterThan(0);
-//     });
+    it('should handle custom pagination', async () => {
+      const result = await mockApi.listGroups({ page: 2, page_size: 5 });
+      expect(result.current_page).toBe(2);
+    });
+  });
 
-//     it('should have unique IDs within each collection', () => {
-//       const userIds = mockApi.users.map((u: any) => u.id);
-//       const uniqueUserIds = new Set(userIds);
-//       expect(uniqueUserIds.size).toBe(userIds.length);
-//     });
+  describe('getGroupDetail', () => {
+    it('should get group detail', async () => {
+      const listResult = await mockApi.listGroups({ page_size: 1 });
+      if (listResult.content.length > 0) {
+        const groupUid = listResult.content[0].uid;
+        const result = await mockApi.getGroupDetail(groupUid);
+        expect(result.uid).toBe(groupUid);
+      }
+    });
 
-//     it('should have proper data structure', () => {
-//       expect(typeof mockApi).toBe('object');
-//       expect(mockApi !== null).toBe(true);
-//     });
-//   });
+    it('should throw error for non-existent group', async () => {
+      await expect(mockApi.getGroupDetail('invalid-uid')).rejects.toThrow('Group not found');
+    });
+  });
 
-//   describe('Mock API Exports', () => {
-//     it('should export mockApi object', () => {
-//       expect(mockApi).toBeDefined();
-//       expect(typeof mockApi).toBe('object');
-//     });
+  describe('listGroupMembers', () => {
+    it('should list group members', async () => {
+      const listResult = await mockApi.listGroups({ page_size: 1 });
+      if (listResult.content.length > 0) {
+        const result = await mockApi.listGroupMembers(listResult.content[0].uid);
+        expect(result.content).toBeDefined();
+        expect(result.current_page).toBe(1);
+      }
+    });
+  });
 
-//     it('should have all collections accessible', () => {
-//       const collections = [
-//         'users',
-//         'groups',
-//         'events',
-//         'expenses',
-//         'transactions',
-//         'notifications',
-//         'messages',
-//         'systemLogs',
-//       ];
+  describe('updateGroup', () => {
+    it('should update group', async () => {
+      const listResult = await mockApi.listGroups({ page_size: 1 });
+      if (listResult.content.length > 0) {
+        const groupUid = listResult.content[0].uid;
+        const result = await mockApi.updateGroup(groupUid, { name: 'Updated Group' });
+        expect(result.uid).toBe(groupUid);
+      }
+    });
+  });
 
-//       collections.forEach((collection) => {
-//         expect(mockApi).toHaveProperty(collection);
-//       });
-//     });
+  // ===== EVENTS TESTS =====
+  describe('listEvents', () => {
+    it('should list events', async () => {
+      const result = await mockApi.listEvents();
+      expect(result.content).toBeDefined();
+      expect(result.current_page).toBe(1);
+    });
 
-//     it('should not mutate original data on repeated access', () => {
-//       const firstAccess = mockApi.users.length;
-//       const secondAccess = mockApi.users.length;
+    it('should search events', async () => {
+      const result = await mockApi.listEvents({ search: 'party' });
+      expect(result.content).toBeDefined();
+    });
+  });
 
-//       expect(firstAccess).toBe(secondAccess);
-//     });
-//   });
-// });
+  describe('getEventDetail', () => {
+    it('should get event detail', async () => {
+      const listResult = await mockApi.listEvents({ page_size: 1 });
+      if (listResult.content.length > 0) {
+        const eventUid = listResult.content[0].event_uid;
+        const result = await mockApi.getEventDetail(eventUid);
+        expect(result.event_uid).toBe(eventUid);
+      }
+    });
+
+    it('should throw error for non-existent event', async () => {
+      await expect(mockApi.getEventDetail('invalid-uid')).rejects.toThrow('Event not found');
+    });
+  });
+
+  describe('listEventMembers', () => {
+    it('should list event members', async () => {
+      const listResult = await mockApi.listEvents({ page_size: 1 });
+      if (listResult.content.length > 0) {
+        const result = await mockApi.listEventMembers(listResult.content[0].event_uid);
+        expect(result.content).toBeDefined();
+      }
+    });
+  });
+
+  describe('listEventExpenses', () => {
+    it('should list event expenses', async () => {
+      const listResult = await mockApi.listEvents({ page_size: 1 });
+      if (listResult.content.length > 0) {
+        const result = await mockApi.listEventExpenses(listResult.content[0].event_uid);
+        expect(result.expenses).toBeDefined();
+        expect(result.total_amount).toBeDefined();
+      }
+    });
+  });
+
+  describe('updateEvent', () => {
+    it('should update event', async () => {
+      const listResult = await mockApi.listEvents({ page_size: 1 });
+      if (listResult.content.length > 0) {
+        const eventUid = listResult.content[0].event_uid;
+        const result = await mockApi.updateEvent(eventUid, { event_name: 'Updated Event' });
+        expect(result.event_uid).toBe(eventUid);
+      }
+    });
+  });
+
+  // ===== EXPENSES TESTS =====
+  describe('listExpenses', () => {
+    it('should list expenses', async () => {
+      const result = await mockApi.listExpenses();
+      expect(result.content).toBeDefined();
+      expect(result.current_page).toBe(1);
+    });
+
+    it('should search expenses', async () => {
+      const result = await mockApi.listExpenses({ search: 'food' });
+      expect(result.content).toBeDefined();
+    });
+
+    it('should handle custom pagination', async () => {
+      const result = await mockApi.listExpenses({ page: 2, page_size: 5 });
+      expect(result.current_page).toBe(2);
+    });
+  });
+
+  describe('getExpenseDetail', () => {
+    it('should get expense detail', async () => {
+      const listResult = await mockApi.listExpenses({ page_size: 1 });
+      if (listResult.content.length > 0) {
+        const expenseUid = listResult.content[0].expense_uid || listResult.content[0].uid;
+        const result = await mockApi.getExpenseDetail(expenseUid);
+        expect(result).toBeDefined();
+      }
+    });
+
+    it('should throw error for non-existent expense', async () => {
+      await expect(mockApi.getExpenseDetail('invalid-uid')).rejects.toThrow('Expense not found');
+    });
+  });
+
+  describe('getExpenseAttachments', () => {
+    it('should get expense attachments', async () => {
+      const result = await mockApi.getExpenseAttachments();
+      expect(Array.isArray(result)).toBe(true);
+    });
+  });
+
+  describe('deActivateExpense', () => {
+    it('should deactivate expense', async () => {
+      const listResult = await mockApi.listExpenses({ page_size: 1 });
+      if (listResult.content.length > 0) {
+        const result = await mockApi.deActivateExpense(listResult.content[0].expense_uid || listResult.content[0].uid);
+        expect(result).toBe(true);
+      }
+    });
+  });
+
+  // ===== TRANSACTIONS TESTS =====
+  describe('listTransactions', () => {
+    it('should list transactions', async () => {
+      const result = await mockApi.listTransactions();
+      expect(result.content).toBeDefined();
+      expect(result.current_page).toBe(1);
+    });
+
+    it('should handle custom pagination', async () => {
+      const result = await mockApi.listTransactions({ page: 2, page_size: 5 });
+      expect(result.current_page).toBe(2);
+    });
+  });
+
+  // ===== NOTIFICATIONS TESTS =====
+  describe('getNotificationStats', () => {
+    it('should get notification stats', async () => {
+      const result = await mockApi.getNotificationStats();
+      expect(result.total_notifications).toBeDefined();
+      expect(result.total_users).toBeDefined();
+      expect(result.notifications_today).toBeDefined();
+    });
+  });
+
+  describe('listNotifications', () => {
+    it('should list notifications', async () => {
+      const result = await mockApi.listNotifications();
+      expect(result.content).toBeDefined();
+      expect(result.current_page).toBe(1);
+    });
+
+    it('should search notifications', async () => {
+      const result = await mockApi.listNotifications({ search: 'test' });
+      expect(result.content).toBeDefined();
+    });
+
+    it('should filter notifications by type', async () => {
+      const result = await mockApi.listNotifications({ type: 'info' });
+      expect(result.content).toBeDefined();
+    });
+  });
+
+  describe('createNotification', () => {
+    it('should create notification', async () => {
+      const result = await mockApi.createNotification({
+        content: 'Test notification',
+        type: 'System',
+        to_user_uids: [],
+        is_broadcast: false,
+      });
+      expect(result.uid).toBeDefined();
+      expect(result.content).toBe('Test notification');
+      expect(result.type).toBe('System');
+    });
+  });
+
+  describe('deleteNotification', () => {
+    it('should delete notification', async () => {
+      const created = await mockApi.createNotification({
+        content: 'Delete test',
+        type: 'System',
+        to_user_uids: [],
+        is_broadcast: false,
+      });
+      const result = await mockApi.deleteNotification(created.uid);
+      expect(result).toBe(true);
+    });
+  });
+
+  // ===== MESSAGES TESTS =====
+  describe('getMessageGroups', () => {
+    it('should get message groups', async () => {
+      const result = await mockApi.getMessageGroups();
+      expect(Array.isArray(result)).toBe(true);
+      if (result.length > 0) {
+        expect(result[0].uid).toBeDefined();
+        expect(result[0].group_name).toBeDefined();
+        expect(result[0].total_messages).toBeDefined();
+      }
+    });
+  });
+
+  describe('listMessages', () => {
+    it('should list messages', async () => {
+      const groups = await mockApi.getMessageGroups();
+      if (groups.length > 0) {
+        const result = await mockApi.listMessages(groups[0].uid);
+        expect(result.content).toBeDefined();
+        expect(result.current_page).toBe(1);
+      }
+    });
+
+    it('should search messages', async () => {
+      const groups = await mockApi.getMessageGroups();
+      if (groups.length > 0) {
+        const result = await mockApi.listMessages(groups[0].uid, { search: 'test' });
+        expect(result.content).toBeDefined();
+      }
+    });
+  });
+
+  // ===== SYSTEM LOGS TESTS =====
+  describe('listSystemLogs', () => {
+    it('should list system logs', async () => {
+      const result = await mockApi.listSystemLogs();
+      expect(result.content).toBeDefined();
+      expect(result.current_page).toBe(1);
+      expect(result.total_rows).toBeGreaterThan(0);
+    });
+
+    it('should handle custom pagination', async () => {
+      const result = await mockApi.listSystemLogs({ page: 2, page_size: 5 });
+      expect(result.current_page).toBe(2);
+    });
+  });
+
+  // ===== AUTH TESTS =====
+  describe('login', () => {
+    it('should login with valid credentials', async () => {
+      const result = await mockApi.login('test@example.com', 'password123');
+      expect(result.access_token).toBeDefined();
+      expect(result.refresh_token).toBeDefined();
+      expect(result.user).toBeDefined();
+      expect(result.user.email).toBe('test@example.com');
+    });
+
+    it('should throw error with invalid credentials', async () => {
+      await expect(mockApi.login('', 'password')).rejects.toThrow('Invalid credentials');
+    });
+
+    it('should throw error without password', async () => {
+      await expect(mockApi.login('test@example.com', '')).rejects.toThrow('Invalid credentials');
+    });
+  });
+
+  // ===== MOCK FLAG TEST =====
+  describe('USE_MOCK flag', () => {
+    it('should have USE_MOCK flag', () => {
+      expect(typeof USE_MOCK).toBe('boolean');
+    });
+  });
+});

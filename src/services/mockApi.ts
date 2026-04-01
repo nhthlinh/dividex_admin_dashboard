@@ -18,7 +18,7 @@ import type { HttpMethod } from "../features/systemLogs/systemLog.types";
 
 // ====== CONFIGURATION ======
 export const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true' || false; // Toggle via env var or default to false
-const MOCK_DELAY_MS = 400; // Simulate network delay
+const MOCK_DELAY_MS = 10; // Simulate network delay
 
 // ====== HELPER FUNCTIONS ======
 

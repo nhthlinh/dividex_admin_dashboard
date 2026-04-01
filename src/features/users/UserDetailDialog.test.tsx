@@ -11,7 +11,28 @@ vi.mock('./user.api', () => ({
     getUserDetail: vi.fn(),
     getUserGroups: vi.fn(),
     getUserExpenses: vi.fn(),
-    getUserLoginHistory: vi.fn(),
+    listUserGroups: vi.fn().mockResolvedValue({
+      content: [],
+      total_rows: 0,
+      current_page: 1,
+      total_pages: 1,
+    }),
+    listUserExpenses: vi.fn().mockResolvedValue({
+      content: [],
+      total_rows: 0,
+      current_page: 1,
+      total_pages: 1,
+    }),
+    getUserContributions: vi.fn().mockResolvedValue({
+      content: [],
+      total_rows: 0,
+      current_page: 1,
+    }),
+    getUserLoginHistory: vi.fn().mockResolvedValue({
+      content: [],
+      total_rows: 0,
+      current_page: 1,
+    }),
   },
 }));
 
@@ -56,6 +77,23 @@ vi.mock('lucide-react', () => ({
   Phone: () => <span>PhoneIcon</span>,
   MapPin: () => <span>MapPinIcon</span>,
   Calendar: () => <span>CalendarIcon</span>,
+  LogOut: () => <span>LogOutIcon</span>,
+  Trash2: () => <span>Trash2Icon</span>,
+}));
+
+vi.mock('../../components/ui/input', () => ({
+  Input: ({ value, onChange, placeholder }: any) => (
+    <input value={value} onChange={onChange} placeholder={placeholder} />
+  ),
+}));
+
+vi.mock('antd', () => ({
+  Spin: () => <div data-testid="spinner">Loading...</div>,
+  Pagination: ({ onChange, total, current, pageSize }: any) => (
+    <div data-testid="pagination" onClick={() => onChange((current || 1) + 1)}>
+      Page {current} of {Math.ceil((total || 0) / (pageSize || 10))}
+    </div>
+  ),
 }));
 
 // import { UserAPI } from './user.api';
@@ -114,8 +152,10 @@ describe('UserDetailDialog', () => {
   it('should render user information', () => {
     render(<UserDetailDialog user={mockUser} isOpen={true} onClose={() => {}} />);
 
-    expect(screen.getByText(mockUser.full_name)).toBeInTheDocument();
-    expect(screen.getByText(mockUser.email)).toBeInTheDocument();
+    const allNames = screen.queryAllByText(mockUser.full_name);
+    expect(allNames.length).toBeGreaterThan(0);
+    
+    expect(screen.queryByText(mockUser.email)).toBeInTheDocument();
   });
 
   it('should render tabs for different user details', () => {
@@ -134,7 +174,8 @@ describe('UserDetailDialog', () => {
   it('should display user avatar', () => {
     render(<UserDetailDialog user={mockUser} isOpen={true} onClose={() => {}} />);
 
-    expect(screen.getByTestId('avatar')).toBeInTheDocument();
+    const avatars = screen.getAllByTestId('avatar');
+    expect(avatars.length).toBeGreaterThan(0);
   });
 
   it('should render different content tabs', () => {

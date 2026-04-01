@@ -75,7 +75,7 @@ describe('AdminInviteAcceptPage', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByTestId('admin-invite-accept-page')).toBeInTheDocument();
+    expect(screen.getByTestId('invite-accept-page')).toBeInTheDocument();
     expect(screen.getByTestId('card')).toBeInTheDocument();
   });
 
@@ -106,8 +106,9 @@ describe('AdminInviteAcceptPage', () => {
       </BrowserRouter>
     );
 
-    const inputs = screen.getAllByRole('textbox');
-    expect(inputs.length).toBeGreaterThanOrEqual(2);
+    const inputs = screen.getAllByDisplayValue('') as HTMLInputElement[];
+    const passwordInputs = inputs.filter(input => input.type === 'password');
+    expect(passwordInputs.length).toBeGreaterThanOrEqual(2);
   });
 
   it('should render submit button', () => {
@@ -129,10 +130,11 @@ describe('AdminInviteAcceptPage', () => {
       </BrowserRouter>
     );
 
-    const inputs = screen.getAllByRole('textbox');
-    await user.type(inputs[0], 'password123');
+    const inputs = screen.getAllByDisplayValue('') as HTMLInputElement[];
+    const passwordInputs = inputs.filter(input => input.type === 'password');
+    await user.type(passwordInputs[0], 'password123');
 
-    expect((inputs[0] as HTMLInputElement).value).toBe('password123');
+    expect((passwordInputs[0] as HTMLInputElement).value).toBe('password123');
   });
 
   it('should call activateAdmin API on form submission', async () => {
@@ -145,11 +147,12 @@ describe('AdminInviteAcceptPage', () => {
       </BrowserRouter>
     );
 
-    const inputs = screen.getAllByRole('textbox');
+    const inputs = screen.getAllByDisplayValue('') as HTMLInputElement[];
+    const passwordInputs = inputs.filter(input => input.type === 'password');
     const submitButton = screen.getAllByRole('button')[0];
 
-    await user.type(inputs[0], 'password123');
-    await user.type(inputs[1], 'password123');
+    await user.type(passwordInputs[0], 'password123');
+    await user.type(passwordInputs[1], 'password123');
     await user.click(submitButton);
 
     // After form submission, API should be called
@@ -163,7 +166,7 @@ describe('AdminInviteAcceptPage', () => {
       </BrowserRouter>
     );
 
-    const page = screen.getByTestId('admin-invite-accept-page');
+    const page = screen.getByTestId('invite-accept-page');
     expect(page).toHaveClass('min-h-screen');
     expect(page).toHaveClass('flex');
     expect(page).toHaveClass('items-center');

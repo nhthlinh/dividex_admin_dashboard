@@ -1,7 +1,19 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Switch } from './switch';
+
+// Mock ResizeObserver
+beforeAll(() => {
+  if (typeof window !== 'undefined' && !window.ResizeObserver) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).ResizeObserver = class ResizeObserver {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    };
+  }
+});
 
 describe('Switch Component', () => {
   it('should render switch', () => {
@@ -38,7 +50,7 @@ describe('Switch Component', () => {
 
   it('should accept onCheckedChange callback', async () => {
     const user = userEvent.setup();
-    const onChange = jest.fn ? jest.fn() : (() => {});
+    const onChange = vi.fn();
     const { container } = render(<Switch onCheckedChange={onChange} />);
 
     const button = container.querySelector('button');

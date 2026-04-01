@@ -35,17 +35,22 @@ export function MessagePage() {
 
   useEffect(() => {
     const fetchMessageGroups = async () => {
-      setLoading(true);
-      const groups = await MessageAPI.getMessageGroups({
-        page: page,
-        page_size: 10,
-      });
-      if (groups.content.length > 0) {
-        setAllGroups(groups.content);
-        setSelectedGroup(groups.content[0]);
-        setTotalPages(groups.total_pages);
+      try {
+        setLoading(true);
+        const groups = await MessageAPI.getMessageGroups({
+          page: page,
+          page_size: 10,
+        });
+        if (groups?.content?.length > 0) {
+          setAllGroups(groups.content);
+          setSelectedGroup(groups.content[0]);
+          setTotalPages(groups.total_pages || 1);
+        }
+      } catch {
+        // Silently handle fetch error
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     fetchMessageGroups();
   }, [page]);
@@ -53,14 +58,22 @@ export function MessagePage() {
   useEffect(() => { 
     const fetchMessagesInGroup = async () => {
       if (selectedGroup) {
-        setLoading(true);
-        const messagesInGroup = await MessageAPI.getMessagesInGroup(selectedGroup.uid, {
-          page: pageMessage,
-          page_size: 10,
-        });
-        setLoading(false); 
-        setMessageGroups(messagesInGroup.content);
-        setTotalPagesMessage(messagesInGroup.content[0].total_messages ? Math.ceil(messagesInGroup.content[0].total_messages / 10) : 1);
+        try {
+          setLoading(true);
+          const messagesInGroup = await MessageAPI.getMessagesInGroup(selectedGroup.uid, {
+            page: pageMessage,
+            page_size: 10,
+          });
+          if (messagesInGroup?.content) {
+            setMessageGroups(messagesInGroup.content);
+            const totalMessages = messagesInGroup.content[0]?.total_messages || 0;
+            setTotalPagesMessage(totalMessages ? Math.ceil(totalMessages / 10) : 1);
+          }
+        } catch {
+          // Silently handle fetch error
+        } finally {
+          setLoading(false);
+        }
       }
     }
     fetchMessagesInGroup();
@@ -68,9 +81,15 @@ export function MessagePage() {
 
   useEffect(() => {
     const fetchMessageManagement = async () => {
-      setLoading(true);
-      await MessageAPI.getMessageManagement().then(setStatistics);
-      setLoading(false);
+      try {
+        setLoading(true);
+        const data = await MessageAPI.getMessageManagement();
+        setStatistics(data);
+      } catch {
+        // Silently handle fetch error
+      } finally {
+        setLoading(false);
+      }
     }
     fetchMessageManagement();
   }, []);

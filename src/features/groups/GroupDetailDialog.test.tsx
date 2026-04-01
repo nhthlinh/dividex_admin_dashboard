@@ -9,6 +9,17 @@ vi.mock('./group.api', () => ({
     getGroupDetail: vi.fn(),
     updateGroup: vi.fn(),
     deleteGroup: vi.fn(),
+    getGroupMembers: vi.fn().mockResolvedValue({
+      content: [],
+      total_rows: 0,
+      current_page: 1,
+    }),
+    getGroupExpenses: vi.fn().mockResolvedValue({
+      total_amount: 0,
+      expenses: [],
+    }),
+    deactivateGroup: vi.fn(),
+    activateGroup: vi.fn(),
   },
 }));
 
@@ -34,10 +45,29 @@ vi.mock('../../components/ui/badge', () => ({
   Badge: ({ children }: any) => <span data-testid="badge">{children}</span>,
 }));
 
+vi.mock('../../components/ui/avatar', () => ({
+  Avatar: ({ children }: any) => <div data-testid="avatar">{children}</div>,
+  AvatarImage: ({ src }: any) => <img src={src} alt="avatar" />,
+  AvatarFallback: ({ children }: any) => <span>{children}</span>,
+}));
+
+vi.mock('../../components/Header', () => ({
+  getAvatarGradient: vi.fn().mockReturnValue('from-blue-400 to-blue-600'),
+}));
+
+vi.mock('antd', () => ({
+  Spin: () => <div data-testid="spinner">Loading...</div>,
+}));
+
 vi.mock('lucide-react', () => ({
   Users: () => <span>UsersIcon</span>,
   DollarSign: () => <span>DollarIcon</span>,
   Calendar: () => <span>CalendarIcon</span>,
+  Trash2: () => <span>Trash2Icon</span>,
+  Unlock: () => <span>UnlockIcon</span>,
+  Lock: () => <span>LockIcon</span>,
+  User: () => <span>UserIcon</span>,
+  Activity: () => <span>ActivityIcon</span>,
 }));
 
 // import { GroupAPI } from './group.api';

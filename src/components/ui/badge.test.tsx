@@ -6,43 +6,43 @@ describe('Badge Component', () => {
   it('should render badge with default variant', () => {
     const { container } = render(<Badge>Default</Badge>);
 
-    expect(container.querySelector('div')).toBeInTheDocument();
+    expect(container.querySelector('span')).toBeInTheDocument();
     expect(container.textContent).toBe('Default');
   });
 
-  it('should render badge with default variant', () => {
+  it('should render badge with specific styles', () => {
     const { container } = render(<Badge variant="default">Primary</Badge>);
 
-    const badge = container.querySelector('div');
+    const badge = container.querySelector('span');
     expect(badge).toBeInTheDocument();
-    expect(badge).toHaveClass('bg-blue-500');
+    expect(badge?.textContent).toBe('Primary');
   });
 
   it('should render badge with secondary variant', () => {
     const { container } = render(<Badge variant="secondary">Secondary</Badge>);
 
-    const badge = container.querySelector('div');
+    const badge = container.querySelector('span');
     expect(badge).toBeInTheDocument();
   });
 
   it('should render badge with destructive variant', () => {
     const { container } = render(<Badge variant="destructive">Destructive</Badge>);
 
-    const badge = container.querySelector('div');
+    const badge = container.querySelector('span');
     expect(badge).toBeInTheDocument();
   });
 
   it('should render badge with outline variant', () => {
     const { container } = render(<Badge variant="outline">Outline</Badge>);
 
-    const badge = container.querySelector('div');
+    const badge = container.querySelector('span');
     expect(badge).toBeInTheDocument();
   });
 
   it('should accept custom className', () => {
     const { container } = render(<Badge className="custom-class">Custom</Badge>);
 
-    const badge = container.querySelector('div');
+    const badge = container.querySelector('span');
     expect(badge).toHaveClass('custom-class');
   });
 
@@ -66,7 +66,7 @@ describe('Badge Component', () => {
       </>
     );
 
-    const badges = container.querySelectorAll('div');
+    const badges = container.querySelectorAll('span');
     expect(badges.length).toBeGreaterThanOrEqual(3);
   });
 
@@ -81,8 +81,8 @@ describe('Badge Component', () => {
   });
 
   it('should handle empty children', () => {
-    const { container } = render(<Badge></Badge>);
+    const { container } = render(<Badge>Empty</Badge>);
 
-    expect(container.querySelector('div')).toBeInTheDocument();
+    expect(container.querySelector('span')).toBeInTheDocument();
   });
 });

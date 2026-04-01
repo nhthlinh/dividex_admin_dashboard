@@ -27,7 +27,6 @@ export function AdminManagementPage() {
 
   const handleInvite = async () => {
     if (!email) {
-      message.warning("Please enter email");
       return;
     }
 

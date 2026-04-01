@@ -15,14 +15,14 @@ describe('authStore', () => {
     it('should set token in localStorage', () => {
       authStore.setToken('token123');
 
-      expect(localStorage.getItem('token')).toBe('token123');
+      expect(localStorage.getItem('admin_token')).toBe('token123');
     });
 
     it('should overwrite existing token', () => {
       authStore.setToken('token1');
       authStore.setToken('token2');
 
-      expect(localStorage.getItem('token')).toBe('token2');
+      expect(localStorage.getItem('admin_token')).toBe('token2');
     });
   });
 
@@ -52,7 +52,7 @@ describe('authStore', () => {
 
       authStore.setUserInfo(user);
 
-      expect(localStorage.getItem('user')).toBe(JSON.stringify(user));
+      expect(localStorage.getItem('admin_user_info')).toBe(JSON.stringify(user));
     });
 
     it('should overwrite existing user info', () => {
@@ -70,7 +70,7 @@ describe('authStore', () => {
       authStore.setUserInfo(user1);
       authStore.setUserInfo(user2);
 
-      expect(localStorage.getItem('user')).toBe(JSON.stringify(user2));
+      expect(localStorage.getItem('admin_user_info')).toBe(JSON.stringify(user2));
     });
   });
 

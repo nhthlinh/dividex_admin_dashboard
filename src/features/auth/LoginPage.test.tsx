@@ -33,18 +33,22 @@ vi.mock('antd', () => ({
       {children || 'Login'}
     </button>
   ),
-  Input: ({ value, placeholder, onChange, ...props }: any) => (
-    <input data-testid={`input-${placeholder}`} value={value} placeholder={placeholder} onChange={onChange} {...props} />
-  ),
-  'Input.Password': ({ value, placeholder, onChange, ...props }: any) => (
-    <input
-      data-testid={`input-${placeholder}`}
-      type="password"
-      value={value}
-      placeholder={placeholder}
-      onChange={onChange}
-      {...props}
-    />
+  Input: Object.assign(
+    ({ value, placeholder, onChange, ...props }: any) => (
+      <input data-testid={`input-${placeholder}`} value={value} placeholder={placeholder} onChange={onChange} {...props} />
+    ),
+    {
+      Password: ({ value, placeholder, onChange, ...props }: any) => (
+        <input
+          data-testid={`input-${placeholder}`}
+          type="password"
+          value={value}
+          placeholder={placeholder}
+          onChange={onChange}
+          {...props}
+        />
+      ),
+    }
   ),
   message: {
     warning: vi.fn(),
