@@ -1,30 +1,40 @@
 import type { User } from "../users/user.types";
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-export type LogLevel = "INFO" | "WARNING" | "ERROR" | "CRITICAL";
 
-export interface SystemLog {
+export interface SystemLogItem {
   uid: string;
-  api_endpoint: string;
-  http_method: HttpMethod;
+  user: User;
+  created_at: string;
+  updated_at: string;
+  path: string;
+  method_type: HttpMethod;
   status_code: number;
-  error_message?: string;
-  error_type?: string;
-  user?: User;
-  ip_address?: string;
-  user_agent?: string;
-  request_body?: any;
-  response_body?: any;
-  stack_trace?: string;
-  execution_time?: number; // in milliseconds
-  timestamp: string;
-  log_level: LogLevel;
+  response_time: number;
+  log_message: string;
 }
 
-export interface ErrorStats {
+export interface SystemLogListResponse {
+  content: SystemLogItem[];
+  current_page: number;
+  page_size: number;
+  total_rows: number;
+  total_pages: number;
+}
+
+export interface GetSystemLogsParams {
+  method_type?: HttpMethod | null;
+  status_code?: "2xx" | "4xx" | "5xx" | null;
+  search?: string;
+  page_size?: number;
+  page?: number;
+}
+
+export interface ManagementLogResponse {
   total_errors: number;
-  errors_today: number;
-  critical_errors: number;
+  percent_increase_errors: number;
+  today_errors: number;
+  percent_increase_today_errors: number;
   avg_response_time: number;
-  top_error_endpoint?: string;
+  percent_increase_avg_response_time: number;
 }

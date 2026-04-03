@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// NOT DONE
 import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
@@ -57,20 +59,23 @@ export function AdminInviteAcceptPage() {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="w-[420px]">
-          <CardContent className="text-center text-slate-600">
-            <CardHeader>
-                Invitation link is invalid or expired.
-            </CardHeader>
-          </CardContent>
+      <div data-testid="invite-accept-page" className="min-h-screen flex items-center justify-center bg-slate-50">
+        <Card className="w-[420px] shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-center">
+              Accept Admin Invitation
+            </CardTitle>
+            <p className="text-center text-sm text-slate-500">
+              Invitation link is invalid or expired.
+            </p>
+          </CardHeader>
         </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+    <div data-testid="invite-accept-page" className="min-h-screen flex items-center justify-center bg-slate-50">
       <Card className="w-[420px] shadow-lg">
         <CardHeader>
           <CardTitle className="text-center">

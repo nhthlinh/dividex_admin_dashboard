@@ -5,12 +5,8 @@ import { Input } from "../../components/ui/input";
 import { Badge } from "../../components/ui/badge";
 
 import {
-  DollarSign,
-  TrendingUp,
   Search,
-  Plus,
   Receipt,
-  PieChart,
 } from "lucide-react";
 import type { Expense } from "./expense.types";
 import { ExpenseDetailDialog } from "./ExpenseDetailDialog";
@@ -20,7 +16,7 @@ import { Spin } from "antd";
 import { router } from "../../app/router";
 import { EventAPI } from "../events/event.api";
 
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 10;
 
 export function ExpenseInEventPage() {
   const eventId = router.state.location.pathname.split("/").pop();
@@ -133,7 +129,7 @@ export function ExpenseInEventPage() {
   });
 
   return (
-    <div className="p-8 space-y-6">
+    <div data-testid="expense-in-event-page" className="p-8 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -141,12 +137,6 @@ export function ExpenseInEventPage() {
           <p className="text-sm text-gray-500 mt-1">
             Track and manage all expenses
           </p>
-        </div>
-        <div className="flex gap-3">
-          <Button size="sm" className="text-white bg-rose-600 hover:bg-rose-700">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Expense
-          </Button>
         </div>
       </div>
 

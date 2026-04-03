@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { User } from "../users/user.types";
 
 export interface GroupStatistics {
@@ -16,7 +17,7 @@ export interface GroupItem {
   created_at: string;
   total_members: number;
   leader: User;
-    avatar_url: {
+  avatar_url: {
     uid: string,
     original_name?: string,
     public_url?: string
@@ -25,6 +26,55 @@ export interface GroupItem {
 
 export interface GroupListResponse {
   content: GroupItem[];
+  current_page: number;
+  page_size: number;
+  total_rows: number;
+  total_pages: number;
+}
+
+export interface GroupMember {
+  group_members_uid: string;
+  user: {
+    full_name: string;
+    email: string;
+    balance: number;
+    avatar_url: {
+      uid: string,
+      original_name?: string,
+      public_url?: string
+    },
+    uid: string;
+  };
+  joined_at: string;
+}
+
+export interface GroupMembersResponse {
+  content: GroupMember[];
+  current_page: number;
+  page_size: number;
+  total_rows: number;
+  total_pages: number;
+}
+
+export interface GetGroupMembersParams {
+  search?: string | null;
+  order_by?: "updated_at" | "full_name";
+  sort_type?: "asc" | "desc";
+  page_size?: number;
+  page?: number;
+}
+
+export interface GroupActivity {
+  uid: string;
+  created_at: string;
+  content: string;
+  type: string;
+  related_uid: string;
+  from_user: any;
+}
+
+export interface GroupActivityListResponse {
+  content: GroupActivity[];
   current_page: number;
   page_size: number;
   total_rows: number;

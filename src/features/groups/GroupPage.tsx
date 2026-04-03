@@ -20,7 +20,7 @@ import type { GroupItem, GroupStatistics } from "./group.types";
 import { GroupAPI } from "./group.api";
 import { Spin } from "antd";
 
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 10;
 
 export function GroupPage() {
   const [stats, setStats] = useState<GroupStatistics | null>(null);
@@ -64,7 +64,7 @@ export function GroupPage() {
           icon: Group,
           label: "Total Groups",
           value: stats.total_groups,
-          change: `${stats.percent_increase_groups}% from last month`,
+          change: `${stats.percent_increase_groups.toFixed(2)}% from last month`,
           trend: stats.percent_increase_groups >= 0 ? "up" : "down",
           bgColor: "bg-pink-50",
           iconColor: "text-pink-500",
@@ -73,7 +73,7 @@ export function GroupPage() {
           icon: Users,
           label: "Active Groups",
           value: stats.active_groups,
-          change: `${stats.percent_increase_active_groups}% from last month`,
+          change: `${stats.percent_increase_active_groups.toFixed(2)}% from last month`,
           trend: stats.percent_increase_active_groups >= 0 ? "up" : "down",
           bgColor: "bg-orange-50",
           iconColor: "text-orange-500",
@@ -82,7 +82,7 @@ export function GroupPage() {
           icon: Users,
           label: "Total Members",
           value: stats.total_members,
-          change: `${stats.percent_increase_members}% from last month`,
+          change: `${stats.percent_increase_members.toFixed(2)}% from last month`,
           trend: stats.percent_increase_members >= 0 ? "up" : "down",
           bgColor: "bg-purple-50",
           iconColor: "text-purple-500",
@@ -91,7 +91,7 @@ export function GroupPage() {
           icon: TrendingUp,
           label: "Avg. Members per Group",
           value: stats.total_groups !== 0 ? (stats.total_members / stats.total_groups).toFixed(2) : 0,
-          change: `${stats.percent_increase_members / stats.total_groups}% from last month`,
+          change: `${(stats.percent_increase_members / stats.total_groups).toFixed(2)}% from last month`,
           trend: stats.percent_increase_members >= 0 ? "up" : "down",
           bgColor: "bg-green-50",
           iconColor: "text-green-500",
@@ -112,7 +112,7 @@ export function GroupPage() {
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div data-testid="group-page" className="p-8 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

@@ -1,30 +1,29 @@
-import { Search, ChevronDown, LogOut } from "lucide-react";
-import { Input } from "./ui/input";
+import { ChevronDown } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { authStore } from "../features/auth/auth.store";
 import {
   DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
 export function Header() {
   return (
-    <header className="bg-white border-b border-slate-200">
-      <div className="flex items-center justify-between px-6 py-4">
-        <h1 className="text-slate-900">Dashboard</h1>
+    <div  style={{ gridColumn: '1 / -1' }}>
+      <header className="bg-white border-b border-slate-200">
+        <div className="flex items-center justify-between px-6 py-4">
+          <h1 className="text-slate-900">Dashboard</h1>
 
-        <div className="flex items-center gap-4">
-          {/* <Button variant="ghost" size="icon" className="relative">
-            <Bell className="size-5 text-slate-600" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-400 rounded-full"></span>
-          </Button> */}
+          <div className="flex items-center gap-4">
+            {/* <Button variant="ghost" size="icon" className="relative">
+              <Bell className="size-5 text-slate-600" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-400 rounded-full"></span>
+            </Button> */}
 
-          <AdminUserMenu />
+            <AdminUserMenu />
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </div>
   );
 }
 
@@ -85,6 +84,7 @@ function AdminUserMenu() {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const getAvatarGradient = (uid: string) => {
   const gradients = [
     "from-rose-500 to-pink-500",

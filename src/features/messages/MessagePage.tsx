@@ -1,4 +1,4 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
@@ -35,17 +35,22 @@ export function MessagePage() {
 
   useEffect(() => {
     const fetchMessageGroups = async () => {
-      setLoading(true);
-      const groups = await MessageAPI.getMessageGroups({
-        page: page,
-        page_size: 10,
-      });
-      if (groups.content.length > 0) {
-        setAllGroups(groups.content);
-        setSelectedGroup(groups.content[0]);
-        setTotalPages(groups.total_pages);
+      try {
+        setLoading(true);
+        const groups = await MessageAPI.getMessageGroups({
+          page: page,
+          page_size: 10,
+        });
+        if (groups?.content?.length > 0) {
+          setAllGroups(groups.content);
+          setSelectedGroup(groups.content[0]);
+          setTotalPages(groups.total_pages || 1);
+        }
+      } catch {
+        // Silently handle fetch error
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     fetchMessageGroups();
   }, [page]);
@@ -53,14 +58,22 @@ export function MessagePage() {
   useEffect(() => { 
     const fetchMessagesInGroup = async () => {
       if (selectedGroup) {
-        setLoading(true);
-        const messagesInGroup = await MessageAPI.getMessagesInGroup(selectedGroup.uid, {
-          page: pageMessage,
-          page_size: 10,
-        });
-        setLoading(false); 
-        setMessageGroups(messagesInGroup.content);
-        setTotalPagesMessage(messagesInGroup.content[0].total_messages ? Math.ceil(messagesInGroup.content[0].total_messages / 10) : 1);
+        try {
+          setLoading(true);
+          const messagesInGroup = await MessageAPI.getMessagesInGroup(selectedGroup.uid, {
+            page: pageMessage,
+            page_size: 10,
+          });
+          if (messagesInGroup?.content) {
+            setMessageGroups(messagesInGroup.content);
+            const totalMessages = messagesInGroup.content[0]?.total_messages || 0;
+            setTotalPagesMessage(totalMessages ? Math.ceil(totalMessages / 10) : 1);
+          }
+        } catch {
+          // Silently handle fetch error
+        } finally {
+          setLoading(false);
+        }
       }
     }
     fetchMessagesInGroup();
@@ -68,9 +81,15 @@ export function MessagePage() {
 
   useEffect(() => {
     const fetchMessageManagement = async () => {
-      setLoading(true);
-      await MessageAPI.getMessageManagement().then(setStatistics);
-      setLoading(false);
+      try {
+        setLoading(true);
+        const data = await MessageAPI.getMessageManagement();
+        setStatistics(data);
+      } catch {
+        // Silently handle fetch error
+      } finally {
+        setLoading(false);
+      }
     }
     fetchMessageManagement();
   }, []);
@@ -81,7 +100,7 @@ export function MessagePage() {
         icon: MessageSquare,
         label: "Total Messages",
         value: statistics.total_messages,
-        change: statistics.percent_increase_messages + "% from last month",
+        change: `${statistics.percent_increase_messages.toFixed(2)}% from last month`,
         bgColor: "bg-blue-50",
         iconColor: "text-blue-500",
       },
@@ -89,7 +108,7 @@ export function MessagePage() {
         icon: Users,
         label: "Active Groups",
         value: statistics.active_groups,
-        change: statistics.percent_increase_active_groups + "% from last month",
+        change: `${statistics.percent_increase_active_groups.toFixed(2)}% from last month`,
         bgColor: "bg-green-50",
         iconColor: "text-green-500",
       },
@@ -97,7 +116,7 @@ export function MessagePage() {
         icon: Send,
         label: "Messages Today",
         value: statistics.message_today,
-        change: statistics.percent_increase_message_today + "% from yesterday",
+        change: `${statistics.percent_increase_message_today.toFixed(2)}% from yesterday`,
         bgColor: "bg-purple-50",
         iconColor: "text-purple-500",
       },
@@ -105,7 +124,7 @@ export function MessagePage() {
         icon: Paperclip,
         label: "Attachments",
         value: statistics.attachments,
-        change: statistics.percent_increase_attachments + "% from last month",
+        change: `${statistics.percent_increase_attachments.toFixed(2)}% from last month`,
         bgColor: "bg-orange-50",
         iconColor: "text-orange-500",
       },
@@ -149,8 +168,12 @@ export function MessagePage() {
       ).length > 0
   );
 
+  if (loading) {
+    return <div data-testid="message-page"></div>;
+  }
+
   return (
-    <div className="p-8 space-y-6">
+    <div data-testid="message-page" className="p-8 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

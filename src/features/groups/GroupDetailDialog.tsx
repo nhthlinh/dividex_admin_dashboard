@@ -3,8 +3,9 @@ import {
   Calendar,
   Unlock,
   Trash2,
+  Activity,
 } from "lucide-react";
-import type { GroupItem } from "./group.types";
+import type { GroupActivity, GroupItem, GroupMember } from "./group.types";
 import { Badge } from "../../components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
@@ -20,22 +21,72 @@ interface GroupDetailDialogProps {
 }
 
 import { useEffect, useState } from "react";
+import { CardContent } from "../../components/ui/card";
+import { Spin } from "antd";
 
 export function GroupDetailDialog({ group, open, onOpenChange }: GroupDetailDialogProps) {
   const [localGroup, setLocalGroup] = useState<GroupItem | null>(group);
+  const [members, setMembers] = useState<GroupMember[]>([]);
+  const [activities, setActivities] = useState<GroupActivity[]>([]);
+
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     setLocalGroup(group);
   }, [group]);
 
-  if (!localGroup) return null;
+  useEffect(() => {
+    if (!localGroup) return;
+    const fetchMembers = async () => {
+      try {
+        const res = await GroupAPI.getGroupMembers(localGroup.uid, {
+          page_size: 100,
+        });
+        setMembers(res.content);
+      } catch (error) {
+        console.error("Failed to fetch group members:", error);
+      }
+    };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
-  };
+    const fetchActivities = async () => {
+      if (!localGroup) return;
+      try {
+        const res = await GroupAPI.getGroupActivity(localGroup.uid, page, 10);
+        setActivities(res.content);
+        setTotalPages(res.total_pages);
+      } catch (error) {
+        console.error("Failed to fetch group activities:", error);
+      }
+    };
+
+    if (localGroup) {
+      fetchMembers();
+      fetchActivities();
+    } 
+  }, [localGroup]);
+
+  useEffect(() => {
+    if (localGroup) {
+      const fetchActivities = async () => {
+        setLoading(true);
+        try {
+          const res = await GroupAPI.getGroupActivity(localGroup.uid, page, 10);
+          setActivities(res.content);
+          setTotalPages(res.total_pages);
+        } catch (error) {
+          console.error("Failed to fetch group activities:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchActivities();
+    }   
+  }, [page]);
+
+  if (!localGroup) return null;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -44,82 +95,6 @@ export function GroupDetailDialog({ group, open, onOpenChange }: GroupDetailDial
       day: "numeric",
     });
   };
-
-  // Mock members data
-  const members = [
-    {
-      uid: "1",
-      name: "Amy Roo",
-      email: "amy.roo@example.com",
-      role: "Leader",
-      joined_at: "2024-01-15",
-      avatar_url: {
-        public_url: "",
-      }
-    },
-    {
-      uid: "2",
-      name: "Hana Ghoghly",
-      email: "hana.g@example.com",
-      role: "Member",
-      joined_at: "2024-02-20",
-      avatar_url: {
-        public_url: "",
-      }
-    },
-    {
-      uid: "3",
-      name: "Nguyễn Hồ Thúy Linh",
-      email: "linh.nguyen@example.com",
-      role: "Member",
-      joined_at: "2024-03-10",
-      avatar_url: {
-        public_url: "",
-      }
-    },
-  ];
-
-  // Mock activities
-  const activities = [
-    {
-      id: "1",
-      action: "Member joined",
-      user: {
-        uid: "3",
-        full_name: "Nguyễn Hồ Thúy Linh",
-        avatar_url: {
-          public_url: "",
-        }
-      },
-      timestamp: "2024-03-10 14:30",
-    },
-    {
-      id: "2",
-      action: "Payment made",
-      user: {
-        uid: "1",
-        full_name: "Amy Roo",
-        avatar_url: {
-          public_url: "",
-        }
-      },
-      amount: 150.0,
-      timestamp: "2024-03-08 10:15",
-    },
-    {
-      id: "3",
-      action: "Event created",
-      user: {
-        uid: "2",
-        full_name: "Hana Ghoghly",
-        avatar_url: {
-          public_url: "",
-        }
-      },
-      event: "Team Building 2024",
-      timestamp: "2024-03-05 16:45",
-    },
-  ];
 
   const handleGoToEventPage = () => {
     window.location.href = `/event/group/${localGroup.uid}`;
@@ -283,28 +258,27 @@ export function GroupDetailDialog({ group, open, onOpenChange }: GroupDetailDial
             <div className="space-y-3">
               {members.map((member) => (
                 <div
-                  key={member.uid}
+                  key={member.group_members_uid}
                   className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   <div className="flex items-center gap-4">
                     <Avatar className="size-7">
-                      {member.avatar_url?.public_url ? (
-                        <AvatarImage src={member.avatar_url.public_url} />
+                      {member.user.avatar_url?.public_url ? (
+                        <AvatarImage src={member.user.avatar_url.public_url} />
                       ) : (
                         <AvatarFallback
-                          className={`bg-gradient-to-br ${getAvatarGradient(member.uid)} text-white font-semibold`}
+                          className={`bg-gradient-to-br ${getAvatarGradient(member.user.uid)} text-white font-semibold`}
                         >
-                          {member.name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                          {member.user.full_name.split(" ").map((n: string) => n[0]).join("").split("").slice(0,2)}
                         </AvatarFallback>
                       )}
                     </Avatar>
                     <div>
-                      <p className="font-semibold">{member.name}</p>
-                      <p className="text-sm text-gray-500">{member.email}</p>
+                      <p className="font-semibold">{member.user.full_name}</p>
+                      <p className="text-sm text-gray-500">{member.user.email}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <Badge variant="secondary">{member.role}</Badge>
                     <p className="text-xs text-gray-500 mt-1">
                       Joined {formatDate(member.joined_at)}
                     </p>
@@ -316,40 +290,75 @@ export function GroupDetailDialog({ group, open, onOpenChange }: GroupDetailDial
 
           <TabsContent value="activity">
             <div className="space-y-3">
+              {loading && (
+                <CardContent className="flex justify-center py-10">
+                  <Spin />
+                </CardContent>
+              )}
+
+              {!loading && activities.length === 0 && (
+                <div className="text-center py-12">
+                  <Activity className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500">No activities found</p>
+                </div>
+              )}
+
               {activities.map((activity) => (
                 <div
-                  key={activity.id}
+                  key={activity.uid}
                   className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg"
                 >
                   <div className="flex-1">
-                    <p className="font-medium">{activity.action}</p>
+                    <p className="font-medium">{activity.type}</p>
                     <p className="flex gap-2 items-center text-sm text-gray-600 mt-1">
                       by
                       <Avatar className="size-7">
-                        {activity.user.avatar_url?.public_url ? (
-                          <AvatarImage src={activity.user.avatar_url.public_url} />
+                        {activity.from_user.avatar_url?.public_url ? (
+                          <AvatarImage src={activity.from_user.avatar_url.public_url} />
                         ) : (
                           <AvatarFallback
-                            className={`bg-gradient-to-br ${getAvatarGradient(activity.user.uid)} text-white font-semibold`}
+                            className={`bg-gradient-to-br ${getAvatarGradient(activity.from_user.uid)} text-white font-semibold`}
                           >
-                            {activity.user.full_name.split(" ").map(n => n[0]).join("").split("").slice(0,2)}
+                            {activity.from_user.full_name.split(" ").map((n: string) => n[0]).join("").split("").slice(0,2)}
                           </AvatarFallback>
                         )}
                       </Avatar>
-                      <span className="font-medium">{activity.user.full_name}</span>
-                      {activity.amount && (
-                        <span> - {formatCurrency(activity.amount)}</span>
-                      )}
-                      {activity.event && (
-                        <span> - {activity.event}</span>
+                      <span className="font-medium">{activity.from_user.full_name}</span>
+                      {activity.content && (
+                        <span> - {activity.content}</span>
                       )}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
-                      {activity.timestamp}
+                      {formatDate(activity.created_at)}
                     </p>
                   </div>
                 </div>
               ))}
+
+              {/* Pagination */}
+              <div className="flex justify-between items-center mt-6">
+                <span className="text-sm text-gray-500">
+                  Page {page} / {totalPages}
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={page === 1}
+                    onClick={() => setPage((p) => p - 1)}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
             </div>
           </TabsContent>
         </Tabs>

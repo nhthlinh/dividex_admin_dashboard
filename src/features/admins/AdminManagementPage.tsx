@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// NOT DONE
 import { useEffect, useState } from "react";
 import { Mail, UserPlus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
@@ -25,7 +27,6 @@ export function AdminManagementPage() {
 
   const handleInvite = async () => {
     if (!email) {
-      message.warning("Please enter email");
       return;
     }
 
@@ -52,12 +53,22 @@ export function AdminManagementPage() {
     }
   };
 
+  const handleDeactivate = async (adminUid: string) => {
+    try {
+      await AdminAPI.deActivateAdmin(adminUid);
+      message.success("Admin deactivated");
+      fetchAdmins();
+    } catch (err: any) {
+      message.error(err.message);
+    }
+  };
+
   useEffect(() => {
     fetchAdmins();
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div data-testid="admin-management-page" className="space-y-6">
       {/* Invite admin */}
       <Card>
         <CardHeader>
@@ -108,24 +119,44 @@ export function AdminManagementPage() {
                         : "bg-yellow-100 text-yellow-700"
                     }`}
                   >
-                    {admin.status === "active" ? "Active" : "Invited"}
+                    {admin.status === "ACTIVE" ? "Active" : "Inactive"}
                   </span>
 
-                  <Popconfirm
-                    title="Delete admin"
-                    description="Are you sure you want to remove this admin?"
-                    okText="Delete"
-                    cancelText="Cancel"
-                    okButtonProps={{ danger: true }}
-                    onConfirm={() => handleDelete(admin.uid)}
-                  >
-                    <Button
-                      variant="ghost"
-                      className="text-red-600 hover:bg-red-50"
+                  {admin.status === "ACTIVE" && (
+                    <Popconfirm
+                      title="Deactivate admin"
+                      description="Are you sure you want to deactivate this admin?"
+                      okText="Deactivate"
+                      cancelText="Cancel"
+                      okButtonProps={{ danger: true }}
+                      onConfirm={() => handleDeactivate(admin.uid)}
                     >
-                      <Trash2 className="size-4" />
-                    </Button>
-                  </Popconfirm>
+                      <Button
+                        variant="ghost"
+                        className="text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </Popconfirm>
+                  )}
+
+                  {admin.status === "INACTIVE" && (
+                    <Popconfirm
+                      title="Delete admin/invitation"
+                      description="Are you sure you want to remove this admin?"
+                      okText="Delete"
+                      cancelText="Cancel"
+                      okButtonProps={{ danger: true }}
+                      onConfirm={() => handleDelete(admin.uid)}
+                    >
+                      <Button
+                        variant="ghost"
+                        className="text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </Popconfirm>
+                  )}
                 </div>
               </div>
             ))}
