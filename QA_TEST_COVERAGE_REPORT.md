@@ -61,8 +61,6 @@
 ### ❌ Not Covered
 
 - API error scenarios (404, 500, timeout errors from getManagementLog/getLogs)
-- Real-time log updates/websocket connections
-- Log export functionality (CSV, PDF)
 - Advanced filtering combinations (method + status + date range)
 - Performance testing with large datasets (1000+ logs)
 - Accessibility compliance details (WCAG 2.1 AA)
