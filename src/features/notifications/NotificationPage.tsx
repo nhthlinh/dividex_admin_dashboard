@@ -111,7 +111,7 @@ export function NotificationPage() {
         {
           label: "Total Notifications",
           value: stats.total_notifications,
-          change: `${stats.percent_increase_total_notifications}%`,
+          change: `${stats.percent_increase_total_notifications.toFixed(2)}%`,
           icon: Bell,
           bgColor: "bg-blue-100",
           iconColor: "text-blue-600",
@@ -119,7 +119,7 @@ export function NotificationPage() {
         {
           label: "Total Users",
           value: stats.total_users,
-          change: `${stats.percent_increase_users}%`,
+          change: `${stats.percent_increase_users.toFixed(2)}%`,
           icon: Users,
           bgColor: "bg-green-100",
           iconColor: "text-green-600",
@@ -127,7 +127,7 @@ export function NotificationPage() {
         {
           label: "Notifications Today",
           value: stats.notifications_today,
-          change: `${stats.percent_increase_notifications_today}%`,
+          change: `${stats.percent_increase_notifications_today.toFixed(2)}%`,
           icon: TrendingUp,
           bgColor: "bg-blue-100",
           iconColor: "text-blue-600",

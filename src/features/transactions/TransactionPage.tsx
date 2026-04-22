@@ -58,8 +58,8 @@ export function TransactionPage() {
     ? [
         {
           label: "Total Deposits",
-          value: stats.total_deposits,
-          change: `${stats.percent_increase_deposits}%`,
+          value: stats.total_deposits, 
+          change: `${stats.percent_increase_deposits.toFixed(2)}%`,
           icon: ArrowDownCircle,
           bgColor: "bg-green-100",
           iconColor: "text-green-600",
@@ -67,7 +67,7 @@ export function TransactionPage() {
         {
           label: "Total Withdrawals",
           value: stats.total_withdrawals,
-          change: `${stats.percent_increase_withdrawals}%`,
+          change: `${stats.percent_increase_withdrawals.toFixed(2)}%`,
           icon: ArrowUpCircle,
           bgColor: "bg-red-100",
           iconColor: "text-red-600",
@@ -75,7 +75,7 @@ export function TransactionPage() {
         {
           label: "Total Transactions",
           value: stats.total_transactions,
-          change: `${stats.percent_increase_transactions}%`,
+          change: `${stats.percent_increase_transactions.toFixed(2)}%`,
           icon: TrendingUp,
           bgColor: "bg-blue-100",
           iconColor: "text-blue-600",

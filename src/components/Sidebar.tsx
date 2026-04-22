@@ -8,7 +8,7 @@ import {
   CreditCard,
   Bell,
   MessageSquare,
-  Settings,
+  //Settings,
   LogOut,
   Menu,
   PlusSquare,
@@ -48,10 +48,9 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
   return (
     <aside
       className={`
-        bg-white border-r border-slate-200
-        flex flex-col transition-all duration-300
+        h-full bg-white border-r border-slate-200
+        flex shrink-0 flex-col transition-all duration-300
         ${collapsed ? "w-[60px]" : "w-[200px]"}
-        hidden md:flex
       `}
     >
       {/* Header */}
@@ -103,7 +102,7 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
 
       {/* Footer */}
       <div className="p-2 border-t">
-        <Button
+        {/* <Button
           variant="ghost"
           className={`w-full ${
             collapsed ? "justify-center" : "justify-start"
@@ -116,7 +115,7 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
         >
           <Settings className="size-4" />
           {!collapsed && <span className="ml-3">Settings</span>}
-        </Button>
+        </Button> */}
 
         <Button
           variant="ghost"
