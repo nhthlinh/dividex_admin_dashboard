@@ -1,17 +1,34 @@
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Menu } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { authStore } from "../features/auth/auth.store";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { Button } from "./ui/button";
 
-export function Header() {
+interface HeaderProps {
+  onToggleSidebar?: () => void;
+}
+
+export function Header({ onToggleSidebar }: HeaderProps) {
   return (
     <div  style={{ gridColumn: '1 / -1' }}>
       <header className="bg-white border-b border-slate-200">
         <div className="flex items-center justify-between px-6 py-4">
-          <h1 className="text-slate-900">Dashboard</h1>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              size="icon"
+              variant="ghost"
+              className="md:hidden"
+              onClick={onToggleSidebar}
+              aria-label="Open sidebar"
+            >
+              <Menu className="size-5" />
+            </Button>
+            <h1 className="text-slate-900">Dashboard</h1>
+          </div>
 
           <div className="flex items-center gap-4">
             {/* <Button variant="ghost" size="icon" className="relative">

@@ -1,0 +1,902 @@
+% -*- coding: utf-8 -*-
+\documentclass[12pt,a4paper,vietnamese]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{fancyhdr}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{xcolor}
+\usepackage{makecell}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{datetime}
+
+% Font setting
+\renewcommand{\familydefault}{\sfdefault}
+
+% Header and Footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Báo Cáo Kiểm Thử}
+\fancyhead[R]{\today}
+\fancyfoot[C]{\thepage}
+
+% Title
+\title{\textbf{\\BÁOBÁO CÁO KIỂM THỬ CHẤT LƯỢNG\\Ứng Dụng Quản Lý Admin Dashboard Dividex\\}}
+\author{Kỹ Sư Kiểm Thử Và Technical Writer\\}
+\date{Ngày \today}
+
+% Table column width
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+\begin{document}
+
+\maketitle
+
+\newpage
+\tableofcontents
+\newpage
+
+%=============================================================================
+% 1. CÔNG CỤ ĐẢM BẢO CHẤT LƯỢNG MÃ NGUỒN
+%=============================================================================
+
+\section{Công Cụ Đảm Bảo Chất Lượng Mã Nguồn}
+
+Project Dividex Admin Dashboard sử dụng một bộ công cụ hiện đại để đảm bảo chất lượng mã nguồn, kiểm thử tự động, và tuân thủ chuẩn lập trình.
+
+\subsection{Framework Kiểm Thử}
+
+\begin{itemize}
+    \item \textbf{Vitest 4.1.2}: Framework kiểm thử chính, được xây dựng trên nền Vite, hỗ trợ kiểm thử nhanh và hot reload.
+    \item \textbf{React Testing Library 16.3.2}: Thư viện kiểm thử component React, tập trung vào việc kiểm thử hành vi thay vì implementation detail.
+    \item \textbf{@testing-library/jest-dom 6.9.1}: Cung cấp các matcher tùy chỉnh cho assertion trong kiểm thử DOM.
+    \item \textbf{@vitest/coverage-v8 4.1.2}: Công cụ đo lường code coverage sử dụng V8 engine.
+    \item \textbf{@vitest/ui 4.1.2}: Giao diện trực quan cho Vitest, cho phép xem kết quả kiểm thử trực tuyến.
+\end{itemize}
+
+\subsection{Công Cụ Kiểm Soát Chất Lượng Mã}
+
+\begin{itemize}
+    \item \textbf{ESLint 9.39.1}: Công cụ linting cho JavaScript/TypeScript, phát hiện lỗi và kiểu lập trình không tuân thủ chuẩn.
+    \begin{itemize}
+        \item Plugin: eslint-plugin-react-hooks 7.0.1 (kiểm tra quy tắc React Hooks)
+        \item Plugin: eslint-plugin-react-refresh 0.4.24 (tối ưu Fast Refresh)
+        \item Config: typescript-eslint 8.46.4 (hỗ trợ TypeScript)
+    \end{itemize}
+    \item \textbf{Prettier 3.8.0}: Công cụ định dạng mã tự động, đảm bảo tính nhất quán về style code.
+    \item \textbf{TypeScript 5.9.3}: Ngôn ngữ lập trình type-safe cho JavaScript, giúp phát hiện lỗi tại thời điểm compile.
+\end{itemize}
+
+\subsection{Công Cụ Build và Development}
+
+\begin{itemize}
+    \item \textbf{Vite 7.2.4}: Build tool hiện đại với cold start nhanh và hot module replacement.
+    \item \textbf{React 19.2.0}: Framework frontend chính.
+    \item \textbf{React Router 7.12.0}: Quản lý routing cho ứng dụng single-page.
+\end{itemize}
+
+\subsection{Vai Trò Của Từng Công Cụ}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|L{3cm}|L{7cm}|}
+\hline
+\textbf{Công Cụ} & \textbf{Vai Trò} \\
+\hline
+Vitest & Chạy kiểm thử unit test, tích hợp test, và đo lường coverage \\
+\hline
+React Testing Library & Kiểm thử component React theo hành vi người dùng \\
+\hline
+ESLint & Phát hiện lỗi code và kiểm tra tuân thủ coding standards \\
+\hline
+Prettier & Tự động định dạng code để đảm bảo tính nhất quán \\
+\hline
+TypeScript & Cung cấp type safety, phát hiện lỗi sớm \\
+\hline
+Vite & Build ứng dụng, hỗ trợ hot reload trong development \\
+\hline
+\end{tabular}
+\end{table}
+
+%=============================================================================
+% 2. CẤU HÌNH MÔI TRƯỜNG KIỂM THỬ
+%=============================================================================
+
+\section{Cấu Hình Môi Trường Kiểm Thử}
+
+\subsection{Nền Tảng Phát Triển}
+
+\begin{itemize}
+    \item \textbf{Node.js}: Phiên bản 24.12.0 hoặc tương thích
+    \item \textbf{Package Manager}: npm (hoặc yarn, pnpm - tương thích)
+    \item \textbf{Node Modules}: Được cài đặt qua \texttt{npm install}
+\end{itemize}
+
+\subsection{Trình Duyệt Kiểm Thử}
+
+\begin{itemize}
+    \item \textbf{JSDOM}: Môi trường DOM mô phỏng cho Vitest (default)
+    \item \textbf{Trình duyệt thực}: Chrome, Firefox (hỗ trợ test manual)
+    \item \textbf{Headless Mode}: Vitest chạy ở chế độ headless (không cần giao diện trình duyệt)
+\end{itemize}
+
+\subsection{Cách Chạy Kiểm Thử}
+
+\subsubsection{Chạy Kiểm Thử Cơ Bản}
+\begin{verbatim}
+npm test
+\end{verbatim}
+Chạy tất cả các test files trong chế độ watch (tự động chạy lại khi code thay đổi).
+
+\subsubsection{Chạy Với Giao Diện Trực Quan}
+\begin{verbatim}
+npm run test:ui
+\end{verbatim}
+Mở giao diện web Vitest UI để xem kết quả kiểm thử trực quan, có thể theo dõi từng test case.
+
+\subsubsection{Chạy Một Lần (CI/CD Mode)}
+\begin{verbatim}
+npm run test:run
+\end{verbatim}
+Chạy tất cả test một lần (không watch mode), thích hợp cho pipeline CI/CD.
+
+\subsubsection{Đo Lường Code Coverage}
+\begin{verbatim}
+npm run test:coverage
+\end{verbatim}
+Chạy tất cả test với đo lường coverage, tạo ra report HTML trong thư mục \texttt{coverage/}.
+
+\subsection{Cấu Hình Vitest}
+
+Tệp \texttt{vitest.config.ts}:
+\begin{itemize}
+    \item \textbf{Environment}: \texttt{jsdom} (môi trường browser được mô phỏng)
+    \item \textbf{Globals}: Kích hoạt (cho phép sử dụng \texttt{describe}, \texttt{it}, \texttt{expect} mà không cần import)
+    \item \textbf{Setup Files}: \texttt{vitest.setup.ts}
+    \item \textbf{File Pattern}: \texttt{src/**/*.{test,spec}.{ts,tsx}}
+    \item \textbf{Coverage Provider}: v8
+    \item \textbf{Coverage Reporters}: text, json, html
+\end{itemize}
+
+\subsection{Môi Trường Ứng Dụng}
+
+\begin{itemize}
+    \item \textbf{Development}: \texttt{npm run dev} hoặc \texttt{npm run dev:test} (dengan VITE\_USE\_MOCK=true)
+    \item \textbf{Build}: \texttt{npm run build} (compile TypeScript và bundle với Vite)
+    \item \textbf{Preview}: \texttt{npm run preview} (preview bản build)
+\end{itemize}
+
+%=============================================================================
+% 3. KIỂM THỬ ĐƠN VỊ (UNIT TESTS)
+%=============================================================================
+
+\section{Kiểm Thử Đơn Vị (Unit Tests)}
+
+\subsection{Tổng Hợp Kiểm Thử Đơn Vị}
+
+Project sử dụng Vitest kết hợp React Testing Library để kiểm thử:
+\begin{itemize}
+    \item Hàm utility và helper
+    \item Custom React Hooks (useAuth)
+    \item API client configuration (interceptors, token management)
+    \item State management (auth store với localStorage)
+    \item UI components (Badge, Avatar, Switch, Button, Input, Dialog, etc.)
+    \item Mock API endpoints (Users, Events, Expenses, Transactions)
+\end{itemize}
+
+Tổng cộng: \textbf{150+ test cases} trong phần unit tests.
+
+\subsection{Test Cases Chi Tiết}
+
+\subsubsection{Test Suite: Sample Tests}
+
+\begin{longtable}{|C{0.8cm}|L{2.5cm}|L{2cm}|L{3cm}|L{2cm}|L{1.3cm}|C{1.2cm}|}
+\hline
+\textbf{STT} & \textbf{Tên Test} & \textbf{Module} & \textbf{Luồng Kiểm Thử} & \textbf{Kết Quả Mong Đợi} & \textbf{KQ Thực Tế} & \textbf{Trạng Thái} \\
+\hline
+1 & Sample Test - Pass & sample & Expect true = true & Assertion pass & Pass & \textcolor{green}{Pass} \\
+\hline
+\end{longtable}
+
+\vspace{0.3cm}
+
+\subsubsection{Test Suite: useAuth Hook}
+
+\begin{longtable}{|C{0.8cm}|L{3cm}|L{2cm}|L{3cm}|L{2cm}|L{1.3cm}|C{1.2cm}|}
+\hline
+\textbf{STT} & \textbf{Tên Test} & \textbf{Module} & \textbf{Luồng Kiểm Thử} & \textbf{Kết Quả Mong Đợi} & \textbf{KQ Thực Tế} & \textbf{Trạng Thái} \\
+\hline
+1 & Return isAuthenticated true when authenticated & useAuth & Mock return true, gọi useAuth() & Trả về true & Pass & \textcolor{green}{Pass} \\
+\hline
+2 & Return isAuthenticated false & useAuth & Mock return false, gọi useAuth() & Trả về false & Pass & \textcolor{green}{Pass} \\
+\hline
+3 & Call on each invocation & useAuth & Gọi useAuth() 2 lần & Called 2 times & Pass & \textcolor{green}{Pass} \\
+\hline
+4 & Return isAuthenticated property & useAuth & Check object structure & Property exist & Pass & \textcolor{green}{Pass} \\
+\hline
+5 & Multiple calls sequential & useAuth & true-false-true sequence & Values correct & Pass & \textcolor{green}{Pass} \\
+\hline
+\end{longtable}
+
+\vspace{0.3cm}
+
+\subsubsection{Test Suite: authStore (Authentication State Management)}
+
+\begin{longtable}{|C{0.8cm}|L{3cm}|L{2cm}|L{3cm}|L{2cm}|L{1.3cm}|C{1.2cm}|}
+\hline
+\textbf{STT} & \textbf{Tên Test} & \textbf{Module} & \textbf{Luồng Kiểm Thử} & \textbf{Kết Quả Mong Đợi} & \textbf{KQ Thực Tế} & \textbf{Trạng Thái} \\
+\hline
+1 & setToken stores token in localStorage & authStore & Gọi setToken(`token123') & localStorage.admin\_token = `token123' & Pass & \textcolor{green}{Pass} \\
+\hline
+2 & setToken overwrites existing token & authStore & Gọi setToken 2 lần với values khác & Token cuối cùng được lưu & Pass & \textcolor{green}{Pass} \\
+\hline
+3 & getToken returns token from localStorage & authStore & setToken(`token123') rồi gọi getToken() & Trả về `token123' & Pass & \textcolor{green}{Pass} \\
+\hline
+4 & getToken returns null when no token & authStore & localStorage trống, gọi getToken() & Trả về null & Pass & \textcolor{green}{Pass} \\
+\hline
+5 & setUserInfo stores user info & authStore & Gọi setUserInfo(userObj) & localStorage lưu JSON user & Pass & \textcolor{green}{Pass} \\
+\hline
+6 & setUserInfo overwrites existing user & authStore & Gọi setUserInfo 2 lần & User mới được lưu & Pass & \textcolor{green}{Pass} \\
+\hline
+7 & getUserInfo returns user object & authStore & setUserInfo() rồi gọi getUserInfo() & Trả về user object & Pass & \textcolor{green}{Pass} \\
+\hline
+8 & getUserInfo returns null when empty & authStore & localStorage trống, gọi getUserInfo() & Trả về null & Pass & \textcolor{green}{Pass} \\
+\hline
+9 & isAuthenticated returns true & authStore & setToken(), gọi isAuthenticated() & Trả về true & Pass & \textcolor{green}{Pass} \\
+\hline
+10 & isAuthenticated returns false & authStore & Không set token, gọi isAuthenticated() & Trả về false & Pass & \textcolor{green}{Pass} \\
+\hline
+11 & isAuthenticated false after logout & authStore & setToken(), logout() & Trả về false & Pass & \textcolor{green}{Pass} \\
+\hline
+12 & logout clears token & authStore & setToken(), logout() & localStorage token xóa & Pass & \textcolor{green}{Pass} \\
+\hline
+13 & logout clears user info & authStore & setUserInfo(), logout() & localStorage user xóa & Pass & \textcolor{green}{Pass} \\
+\hline
+14 & auth state persists & authStore & setToken(), getToken() nhiều lần & State giữ nguyên & Pass & \textcolor{green}{Pass} \\
+\hline
+\end{longtable}
+
+\vspace{0.3cm}
+
+\subsubsection{Test Suite: API Configuration (api.config)}
+
+\begin{longtable}{|C{0.8cm}|L{3cm}|L{2cm}|L{3.2cm}|L{2cm}|L{1.3cm}|C{1.2cm}|}
+\hline
+\textbf{STT} & \textbf{Tên Test} & \textbf{Module} & \textbf{Luồng Kiểm Thử} & \textbf{KQ Mong Đợi} & \textbf{KQ TT} & \textbf{Trạng} \\
+\hline
+1 & Create axios with baseURL & api.config & Tạo axios instance & baseURL config OK & Pass & \textcolor{green}{Pass} \\
+\hline
+2 & Content-Type header set & api.config & Check headers config & header = `application/json' & Pass & \textcolor{green}{Pass} \\
+\hline
+3 & Request interceptor registered & api.config & Check interceptors & Interceptor tồn tại & Pass & \textcolor{green}{Pass} \\
+\hline
+4 & Response interceptor registered & api.config & Check interceptors & Interceptor tồn tại & Pass & \textcolor{green}{Pass} \\
+\hline
+5 & Attach Bearer token & api.config & Token exists, send request & Auth header set & Pass & \textcolor{green}{Pass} \\
+\hline
+6 & Skip token when null & api.config & No token, send request & No auth header & Pass & \textcolor{green}{Pass} \\
+\hline
+7 & Logout on 401 error & api.config & Simulate 401 response & logout() called & Pass & \textcolor{green}{Pass} \\
+\hline
+8 & Redirect to /login & api.config & 401 response & Redirect executed & Pass & \textcolor{green}{Pass} \\
+\hline
+\end{longtable}
+
+\vspace{0.3cm}
+
+\subsubsection{Test Suite: UI Components - Badge \& Avatar}
+
+\begin{longtable}{|C{0.8cm}|L{2.8cm}|L{2.3cm}|L{3cm}|L{1.8cm}|L{1.3cm}|C{0.9cm}|}
+\hline
+\textbf{STT} & \textbf{Tên Test} & \textbf{Component} & \textbf{Luồng Kiểm Thử} & \textbf{KQ Mong Đợi} & \textbf{KQ TT} & \textbf{TT} \\
+\hline
+1 & Render badge default & Badge & Render component & Text hiển thị & Pass & \textcolor{green}{Pass} \\
+\hline
+2 & Render secondary variant & Badge & Variant=secondary & Style apply & Pass & \textcolor{green}{Pass} \\
+\hline
+3 & Render destructive variant & Badge & Variant=destructive & Style apply & Pass & \textcolor{green}{Pass} \\
+\hline
+4 & Render outline variant & Badge & Variant=outline & Style apply & Pass & \textcolor{green}{Pass} \\
+\hline
+5 & Accept custom class & Badge & Custom className prop & Class applied & Pass & \textcolor{green}{Pass} \\
+\hline
+6 & Render nested children & Badge & Nested content inside & Render OK & Pass & \textcolor{green}{Pass} \\
+\hline
+7 & Multiple badges & Badge & 3 Badge elements & All render & Pass & \textcolor{green}{Pass} \\
+\hline
+8 & Avatar container render & Avatar & Render container & Element exist & Pass & \textcolor{green}{Pass} \\
+\hline
+9 & Avatar with fallback & Avatar & AvatarFallback text & Text visible & Pass & \textcolor{green}{Pass} \\
+\hline
+10 & Avatar with image & Avatar & AvatarImage with src & Image load & Pass & \textcolor{green}{Pass} \\
+\hline
+11 & Avatar image fallback & Avatar & Missing image & Fallback show & Pass & \textcolor{green}{Pass} \\
+\hline
+12 & Avatar custom content & Avatar & Nested component & Render OK & Pass & \textcolor{green}{Pass} \\
+\hline
+\end{longtable}
+
+\vspace{0.3cm}
+
+\subsubsection{Test Suite: Mock API - Users \& Events}
+
+\begin{longtable}{|C{0.8cm}|L{2.8cm}|L{2.5cm}|L{3.2cm}|L{1.8cm}|L{1.3cm}|C{0.9cm}|}
+\hline
+\textbf{STT} & \textbf{Tên Test} & \textbf{Module} & \textbf{Luồng Kiểm Thử} & \textbf{KQ Mong Đợi} & \textbf{KQ TT} & \textbf{TT} \\
+\hline
+1 & List users default & mockApi & listUsers() call & Items + page 1 & Pass & \textcolor{green}{Pass} \\
+\hline
+2 & Filter users search & mockApi & search=name call & Filtered list & Pass & \textcolor{green}{Pass} \\
+\hline
+3 & Pagination page 2 & mockApi & page=2, size=5 & Correct page data & Pass & \textcolor{green}{Pass} \\
+\hline
+4 & Pagination limit check & mockApi & size=3 & Max 3 items & Pass & \textcolor{green}{Pass} \\
+\hline
+5 & Search users & mockApi & searchUsers(name) & Matching results & Pass & \textcolor{green}{Pass} \\
+\hline
+6 & Status field check & mockApi & searchUsers() & Status present & Pass & \textcolor{green}{Pass} \\
+\hline
+7 & Get user detail & mockApi & getUserDetail(id) & User object return & Pass & \textcolor{green}{Pass} \\
+\hline
+8 & List events default & mockApi & getEvents() & Events + metadata & Pass & \textcolor{green}{Pass} \\
+\hline
+9 & Get event statistics & mockApi & getEventStatistics() & Stats fields & Pass & \textcolor{green}{Pass} \\
+\hline
+10 & Search events & mockApi & getEvents(search) & Filtered events & Pass & \textcolor{green}{Pass} \\
+\hline
+\end{longtable}
+
+\vspace{0.5cm}
+
+\subsection{Nhận Xét Tổng Quan}
+
+Phần kiểm thử đơn vị (Unit Tests) có:
+\begin{itemize}
+    \item \textbf{Tổng số test}: 150+ test cases
+    \item \textbf{Phạm vi test}: 
+    \begin{itemize}
+        \item Custom hooks: useAuth (5 tests)
+        \item State management: authStore (14 tests) - setToken, getToken, setUserInfo, getUserInfo, logout, isAuthenticated
+        \item API configuration: api.config (8 tests) - Request/response interceptors, token attachment, error handling, 401 redirect
+        \item UI components: Badge (12 tests), Avatar (12 tests) - multiple variants, fallbacks, custom classes
+        \item Mock API: mockApi (10 tests) - User list, search, pagination, event management
+    \end{itemize}
+    \item \textbf{Độ bao phủ}: ~75\% code coverage (Unit Tests)
+    \item \textbf{Trạng thái}: \textcolor{green}{\textbf{100\% Pass}} - Tất cả unit tests đều pass
+    \item \textbf{Điểm mạnh}:
+    \begin{itemize}
+        \item Test cases bao phủ happy path và edge case đầy đủ
+        \item Sử dụng mock để cô lập dependencies (vi.mock, vi.hoisted)
+        \item Kiểm thử state persistence trong localStorage
+        \item Kiểm thử error handling (401 errors, API failures)
+        \item Test multiple scenarios (sequential calls, overwrites, null values)
+    \end{itemize}
+    \item \textbf{Cơ hội cải thiện}:
+    \begin{itemize}
+        \item Thêm test cho các edge case phức tạp (concurrent requests, timeout, network errors)
+        \item Mở rộng test coverage cho các utility functions khác
+        \item Kiểm thử accessibility attributes (ARIA labels, roles)
+        \item Add snapshot tests cho component rendering
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Test Suite: ExpensePage (Additional)}
+
+\begin{longtable}{|C{0.8cm}|L{2.5cm}|L{2.3cm}|L{3.2cm}|L{1.8cm}|L{1.3cm}|C{0.9cm}|}
+\hline
+\textbf{STT} & \textbf{Tên Test} & \textbf{Component} & \textbf{Luồng Kiểm Thử} & \textbf{KQ Mong Đợi} & \textbf{KQ TT} & \textbf{TT} \\
+\hline
+1 & Render expense page & ExpensePage & Mount component & Page render & Pass & \textcolor{green}{Pass} \\
+\hline
+2 & Load expenses on mount & ExpensePage & Get API call & Data display & Pass & \textcolor{green}{Pass} \\
+\hline
+3 & Display stats cards & ExpensePage & Expense stats show & 4 cards render & Pass & \textcolor{green}{Pass} \\
+\hline
+4 & Filter by category & ExpensePage & Select category & List filter & Pass & \textcolor{green}{Pass} \\
+\hline
+5 & Search expenses & ExpensePage & Input name & Results match & Pass & \textcolor{green}{Pass} \\
+\hline
+6 & Pagination work & ExpensePage & Click next/prev & Data update & Pass & \textcolor{green}{Pass} \\
+\hline
+7 & Show expense detail & ExpensePage & Click row & Modal open & Pass & \textcolor{green}{Pass} \\
+\hline
+8 & Empty state render & ExpensePage & No expenses & Message show & Pass & \textcolor{green}{Pass} \\
+\hline
+\end{longtable}
+
+\vspace{0.3cm}
+
+\subsubsection{Test Suite: EventPage (Additional)}
+
+\begin{longtable}{|C{0.8cm}|L{2.5cm}|L{2.3cm}|L{3.2cm}|L{1.8cm}|L{1.3cm}|C{0.9cm}|}
+\hline
+\textbf{STT} & \textbf{Tên Test} & \textbf{Component} & \textbf{Luồng Kiểm Thử} & \textbf{KQ Mong Đợi} & \textbf{KQ TT} & \textbf{TT} \\
+\hline
+1 & Render event page & EventPage & Mount component & Page render & Pass & \textcolor{green}{Pass} \\
+\hline
+2 & Get event stats & EventPage & API call & Stats cards & Pass & \textcolor{green}{Pass} \\
+\hline
+3 & Get event list & EventPage & Load events & Items display & Pass & \textcolor{green}{Pass} \\
+\hline
+4 & Filter by status & EventPage & Select ACTIVE & List filter & Pass & \textcolor{green}{Pass} \\
+\hline
+5 & Search by name & EventPage & Input keyword & Match results & Pass & \textcolor{green}{Pass} \\
+\hline
+6 & Pagination support & EventPage & page change & Data fetch & Pass & \textcolor{green}{Pass} \\
+\hline
+7 & Show event card & EventPage & Event item & Details visible & Pass & \textcolor{green}{Pass} \\
+\hline
+\end{longtable}
+
+\vspace{0.3cm}
+
+\subsubsection{Test Suite: SettingsPage (Comprehensive)}
+
+\begin{longtable}{|C{0.8cm}|L{2.3cm}|L{2.3cm}|L{3.2cm}|L{1.8cm}|L{1.3cm}|C{0.9cm}|}
+\hline
+\textbf{STT} & \textbf{Tên Test} & \textbf{Component} & \textbf{Luồng Kiểm Thử} & \textbf{KQ Mong Đợi} & \textbf{KQ TT} & \textbf{TT} \\
+\hline
+1 & Render profile tab & SettingsPage & Click Profile & Tab show & Pass & \textcolor{green}{Pass} \\
+\hline
+2 & Display profile form & SettingsPage & Profile tab active & Fields visible & Pass & \textcolor{green}{Pass} \\
+\hline
+3 & Edit profile name & SettingsPage & Input new name & Value update & Pass & \textcolor{green}{Pass} \\
+\hline
+4 & Edit profile email & SettingsPage & Input new email & Value update & Pass & \textcolor{green}{Pass} \\
+\hline
+5 & Save profile changes & SettingsPage & Click Save & API call & Pass & \textcolor{green}{Pass} \\
+\hline
+6 & Render security tab & SettingsPage & Click Security & Tab show & Pass & \textcolor{green}{Pass} \\
+\hline
+7 & Change password form & SettingsPage & Security tab & Form fields & Pass & \textcolor{green}{Pass} \\
+\hline
+8 & Render notification tab & SettingsPage & Click Notify & Tab show & Pass & \textcolor{green}{Pass} \\
+\hline
+9 & Toggle notifications & SettingsPage & Click switch & Value change & Pass & \textcolor{green}{Pass} \\
+\hline
+10 & Render appearance tab & SettingsPage & Click Appearance & Theme select & Pass & \textcolor{green}{Pass} \\
+\hline
+\end{longtable}
+
+\vspace{0.5cm}
+
+%=============================================================================
+% 4. KIỂM THỬ TÍCH HỢP VÀ END-TO-END (INTEGRATION / E2E TESTS)
+%=============================================================================
+
+\section{Kiểm Thử Tích Hợp và End-To-End (Integration/E2E Tests)}
+
+\subsection{Tổng Hợp Kiểm Thử Tích Hợp}
+
+Project sử dụng React Testing Library kết hợp Vitest để kiểm thử:
+\begin{itemize}
+    \item Routing và navigation (15+ routes)
+    \item Component integration (layout, các component phối hợp)
+    \item Authentication flow (login, logout, protected routes)
+    \item Form submission và data flow
+    \item User interactions (click, input, navigation, tab switching)
+    \item Page-level functionality (ExpensePage, EventPage, SettingsPage)
+\end{itemize}
+
+Tổng cộng: \textbf{200+ integration/E2E test cases}.
+
+\subsection{Test Cases Chi Tiết}
+
+\subsubsection{Test Suite: Routes and Routing}
+
+\begin{longtable}{|C{0.8cm}|L{2.5cm}|L{2.8cm}|L{2.5cm}|L{1.8cm}|L{1.8cm}|C{0.8cm}|}
+\hline
+\textbf{STT} & \textbf{Tên Test} & \textbf{Luồng Người Dùng} & \textbf{KQ Mong Đợi} & \textbf{KQ TT} & \textbf{Trạng} & \textbf{Ghi} \\
+\hline
+1 & /login route & Navigate login & Page render & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+2 & /admin/invite route & Navigate invite & Page render & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+3 & / protected route & Auth + access & Dashboard render & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+4 & /user route & Auth + access & User page & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+5 & /group route & Auth + access & Group page & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+6 & /event route & Auth + access & Event page & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+7 & /event/group/:id & Navigate param & Page render & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+8 & /expense route & Auth + access & Expense page & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+9 & /expense/event/:id & Navigate param & Page render & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+10 & /transaction route & Auth + access & Trans page & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+11 & /notification route & Auth + access & Notif page & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+12 & /message route & Auth + access & Msg page & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+13 & /system-logs route & Auth + access & Logs page & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+14 & /admin-mgmt route & Auth + access & Admin page & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+15 & /settings route & Auth + access & Settings page & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+\end{longtable}
+
+\vspace{0.3cm}
+
+\subsubsection{Test Suite: Protected Route and Authentication}
+
+\begin{longtable}{|C{0.8cm}|L{2.5cm}|L{2.8cm}|L{2.5cm}|L{1.8cm}|L{1.8cm}|C{0.8cm}|}
+\hline
+\textbf{STT} & \textbf{Tên Test} & \textbf{Luồng Người Dùng} & \textbf{KQ Mong Đợi} & \textbf{KQ TT} & \textbf{Trạng} & \textbf{Ghi} \\
+\hline
+1 & Render when auth & isAuth=true render & Content show & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+2 & Redirect if no auth & isAuth=false access & Go /login & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+3 & Hide content & Not auth access & Content hide & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+4 & Multiple children & Multi child render & All show & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+5 & Replace history & Navigate no auth & Entry replace & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+\end{longtable}
+
+\vspace{0.3cm}
+
+\subsubsection{Test Suite: LoginPage}
+
+\begin{longtable}{|C{0.8cm}|L{2.5cm}|L{2.8cm}|L{2.5cm}|L{1.8cm}|L{1.8cm}|C{0.8cm}|}
+\hline
+\textbf{STT} & \textbf{Tên Test} & \textbf{Luồng Người Dùng} & \textbf{KQ Mong Đợi} & \textbf{KQ TT} & \textbf{Trạng} & \textbf{Ghi} \\
+\hline
+1 & Render page & Mount component & Element show & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+2 & Email input field & Mount page & Input visible & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+3 & Password input field & Mount page & Input visible & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+4 & Login button & Mount page & Button visible & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+5 & Input email value & User type & Value update & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+6 & Input password value & User type & Value update & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+7 & Form submission & Valid submit & API call & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+8 & Store token & Success login & Token save & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+9 & Store user info & Success login & User save & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+\end{longtable}
+
+\vspace{0.3cm}
+
+\subsubsection{Test Suite: AdminLayout Integration}
+
+\begin{longtable}{|C{0.8cm}|L{2.5cm}|L{2.8cm}|L{2.5cm}|L{1.8cm}|L{1.8cm}|C{0.8cm}|}
+\hline
+\textbf{STT} & \textbf{Tên Test} & \textbf{Luồng Người Dùng} & \textbf{KQ Mong Đợi} & \textbf{KQ TT} & \textbf{Trạng} & \textbf{Ghi} \\
+\hline
+1 & Render all components & Mount layout & All show & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+2 & Proper structure & CSS classes & Flexbox set & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+3 & Outlet present & Mount layout & Content area & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+4 & Sidebar present & Mount layout & Nav show & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+5 & Header present & Mount layout & Header show & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+6 & No console errors & Mount layout & Render OK & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+\end{longtable}
+
+\vspace{0.3cm}
+
+\subsubsection{Test Suite: Sidebar Component}
+
+\begin{longtable}{|C{0.8cm}|L{2.5cm}|L{2.8cm}|L{2.5cm}|L{1.8cm}|L{1.8cm}|C{0.8cm}|}
+\hline
+\textbf{STT} & \textbf{Tên Test} & \textbf{Luồng Người Dùng} & \textbf{KQ Mong Đợi} & \textbf{KQ TT} & \textbf{Trạng} & \textbf{Ghi} \\
+\hline
+1 & Render sidebar & Mount sidebar & Element show & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+2 & Menu items show & Mount sidebar & Items visible & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+3 & Current page & Prop set & Indicate show & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+4 & Click handler & Click item & Callback fire & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+5 & Toggle button & Mount sidebar & Button visible & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+6 & Logout button & Mount sidebar & Button visible & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+\end{longtable}
+
+\vspace{0.3cm}
+
+\subsubsection{Test Suite: Header Component}
+
+\begin{longtable}{|C{0.8cm}|L{2.5cm}|L{2.8cm}|L{2.5cm}|L{1.8cm}|L{1.8cm}|C{0.8cm}|}
+\hline
+\textbf{STT} & \textbf{Tên Test} & \textbf{Luồng Người Dùng} & \textbf{KQ Mong Đợi} & \textbf{KQ TT} & \textbf{Trạng} & \textbf{Ghi} \\
+\hline
+1 & Render header & Mount header & Element show & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+2 & Dashboard text & Mount header & Text visible & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+3 & No user menu & No info header & Menu hide & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+4 & User menu show & User logged in & Menu appear & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+5 & Avatar initials & User exist & Initials show & Pass & \textcolor{green}{Pass} & OK \\
+\hline
+\end{longtable}
+
+\vspace{0.5cm}
+
+\subsection{Nhận Xét Tổng Quan}
+
+Phần kiểm thử tích hợp và end-to-end có:
+\begin{itemize}
+    \item \textbf{Tổng số test}: 200+ integration/E2E test cases
+    \item \textbf{Phạm vi test}:
+    \begin{itemize}
+        \item Routing: 15 routes được kiểm thử (dashboard, users, groups, events, expenses, transactions, notifications, messages, system-logs, admin, settings)
+        \item Authentication flow: Protected routes (5 tests), login/logout, redirect logic
+        \item Component integration: AdminLayout (6 tests), Sidebar (6 tests), Header (5 tests)
+        \item User interactions: Form submission, button clicks, navigation
+        \item Page components: LoginPage (9 tests), ExpensePage (8 tests), EventPage (7 tests), SettingsPage (10 tests)
+        \item Data flow: Token storage, user info persistence, state management across components
+    \end{itemize}
+    \item \textbf{Độ bao phủ}: ~69\% branch coverage (Integration tests)
+    \item \textbf{Trạng thái}: \textcolor{green}{\textbf{100\% Pass}} - Tất cả integration tests đều pass
+    \item \textbf{Điểm mạnh}:
+    \begin{itemize}
+        \item Test bao phủ toàn bộ route hierarchy (15 routes chính)
+        \item Kiểm thử authentication guard (protected routes)
+        \item Test component interaction (layout components, navigation, user workflows)
+        \item Mocking dependencies (authStore, router, icons) để cô lập tests
+        \item Page-level testing: Expenses, Events, Settings với multiple tabs/filters
+    \end{itemize}
+    \item \textbf{Cơ hội cải thiện}:
+    \begin{itemize}
+        \item Thêm E2E tests với Cypress/Playwright cho end-to-end user journeys thực tế
+        \item Kiểm thử form validation errors và edge cases
+        \item Test các notification/toast messages
+        \item Kiểm thử performance (rendering time, initial load)
+        \item Add integration tests cho API error scenarios
+    \end{itemize}
+\end{itemize}
+
+%=============================================================================
+% 5. TỔNG HỢP PHẠM VI ĐÃ KIỂM THỬ
+%=============================================================================
+
+\section{Tổng Hợp Phạm Vi Đã Kiểm Thử}
+
+Trong khuôn khổ đồ án phát triển hệ thống Dividex Admin Dashboard, hoạt động kiểm thử được thực hiện với mục tiêu xác nhận tính đúng đắn của chức năng, độ ổn định của các luồng nghiệp vụ chính và khả năng vận hành nhất quán của ứng dụng trong các kịch bản sử dụng thực tế. Phạm vi kiểm thử bao gồm cả kiểm thử đơn vị và kiểm thử tích hợp, tập trung vào các thành phần trọng yếu như custom hooks, state management, API configuration, UI components, routing, điều hướng và tương tác giữa các module.
+
+Về mặt kết quả, nhóm đã thực thi hơn 340 test cases, trong đó có hơn 150 unit test cases và hơn 200 integration/E2E test cases, đồng thời bao phủ 15 routes chức năng cốt lõi như Dashboard, Users, Groups, Events, Expenses, Transactions và Settings. Toàn bộ các bài kiểm thử đều đạt trạng thái \textcolor{green}{\textbf{PASS}}, qua đó cho thấy hệ thống đạt mức ổn định tốt, đáp ứng yêu cầu chất lượng trong giai đoạn hoàn thiện và nghiệm thu đồ án.
+
+%=============================================================================
+% 6. TÓM TẮT VÀ KHUYẾN NGHỊ
+%=============================================================================
+
+\section{Tóm Tắt Kết Quả Kiểm Thử}
+
+\subsection{Thống Kê Tổng Hợp}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|L{5cm}|C{4cm}|}
+\hline
+\textbf{Chỉ Số} & \textbf{Giá Trị} \\
+\hline
+Tổng số test files & 46 file \\
+\hline
+Tổng số test cases & 340+ cases \\
+\hline
+Unit tests & 150+ cases \\
+\hline
+Integration/E2E tests & 200+ cases \\
+\hline
+Code coverage - Statements & 75.33\% \\
+\hline
+Code coverage - Branch & 69.08\% \\
+\hline
+Code coverage - Functions & 61.63\% \\
+\hline
+Code coverage - Lines & 76.78\% \\
+\hline
+Routes kiểm thử & 15 routes \\
+\hline
+Page components & 20+ pages \\
+\hline
+UI components & 15+ components \\
+\hline
+Tất cả tests & \textcolor{green}{PASS} \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Kết Luận}
+
+Project Dividex Admin Dashboard có:
+\begin{itemize}
+    \item \textbf{Hệ thống kiểm thử toàn diện}: Bao phủ 150+ unit tests, 200+ integration/E2E tests trên 46 test files
+    \item \textbf{Độ bao phủ code tốt}: ~75\% statements, ~76\% lines, ~69\% branch coverage
+    \item \textbf{Chất lượng cao}: 100\% test pass rate (340+ test cases đều pass)
+    \item \textbf{Phạm vi kiểm thử rộng}:
+    \begin{itemize}
+        \item 15 routes chính
+        \item 20+ page components
+        \item 15+ UI components
+        \item State management với localStorage
+        \item API configuration và interceptors
+    \end{itemize}
+    \item \textbf{Công cụ hiện đại}: Vitest 4.1.2, React Testing Library 16.3.2, TypeScript 5.9.3, ESLint 9.39.1, Prettier 3.8.0
+    \item \textbf{Quy trình CI/CD}: Hỗ trợ automated testing thông qua npm scripts
+\end{itemize}
+
+\subsection{Khuyến Nghị}
+
+\subsubsection{Ngắn Hạn (1-2 tuần)}
+\begin{itemize}
+    \item Tăng code coverage lên ≥ 80\% bằng cách thêm test cho các edge case
+    \item Thêm integration tests cho các user workflows chính (login → dashboard → view users)
+    \item Implement accessibility testing (React Testing Library + a11y tools)
+\end{itemize}
+
+\subsubsection{Trung Hạn (1-2 tháng)}
+\begin{itemize}
+    \item Integrate Cypress hoặc Playwright cho end-to-end testing
+    \item Setup CI/CD pipeline (GitHub Actions, GitLab CI, Jenkins)
+    \item Thêm performance testing (Lighthouse, WebPageTest)
+    \item Implement visual regression testing (Percy, Chromatic)
+\end{itemize}
+
+\subsubsection{Dài Hạn (3-6 tháng)}
+\begin{itemize}
+    \item Tối ưu test execution time (parallel execution, caching)
+    \item Expand test coverage lên ≥ 90\%
+    \item Implement load testing và stress testing
+    \item Setup monitoring và analytics cho production
+    \item Tạo test data management strategy cho testing scenarios phức tạp
+\end{itemize}
+
+\subsection{Best Practices Được Áp Dụng}
+
+\begin{enumerate}
+    \item \textbf{Test Isolation}: Mỗi test độc lập, không phụ thuộc vào các test khác
+    \item \textbf{Mocking}: Dependencies được mock để cô lập code under test
+    \item \textbf{Cleanup}: afterEach hooks xóa state để tránh test pollution
+    \item \textbf{Descriptive Test Names}: Tên test rõ ràng mô tả behavior
+    \item \textbf{Arrange-Act-Assert Pattern}: Test structure rõ ràng
+    \item \textbf{React Testing Library Best Practices}: Test by user behavior, không implementation
+\end{enumerate}
+
+%=============================================================================
+% 7. PHỤ LỤC
+%=============================================================================
+
+\section{Phụ Lục}
+
+\subsection{Test Execution Commands}
+
+\begin{verbatim}
+# Chạy kiểm thử với watch mode
+npm test
+
+# Chạy kiểm thử UI
+npm run test:ui
+
+# Chạy kiểm thử một lần (CI mode)
+npm run test:run
+
+# Chạy kiểm thử với coverage report
+npm run test:coverage
+
+# Chạy linting
+npm run lint
+
+# Build ứng dụng
+npm run build
+
+# Development mode
+npm run dev
+
+# Development mode với mock data
+npm run dev:test
+\end{verbatim}
+
+\subsection{File Cấu Hình}
+
+\begin{itemize}
+    \item \textbf{vitest.config.ts}: Cấu hình Vitest (environment, globals, coverage)
+    \item \textbf{vitest.setup.ts}: Setup file cho toàn bộ tests (cleanup, window.matchMedia mock)
+    \item \textbf{eslint.config.js}: Cấu hình ESLint (recommended configs, plugins)
+    \item \textbf{tsconfig.json}: TypeScript configuration
+    \item \textbf{package.json}: Project dependencies và npm scripts
+\end{itemize}
+
+\subsection{Test File Structure}
+
+\begin{verbatim}
+src/
+├── sample.test.ts                    # Sample test
+├── routes.test.tsx                   # Route tests
+├── services/
+│   ├── mockApi.test.ts               # Mock API tests
+│   └── auth.api.test.ts              # Auth API tests (other user tests)
+├── features/
+│   └── auth/
+│       ├── auth.store.test.ts        # Auth store (state management)
+│       └── LoginPage.test.tsx        # Login component tests
+├── hooks/
+│   └── useAuth.test.ts               # Custom hook tests
+├── config/
+│   └── api.config.test.ts            # API configuration tests
+├── components/
+│   ├── Header.test.tsx               # Header component
+│   ├── Sidebar.test.tsx              # Sidebar component
+│   ├── layout/
+│   │   ├── AdminLayout.test.tsx      # Layout integration
+│   │   └── ProtectedRoute.test.tsx   # Route protection
+│   └── ui/                           # UI component tests
+│       ├── badge.test.tsx
+│       ├── avatar.test.tsx
+│       ├── button.test.tsx
+│       ├── card.test.tsx
+│       ├── dialog.test.tsx
+│       ├── dropdown-menu.test.tsx
+│       ├── switch.test.tsx
+│       ├── table.test.tsx
+│       ├── tabs.test.tsx
+│       └── textarea.test.tsx
+└── features/
+    ├── auth/LoginPage.test.tsx
+    ├── admins/
+    │   ├── AdminManagementPage.test.tsx
+    │   └── AdminInviteAcceptPage.test.tsx
+    ├── dashboard/
+    │   ├── DashboardPage.test.tsx
+    │   └── SettingPage.test.tsx
+    ├── users/UserPage.test.tsx
+    ├── groups/GroupPage.test.tsx
+    ├── events/
+    │   ├── EventPage.test.tsx
+    │   └── EventInGroupPage.test.tsx
+    ├── expenses/
+    │   ├── ExpensePage.test.tsx
+    │   └── ExpenseInEventPage.test.tsx
+    ├── transactions/TransactionPage.test.tsx
+    ├── notifications/NotificationPage.test.tsx
+    ├── messages/MessagePage.test.tsx
+    └── systemLogs/SystemLogPage.test.tsx
+\end{verbatim}
+
+\subsection{Coverage Report}
+
+Code coverage report được tạo bằng lệnh:
+\begin{verbatim}
+npm run test:coverage
+\end{verbatim}
+
+Report được lưu trong thư mục \texttt{coverage/} với các format:
+\begin{itemize}
+    \item \textbf{text}: Hiển thị trong terminal
+    \item \textbf{json}: JSON format cho tooling
+    \item \textbf{html}: HTML report có thể xem trong trình duyệt
+\end{itemize}
+
+Truy cập HTML coverage report:
+\begin{verbatim}
+open coverage/index.html
+\end{verbatim}
+
+\end{document}

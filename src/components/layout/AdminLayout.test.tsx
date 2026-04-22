@@ -79,9 +79,9 @@ describe('AdminLayout', () => {
 
       const layout = screen.getByTestId('admin-layout');
       expect(layout).toHaveClass('flex');
-      expect(layout).toHaveClass('h-screen');
+      expect(layout).toHaveClass('min-h-screen');
       expect(layout).toHaveClass('bg-slate-50');
-      expect(layout).toHaveClass('overflow-hidden');
+      expect(layout).toHaveClass('overflow-x-hidden');
     });
 
     it('should render outlet for page content', () => {

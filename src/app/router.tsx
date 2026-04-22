@@ -15,7 +15,7 @@ import { MessagePage } from "../features/messages/MessagePage";
 import { EventInGroupPage } from "../features/events/EventInGroupPage";
 import { ExpenseInEventPage } from "../features/expenses/ExpenseInEventPage";
 import { SystemLogPage } from "../features/systemLogs/SystemLogPage";
-import { SettingsPage } from "../features/dashboard/SettingPage";
+//import { SettingsPage } from "../features/dashboard/SettingPage";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
@@ -45,7 +45,7 @@ export const router = createBrowserRouter([
       { path: "message", element: <MessagePage />},
       { path: "system-logs", element: <SystemLogPage />},
       { path: "admin", element: <AdminManagementPage /> },
-      { path: "settings", element: <SettingsPage /> }
+      //{ path: "settings", element: <SettingsPage /> }
     ],
   },
 ]);
