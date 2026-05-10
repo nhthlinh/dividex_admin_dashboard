@@ -56,6 +56,6 @@ export const AdminAPI = {
       return;
     }
 
-    await api.delete(`/admin/${adminUid}/deactivate`)
+    await api.patch(`/admin/${adminUid}/deactivate`)
   },
 }

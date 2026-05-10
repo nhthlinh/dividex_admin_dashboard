@@ -39,6 +39,7 @@ const menuItems = [
 export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
   console.log("Current Page in Sidebar:", currentPage);
   const [collapsed, setCollapsed] = useState(false);
+  const userInfo = authStore.getUserInfo();
 
   const handleLogout = () => {
     authStore.logout(); // clear token + user
@@ -76,6 +77,10 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
 
           if (item.key === "dashboard" && pathname === "/") {
             isActive = true;
+          }
+
+          if (item.key === "admin" && userInfo?.role != "SUPERUSER") {
+            return;
           }
 
           return (

@@ -24,17 +24,26 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(
   res => res,
   (error: AxiosError) => {
+    const errorMessage = (error.response?.data as any)?.message || ''
     const apiError: ApiError = {
-      message:
-        (error.response?.data as any)?.message ||
-        'Có lỗi xảy ra, vui lòng thử lại',
+      message: errorMessage || 'Có lỗi xảy ra, vui lòng thử lại',
       status: error.response?.status,
     }
 
-    // Token hết hạn → logout
-    if (apiError.status === 401) {
+    // Token không hợp lệ/hết hạn → logout & redirect to login
+    const messageLower = errorMessage.toLowerCase()
+    if (
+      apiError.status === 401 ||
+      apiError.status === 403 ||
+      messageLower.includes('invalid') && messageLower.includes('token') ||
+      messageLower.includes('token expired') ||
+      messageLower.includes('unauthorized')
+    ) {
       authStore.logout()
-      window.location.href = '/login'
+      // Redirect to login page
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login'
+      }
     }
 
     return Promise.reject(apiError)
